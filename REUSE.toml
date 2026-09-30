@@ -14,6 +14,7 @@ path = [
     "**/*.md",
     "src/main/resources/**/*.json",
     "src/main/resources/**/*.nbt",
+    "src/main/resources/**/*.png",
     "LICENSE",
     ".github/**",
 ]

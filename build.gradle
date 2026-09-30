@@ -23,7 +23,17 @@ tasks.withType(Jar).configureEach {
     archiveVersion = "$minecraft_version-$mod_version"
 }
 
+repositories {
+    // Groundworks: its releases are published to the local maven repository only.
+    mavenLocal()
+    maven { url = 'https://cursemaven.com' }
+}
+
 def gameTestReport = layout.buildDirectory.file('reports/gametest.xml').get().asFile
+
+// The Groundworks versions the Library nests and, through neoforge.mods.toml, accepts at load. The
+// same range as Beltworks', so a pack holding both loads one Groundworks.
+def groundworksRange = '[0.5,0.6)'
 
 neoForge {
     version = neoforge_version
@@ -74,6 +84,21 @@ tasks.named('runGameTestServer') {
 }
 
 dependencies {
+    // Bundled, so the Library runs with nothing else installed.
+    jarJar(implementation('io.github.5thlayer:groundworks')) {
+        version {
+            strictly groundworksRange
+            prefer '0.5.0'
+        }
+    }
+    // Jade finds the pole's tooltip plugin by its annotation, so the Library runs without it.
+    compileOnly 'curse.maven:jade-324717:8651070'
+
+    // DataFixerUpper, and only that: Codec is Mojang's serialisation library, not a Minecraft type,
+    // so the wire store's codec round-trips on a plain JVM. The version is the one Minecraft 26.1.2 ships.
+    testImplementation 'com.mojang:datafixerupper:9.0.19'
+    testImplementation 'com.google.code.gson:gson:2.13.2'
+
     testImplementation platform('org.junit:junit-bom:5.10.2')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -108,6 +133,7 @@ tasks.named('check') { dependsOn checkJarLicensing }
 def modProperties = [
         mod_id: mod_id, mod_name: mod_name, mod_description: mod_description, version: mod_version,
         minecraft_version: minecraft_version, neoforge_version: neoforge_version,
+        groundworksRange: groundworksRange,
 ]
 processResources {
     inputs.properties modProperties
