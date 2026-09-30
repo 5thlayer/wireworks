@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 5thlayer
 // SPDX-License-Identifier: MIT
 
-package io.github._5thlayer.examplelib;
+package io.github._5thlayer.wireworks;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -27,11 +27,11 @@ class ModIdTest {
         try (Reader reader = Files.newBufferedReader(Path.of("gradle.properties"))) {
             properties.load(reader);
         }
-        assertEquals(properties.getProperty("mod_id"), ExampleLib.MOD_ID);
+        assertEquals(properties.getProperty("mod_id"), Wireworks.MOD_ID);
     }
 
     @Test
     void theModIdIsANamespace() {
-        assertTrue(ExampleLib.MOD_ID.matches("[a-z0-9_.-]+"), ExampleLib.MOD_ID);
+        assertTrue(Wireworks.MOD_ID.matches("[a-z0-9_.-]+"), Wireworks.MOD_ID);
     }
 }

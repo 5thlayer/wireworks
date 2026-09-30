@@ -1,6 +1,6 @@
-# Example Library
+# Wireworks
 
-One paragraph: the mechanic this Library gives, and which Consumers use it.
+Electric poles after Factorio's: a pole powers every machine inside its supply area, and wires join poles into networks. The FactoryWorks Pack is its first Consumer.
 
 ## Language
 
@@ -8,7 +8,7 @@ The Library's terms, each with what it is and the words to avoid. `/domain-model
 
 ### Parties
 
-**Example Library**:
+**Wireworks**:
 This Library.
 
 **Consumer**:
