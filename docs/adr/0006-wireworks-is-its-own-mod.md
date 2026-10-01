@@ -15,6 +15,7 @@ stands.
 Factorio's prototypes. Here the three tiers are fixed, since their blocks register at startup, but
 each one's supply size and wire reach are set in `wireworks-server.toml`, and the defaults are
 Factorio's. A server config reaches the client, so the preview draws the area the server powers. A
+wire only exists within reach, so a reload that shortens a reach cuts the wires it no longer spans. A
 pack that wants Factorio's figures pinned states them in its own config and tests that file.
 
 - *Considered: tiers as datapack entries.* Rejected: a block needs its tier at registration, before a
@@ -23,7 +24,9 @@ pack that wants Factorio's figures pinned states them in its own config and test
 
 **Any item in `wireworks:wire_tools` wires poles.** ADR-0004 gave the gesture to the Engineer's Pick.
 Here it runs on the right-click event for any item in the tag, so a tool needs no code of its own,
-and the held end lets go on the player tick. The default tag holds the copper ingot, since vanilla
+and the held end lets go on the player tick, or as the tool is dropped. The event fires before
+vanilla asks whether the player may build, so the gesture asks itself: a player in adventure or
+spectator mode cannot wire. The default tag holds the copper ingot, since vanilla
 has no copper cable. A pack replaces the tag to choose its own tools.
 
 **The generators and accumulators are tags a pack fills.** ADR-0003 named Oritech's Steam Engine and
@@ -40,7 +43,8 @@ aborts.
 **Fast Replace is Groundworks'.** ADR-0002 and FactoryWorks ADR-0082 had the Pack swap a pole column
 for another tier. Groundworks' ADR 0008 moves the click, the charge and the refund into Groundworks;
 Wireworks gives the column builder, `PoleColumnReplace`, and keeps a column's wires across the swap,
-and a pack states which tiers form a group by passing the builder to `FastReplace.group`. Wireworks
+but for those the new tier no longer reaches, which are cut. A swap that would join the column to one
+of the new tier on or under it is refused, since one of the two would lose its base. A pack states which tiers form a group by passing the builder to `FastReplace.group`. Wireworks
 states no group, so a group is never claimed before the pack's. Without one, a pole aimed at a column
 of another tier is refused.
 

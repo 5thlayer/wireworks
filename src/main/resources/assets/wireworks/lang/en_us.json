@@ -10,6 +10,7 @@
   "item.wireworks.substation_electric_pole": "Substation",
   "message.wireworks.other_tier": "A %s cannot extend a %s column.",
   "message.wireworks.replace_refused": "The pole column cannot be replaced here.",
+  "message.wireworks.replace_joins_column": "The pole column would join the column of that tier next to it.",
   "tooltip.wireworks.hold_shift": "Hold Shift for more",
   "tooltip.wireworks.pole.area": "Supplies a %sx%s area",
   "tooltip.wireworks.pole.band": "Reaches %s blocks up and down",

@@ -13,4 +13,6 @@ public enum WireworksRefusal implements Refusal {
     COLUMN_FULL,
     /** A pole column whose next segment's position is occupied. */
     BLOCKED_TOP,
+    /** A pole column replaced into the tier of a column standing directly on or under it. */
+    JOINS_A_COLUMN,
 }

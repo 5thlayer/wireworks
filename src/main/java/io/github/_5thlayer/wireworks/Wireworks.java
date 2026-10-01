@@ -33,6 +33,7 @@ public final class Wireworks {
         NeoForge.EVENT_BUS.addListener(LevelWires::onChunkSent);
         NeoForge.EVENT_BUS.addListener(PoleWireGesture::onRightClickBlock);
         NeoForge.EVENT_BUS.addListener(PoleWireGesture::onPlayerTick);
+        NeoForge.EVENT_BUS.addListener(PoleWireGesture::onEntityJoinLevel);
         if (FMLEnvironment.getDist() == Dist.CLIENT) {
             PoleWireClient.register(modBus);
         }

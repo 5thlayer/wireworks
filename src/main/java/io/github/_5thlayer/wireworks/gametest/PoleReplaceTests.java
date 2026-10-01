@@ -48,6 +48,7 @@ final class PoleReplaceTests {
     private static final BlockPos BESIDE = ABOVE_FLOOR.east(3);
     private static final BlockPos STAND = new BlockPos(3, 1, 1);
     private static final String OTHER_TIER_KEY = "message.wireworks.other_tier";
+    private static final String JOINS_KEY = "message.wireworks.replace_joins_column";
     private static final String NO_ROOM_KEY = "message.groundworks.fast_replace_no_room_to_return";
 
     private PoleReplaceTests() {
@@ -69,6 +70,46 @@ final class PoleReplaceTests {
         tests.test("replace_pole_refused_with_no_room_changes_nothing", 20,
                 helper -> refuses(helper, PoleTier.SMALL, 3, PoleTier.MEDIUM, 2, true,
                         Refusal.FastReplace.NO_ROOM_TO_RETURN, NO_ROOM_KEY));
+        tests.test("replace_pole_refuses_joining_the_column_on_it", 20, helper -> {
+            helper.setBlock(ABOVE_FLOOR.above(2), WireworksRegistries.pole(PoleTier.MEDIUM).get());
+            refuses(helper, PoleTier.SMALL, 2, PoleTier.MEDIUM, 0, false,
+                    WireworksRefusal.JOINS_A_COLUMN, JOINS_KEY);
+        });
+        tests.test("replace_pole_cuts_the_wires_the_new_tier_does_not_reach", 20, PoleReplaceTests::cutsBeyondReach);
+    }
+
+    /**
+     * A medium column wired to a medium pole eight blocks off, and to a small one two blocks off.
+     * Replaced by a small pole, it reaches 7.5: the far wire is cut and the near one kept.
+     */
+    private static void cutsBeyondReach(GameTestHelper helper) {
+        BlockPos near = ABOVE_FLOOR.west(2);
+        BlockPos far = ABOVE_FLOOR.east(8);
+        helper.setBlock(ABOVE_FLOOR, WireworksRegistries.pole(PoleTier.MEDIUM).get());
+        helper.setBlock(near, WireworksRegistries.pole(PoleTier.SMALL).get());
+        helper.setBlock(far, WireworksRegistries.pole(PoleTier.MEDIUM).get());
+        LevelWires levelWires = LevelWires.of(helper.getLevel());
+        BlockPos base = helper.absolutePos(ABOVE_FLOOR);
+        if (!levelWires.contains(base, helper.absolutePos(near)) || !levelWires.contains(base, helper.absolutePos(far))) {
+            helper.fail("the fixture was not wired to both the near and the far pole", ABOVE_FLOOR);
+        }
+        ListeningPlayer player = new ListeningPlayer(helper, STAND);
+        player.setItemInHand(InteractionHand.MAIN_HAND, pole(PoleTier.SMALL, 2));
+        click(helper, player, hit(helper, ABOVE_FLOOR));
+        helper.startSequence()
+                .thenIdle(3)
+                .thenExecute(() -> {
+                    if (helper.getBlockEntity(ABOVE_FLOOR, SupplyAreaPoleBlockEntity.class).tier() != PoleTier.SMALL) {
+                        helper.fail("the column was not replaced by a small pole", ABOVE_FLOOR);
+                    }
+                    if (levelWires.contains(base, helper.absolutePos(far))) {
+                        helper.fail("the wire to a pole eight blocks off outlived a reach of 7.5", far);
+                    }
+                    if (!levelWires.contains(base, helper.absolutePos(near))) {
+                        helper.fail("the wire to a pole two blocks off was cut", near);
+                    }
+                })
+                .thenSucceed();
     }
 
     /** A three-segment column of {@code from}, clicked at segment {@code aimed} with {@code to}. */
@@ -136,7 +177,8 @@ final class PoleReplaceTests {
         BlockPos target = ABOVE_FLOOR.above(aimed);
         BlockHitResult hit = hit(helper, target);
         PlacementPlan plan = plan(helper, player, hit, target);
-        if (plan.refusal() != expected || plan.isReplace() != (expected == Refusal.FastReplace.NO_ROOM_TO_RETURN)) {
+        boolean replace = expected == Refusal.FastReplace.NO_ROOM_TO_RETURN || expected == WireworksRefusal.JOINS_A_COLUMN;
+        if (plan.refusal() != expected || plan.isReplace() != replace) {
             helper.fail("expected the refusal " + expected + " but the plan was " + plan, target);
         }
         Map<BlockPos, BlockState> world = world(helper);

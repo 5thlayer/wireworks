@@ -14,11 +14,15 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
@@ -37,9 +41,17 @@ public final class PoleWireGesture {
     private PoleWireGesture() {
     }
 
-    /** A main-hand right-click with a wire tool on a pole; any other click is left alone. */
+    /**
+     * A main-hand right-click with a wire tool on a pole; any other click is left alone. The event
+     * fires before vanilla asks whether the player may build, so a player in adventure or spectator
+     * mode is turned away here, as an item's own use would be.
+     */
     static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         if (event.getHand() != InteractionHand.MAIN_HAND || !event.getItemStack().is(WireworksTags.WIRE_TOOLS)) {
+            return;
+        }
+        Player player = event.getEntity();
+        if (!player.mayBuild() || player.isSpectator()) {
             return;
         }
         Level level = event.getLevel();
@@ -49,7 +61,7 @@ public final class PoleWireGesture {
         }
         event.setCanceled(true);
         event.setCancellationResult(level instanceof ServerLevel server
-                ? click(server, event.getItemStack(), clicked, event.getEntity())
+                ? click(server, event.getItemStack(), clicked, player)
                 : InteractionResult.SUCCESS);
     }
 
@@ -86,26 +98,43 @@ public final class PoleWireGesture {
         return InteractionResult.SUCCESS_SERVER;
     }
 
-    /** Lets go of every held end the moment {@link PendingEnd} says it is no longer held. */
+    /**
+     * Lets go of every held end the moment {@link PendingEnd} says it is no longer held. A stack only
+     * leaves the inventory through the open menu, so its slots and the cursor are where a held end
+     * is looked for: one put in a chest or picked up on the cursor is out of the main hand there,
+     * and lets go before the menu closes.
+     */
     static void onPlayerTick(PlayerTickEvent.Post event) {
         if (!(event.getEntity().level() instanceof ServerLevel level)) {
             return;
         }
         Player player = event.getEntity();
+        AbstractContainerMenu menu = player.containerMenu;
+        for (Slot slot : menu.slots) {
+            release(slot.getItem(), level, player);
+        }
+        release(menu.getCarried(), level, player);
+        // The menu holds the player's inventory but not always all of it.
         Inventory inventory = player.getInventory();
         for (int i = 0; i < inventory.getContainerSize(); i++) {
-            ItemStack stack = inventory.getItem(i);
-            if (stack.has(WireworksRegistries.PENDING_WIRE.get())) {
-                release(stack, level, player, stack == player.getMainHandItem());
-            }
+            release(inventory.getItem(i), level, player);
         }
     }
 
-    private static void release(ItemStack pick, ServerLevel level, Player holder, boolean mainHand) {
+    /** A dropped tool, thrown or spilled on death, lets go as it hits the ground. */
+    static void onEntityJoinLevel(EntityJoinLevelEvent event) {
+        if (event.getLevel() instanceof ServerLevel level && event.getEntity() instanceof ItemEntity item
+                && item.getItem().has(WireworksRegistries.PENDING_WIRE.get())) {
+            letGo(item.getItem(), level, item.blockPosition());
+        }
+    }
+
+    private static void release(ItemStack pick, ServerLevel level, Player holder) {
         GlobalPos pending = pick.get(WireworksRegistries.PENDING_WIRE.get());
         if (pending == null) {
             return;
         }
+        boolean mainHand = pick == holder.getMainHandItem();
         boolean sameDimension = pending.dimension().equals(level.dimension());
         BlockPos anchor = pending.pos();
         boolean standing = sameDimension && level.isLoaded(anchor)
@@ -118,12 +147,15 @@ public final class PoleWireGesture {
         double range = holder.blockInteractionRange();
         if (!PendingEnd.stillHeld(pole, holder.getX(), holder.getY(), holder.getZ(), range,
                 standing, mainHand, sameDimension)) {
-            pick.remove(WireworksRegistries.PENDING_WIRE.get());
-            // The snap: dropping an end is heard at the player, since nothing else shows it. A
-            // chain's break, so it is none of the made, cut or refused sounds.
-            level.playSound(null, holder.blockPosition(), SoundEvents.CHAIN_BREAK,
-                    SoundSource.PLAYERS, 1.0F, 1.0F);
+            letGo(pick, level, holder.blockPosition());
         }
+    }
+
+    private static void letGo(ItemStack pick, ServerLevel level, BlockPos at) {
+        pick.remove(WireworksRegistries.PENDING_WIRE.get());
+        // The snap: dropping an end is heard where it was let go, since nothing else shows it. A
+        // chain's break, so it is none of the made, cut or refused sounds.
+        level.playSound(null, at, SoundEvents.CHAIN_BREAK, SoundSource.PLAYERS, 1.0F, 1.0F);
     }
 
     private static void play(ServerLevel level, BlockPos at, SoundEvent sound) {

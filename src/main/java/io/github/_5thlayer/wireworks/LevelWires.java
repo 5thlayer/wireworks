@@ -17,6 +17,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -118,6 +119,21 @@ public final class LevelWires extends SavedData {
             }
         }
         wires.rekey(from, to);
+        changed(level, touched.toArray(BlockPos[]::new));
+    }
+
+    /** Cuts every wire between two of {@code standing} that no longer reach each other. */
+    void cutBeyondReach(ServerLevel level, Map<PoleLinks.Pos, PoleLinks.Pole> standing) {
+        List<PoleLinks.Wire> beyond = PoleWiring.beyondReach(wires.all(), standing);
+        if (beyond.isEmpty()) {
+            return;
+        }
+        List<BlockPos> touched = new ArrayList<>();
+        for (PoleLinks.Wire wire : beyond) {
+            wires.remove(wire.a(), wire.b());
+            touched.add(block(wire.a()));
+            touched.add(block(wire.b()));
+        }
         changed(level, touched.toArray(BlockPos[]::new));
     }
 

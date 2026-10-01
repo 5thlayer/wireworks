@@ -10,8 +10,10 @@ import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.NeoForge;
@@ -35,6 +37,58 @@ final class WireGestureTests {
         tests.test("a_wire_tool_cuts_and_wires_again", 20, WireGestureTests::cutsAndWiresAgain);
         tests.test("an_item_outside_the_tag_holds_no_end", 20, WireGestureTests::otherItemHoldsNoEnd);
         tests.test("a_held_end_drops_when_the_tool_leaves_the_hand", 20, WireGestureTests::endDropsOutOfHand);
+        tests.test("a_held_end_drops_when_the_tool_is_on_the_cursor", 20, WireGestureTests::endDropsOnTheCursor);
+        tests.test("a_held_end_drops_when_the_tool_is_thrown", 20, WireGestureTests::endDropsWhenThrown);
+        tests.test("a_player_who_may_not_build_cannot_wire", 20, WireGestureTests::adventureCannotWire);
+    }
+
+    private static void endDropsOnTheCursor(GameTestHelper helper) {
+        ItemStack tool = new ItemStack(Items.COPPER_INGOT);
+        ServerPlayer player = holding(helper, tool);
+        player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        player.containerMenu.setCarried(tool);
+        NeoForge.EVENT_BUS.post(new PlayerTickEvent.Post(player));
+        if (tool.has(WireworksRegistries.PENDING_WIRE.get())) {
+            helper.fail("the end stayed held on the cursor", A);
+        }
+        helper.succeed();
+    }
+
+    private static void endDropsWhenThrown(GameTestHelper helper) {
+        ItemStack tool = new ItemStack(Items.COPPER_INGOT);
+        ServerPlayer player = holding(helper, tool);
+        player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        ItemEntity thrown = player.drop(tool, false);
+        if (thrown == null) {
+            helper.fail("the tool was not thrown", A);
+            return;
+        }
+        if (thrown.getItem().has(WireworksRegistries.PENDING_WIRE.get())) {
+            helper.fail("the thrown tool still holds an end", A);
+        }
+        helper.succeed();
+    }
+
+    private static void adventureCannotWire(GameTestHelper helper) {
+        ServerPlayer player = poles(helper, new ItemStack(Items.COPPER_INGOT));
+        player.setGameMode(GameType.ADVENTURE);
+        click(helper, player, A);
+        click(helper, player, B);
+        expectWired(helper, true, "an adventure player clicking A then B");
+        if (player.getMainHandItem().has(WireworksRegistries.PENDING_WIRE.get())) {
+            helper.fail("an adventure player's tool held an end", A);
+        }
+        helper.succeed();
+    }
+
+    /** A player whose tool holds A's end. */
+    private static ServerPlayer holding(GameTestHelper helper, ItemStack tool) {
+        ServerPlayer player = poles(helper, tool);
+        click(helper, player, A);
+        if (!tool.has(WireworksRegistries.PENDING_WIRE.get())) {
+            helper.fail("clicking a pole with the tool held no end", A);
+        }
+        return player;
     }
 
     private static void cutsAndWiresAgain(GameTestHelper helper) {
