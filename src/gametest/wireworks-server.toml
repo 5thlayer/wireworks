@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: 2026 5thlayer
+# SPDX-License-Identifier: MIT
+
+# The game test server's config, copied over run/gametest's before each run. The substation is
+# configured off its defaults, which equal the Pack's figures, so a config that never reached the
+# tiers fails ConfigTests rather than passing on the defaults. No other test leans on the
+# substation's reach, and its area only shrinks: the creative pole is a substation, and a larger
+# area would supply consumers the network tests keep out of its reach.
+
+[small]
+	supplySize = 5
+	wireReach = 7.5
+
+[medium]
+	supplySize = 7
+	wireReach = 9.0
+
+[substation]
+	supplySize = 16
+	wireReach = 21.5

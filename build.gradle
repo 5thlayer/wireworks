@@ -67,9 +67,17 @@ neoForge {
 // run that didn't run a test is no evidence for it. The report, not the exit code, decides, so a
 // failing run still names its tests; a server that crashes writes no report and fails here too.
 // The server writes the report but not its folder, which a clean checkout has yet to make.
+// The server reads its config from run/gametest/config, which no checkout keeps. The copy goes
+// over whatever an earlier run left there, so every run tests the same config.
+def gameTestConfig = file('src/gametest/wireworks-server.toml')
 tasks.named('runGameTestServer') {
     ignoreExitValue = true
+    inputs.file gameTestConfig
     doFirst {
+        copy {
+            from gameTestConfig
+            into 'run/gametest/config'
+        }
         gameTestReport.delete()
         gameTestReport.parentFile.mkdirs()
     }
