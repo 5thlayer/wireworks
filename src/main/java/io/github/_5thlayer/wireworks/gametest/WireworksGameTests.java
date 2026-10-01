@@ -18,6 +18,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Rotation;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.event.RegisterGameTestsEvent;
+import net.neoforged.neoforge.gametest.GameTestHooks;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
@@ -42,6 +43,9 @@ public final class WireworksGameTests {
 
     public static void register(IEventBus modBus) {
         TEST_TYPES.register(modBus);
+        if (GameTestHooks.isGametestEnabled()) {
+            TestConsumer.register(modBus);
+        }
         // Posted only when game tests are enabled, so a production server never registers the tests.
         modBus.addListener(WireworksGameTests::registerTests);
     }
@@ -51,6 +55,10 @@ public final class WireworksGameTests {
         var environment = event.registerEnvironment(id("default"), new TestEnvironmentDefinition.AllOf(List.of()));
         var tests = new Registrar(event, environment);
         LoadTests.register(tests);
+        ElectricNetworkTests.register(tests);
+        PoleWireTests.register(tests);
+        PoleColumnCostTests.register(tests);
+        WireGestureTests.register(tests);
     }
 
     private static Identifier id(String path) {

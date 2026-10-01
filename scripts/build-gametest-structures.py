@@ -32,7 +32,9 @@ STRUCTURES = os.path.join(ROOT, "src", "main", "resources", "data", _mod_id(), "
 
 DATA_VERSION = 4790  # 26.1.2
 # Room for a block and what stands round it: a door or a bed, and the blocks either side.
-SIZE = (9, 5, 9)
+# Twenty-three wide, for a creative pole's 18x18 area, a small pole wired seven blocks east and a
+# consumer only that pole reaches. Seven tall, for a column of MAX_SEGMENTS with a block above.
+SIZE = (23, 7, 7)
 TEMPLATES = {"platform.nbt": SIZE}
 
 TAG_INT, TAG_STRING, TAG_LIST, TAG_COMPOUND = 3, 8, 9, 10

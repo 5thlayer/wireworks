@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
 
@@ -172,8 +173,17 @@ public final class LevelWires extends SavedData {
             chunks.add(ChunkPos.containing(p));
         }
         for (ChunkPos chunk : chunks) {
-            PacketDistributor.sendToPlayersTrackingChunk(level, chunk,
-                    new PoleWiresPacket(chunk.x(), chunk.z(), wires.touching(chunk.x(), chunk.z())));
+            PoleWiresPacket packet = new PoleWiresPacket(chunk.x(), chunk.z(), wires.touching(chunk.x(), chunk.z()));
+            for (ServerPlayer player : level.getChunkSource().chunkMap.getPlayers(chunk, false)) {
+                send(player, packet);
+            }
+        }
+    }
+
+    /** Only to a connection that negotiated the channel; sending to one that didn't throws. */
+    private static void send(ServerPlayer player, PoleWiresPacket packet) {
+        if (player.connection.hasChannel(packet)) {
+            PacketDistributor.sendToPlayer(player, packet);
         }
     }
 
@@ -181,7 +191,7 @@ public final class LevelWires extends SavedData {
     public static void onChunkSent(ChunkWatchEvent.Sent event) {
         ChunkPos chunk = event.getPos();
         List<PoleLinks.Wire> touching = of(event.getLevel()).wires.touching(chunk.x(), chunk.z());
-        PacketDistributor.sendToPlayer(event.getPlayer(), new PoleWiresPacket(chunk.x(), chunk.z(), touching));
+        send(event.getPlayer(), new PoleWiresPacket(chunk.x(), chunk.z(), touching));
     }
 
     private static BlockPos block(PoleLinks.Pos p) {
