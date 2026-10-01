@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * which is Factorio's 2D square given the one dimension Factorio does not have.
  *
  * <p>Pure integer geometry on purpose: it is the half of the pole that can be checked without a
- * server, which is what {@code docs/testing/what-to-check.md} asks a pack-logic check to be.
+ * server, so it is a JUnit test rather than a game test.
  */
 class SupplyAreaTest {
 

@@ -13,13 +13,10 @@ import net.minecraft.world.level.block.state.BlockState;
  *
  * <h2>Why the pole has a height at all</h2>
  *
- * <p>The supply area used to be anchored to the pole block, which meant a player who mounted a pole
- * on a stack of fences -- the obvious way to get a wire attachment point into the air, and what
- * Power Grid's catenary invites -- lifted the supply area off the ground with it. The fault was not
- * that {@link PoleTier#VERTICAL_RADIUS} was too small. It was that the pole block's height is a
- * <em>wiring</em> decision while the supply area is a <em>ground</em> concept, and the two were
- * sharing one coordinate. Giving the pole its own height separates them: the column reaches up to
- * the wire, and the area stays measured at the base.
+ * <p>A pole's height is a <em>wiring</em> decision, where the wire hangs, while its supply area is
+ * a <em>ground</em> concept. Giving the pole its own height keeps the two apart: the column reaches
+ * up to the wire, and the area stays measured at the base, so raising a wire never lifts the area
+ * off the floor.
  *
  * <h2>Being an extension is derived, never stored</h2>
  *
@@ -48,8 +45,8 @@ public final class PoleColumn {
      *
      * <p>An ergonomics number, not a performance one. Extensions do not tick, so height is free;
      * what is not free is a pole whose top a player cannot reach. Everything the height is <em>for</em>
-     * happens up there -- placing Power Grid's Device Connector on the top segment, then clicking it
-     * to run wire -- and both are bounded by reach. Five puts the top segment's face at {@code y+4},
+     * happens up there -- the wire hangs from the top segment, and the wire tool clicks it -- and
+     * both are bounded by reach. Five puts the top segment's face at {@code y+4},
      * within reach of a player standing on the ground the base sits on, so a pole is workable
      * without building scaffolding beside it and tearing it down after.
      *

@@ -6,22 +6,16 @@ package io.github._5thlayer.wireworks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 
 /**
- * A supply-area pole that is also an unlimited generator for its network: the dev tool an energy face is checked with
- * (factoryworks#272).
+ * A supply-area pole that is also an unlimited generator for its network: the dev tool an energy face is checked with.
  *
- * <p>Place it, place a machine beside it, read Jade. Without it, checking "does the Electric
- * Furnace draw 90 FE/t" by hand means first building a working power chain, because the shipped
- * pole generates nothing -- so a two-block test would depend on a working steam chain.
+ * <p>Place it, place a machine beside it, read Jade. Without it, checking a machine's draw by hand
+ * means first building a working power chain, because the shipped poles generate nothing.
  *
  * <h2>It is a subclass, not a fourth {@link PoleTier}</h2>
  *
- * <p>{@code PoleTier} is a footprint ladder taken from Factorio's own prototypes (FactoryWorks ADR-0036,
- * FactoryWorks ADR-0028's naming rule), and three places walk {@code PoleTier.values()}. A creative row in it
- * would put a non-Factorio entry into a corpus-derived ladder and drag it into the item map, the
- * recipe sweep and {@code docs/factorio-mechanics.md}, none of which have anything to say about a
- * dev tool. So this is a separate block wearing the substation's footprint -- the 18x18 is the
- * useful one for testing, since a machine can go anywhere nearby rather than having to touch the
- * pole.
+ * <p>{@code PoleTier} is Factorio's ladder of poles, and the config, the blocks and the recipes each
+ * walk {@code PoleTier.values()}. A dev tool has nothing to say in any of them, so this is a separate
+ * block wearing the substation's footprint: the largest area, so a machine can go anywhere nearby.
  *
  * <p>Everything else is inherited and stays shared: the column, the scan, the water-fill
  * rationing, the Jade line and the network it links into. What is being tested has to be the thing
@@ -31,8 +25,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
  *
  * <h2>It ships</h2>
  *
- * <p>Creative tab and {@code /give}, with no recipe emitted and none admitted by the sweep, which
- * is what keeps it out of survival -- the same arrangement vanilla's creative-only blocks have. It
+ * <p>Creative tab and {@code /give}, with no recipe, which is what keeps it out of survival -- the same arrangement vanilla's creative-only blocks have. It
  * is not gated behind a dev flag: a gate is another dial with its own failure mode, and the thing
  * it would protect against is a player who has already opened the creative menu.
  */

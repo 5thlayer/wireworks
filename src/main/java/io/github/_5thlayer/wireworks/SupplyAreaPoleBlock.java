@@ -34,10 +34,10 @@ import net.minecraft.server.level.ServerLevel;
 
 /**
  * A Factorio electric pole (FactoryWorks ADR-0036, FactoryWorks ADR-0062): it supplies every machine standing in its area, and
- * it links to every pole within wire reach into one Electric Network.
+ * the poles its wires join are one Electric Network.
  *
- * <p>The network is recomputed from the poles standing rather than stored -- no propagation, no
- * topology persisted across chunk unloads. {@link ElectricNetworks} has the why.
+ * <p>The wires are saved with the level ({@link LevelWires}); the networks are recomputed from them
+ * and the poles standing. {@link ElectricNetworks} has the why.
  *
  * <p>One class serves all three tiers; they differ by the {@link PoleTier} handed to the
  * constructor and by nothing else.
@@ -147,14 +147,6 @@ public class SupplyAreaPoleBlock extends Block implements EntityBlock {
     }
 
 
-    /**
-     * Breaking any segment drops the column above it.
-     *
-     * <p>Chains and scaffolding both do this, so the muscle memory is already there,
-     * and the alternative -- leaving segments floating where their base was -- is a lie about a
-     * structure the player thinks of as one object. Recursion is via {@code destroyBlock}, which
-     * re-enters here for the block above, so the column unwinds one segment at a time.
-     */
     /** A placed base wires itself (FactoryWorks ADR-0068). */
     @Override
     protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState,
@@ -182,10 +174,19 @@ public class SupplyAreaPoleBlock extends Block implements EntityBlock {
         return super.getDrops(state, params);
     }
 
+    /**
+     * Breaking any segment drops the column above it.
+     *
+     * <p>Chains and scaffolding both do this, so the muscle memory is already there,
+     * and the alternative -- leaving segments floating where their base was -- is a lie about a
+     * structure the player thinks of as one object. Recursion is via {@code destroyBlock}, which
+     * re-enters here for the block above, so the column unwinds one segment at a time.
+     */
     @Override
     protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos,
                                                boolean movedByPiston) {
-        // Vanilla sets the new state before this runs, so a pole there is a Fast Replace, not a break.
+        // 26.1 calls this whenever the block changes, after setting the new one: a pole there is a
+        // Fast Replace, which keeps the column and its wires, not a break.
         if (level.getBlockState(pos).getBlock() instanceof SupplyAreaPoleBlock) {
             return;
         }
@@ -193,8 +194,6 @@ public class SupplyAreaPoleBlock extends Block implements EntityBlock {
         if (!level.getBlockState(pos.below()).is(this)) {
             LevelWires.of(level).broken(level, pos);
         }
-        // 26.1 calls this only when the block is genuinely gone, so the old
-        // `!state.is(newState.getBlock())` guard is the caller's job now.
         BlockPos above = pos.above();
         if (level.getBlockState(above).is(this)) {
             // Dropped without loot: extending a column costs nothing, so a segment must pay nothing

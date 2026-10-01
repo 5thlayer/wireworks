@@ -40,12 +40,9 @@ import snownee.jade.api.config.IPluginConfig;
  * other surface that would ever distinguish them.
  *
  * <p>Deliberately not here: the tier and the footprint, which the item tooltip already carries and
- * Jade prints the block's name above anyway; and which Power Grid circuit the pole is on, which
- * would mean reading that mod's internals for a diagnostic its own multimeter, plotter and goggles
- * already provide (FactoryWorks ADR-0036 commits to touching no internals, and the division of teaching labour
- * is the ADR's).
+ * Jade prints the block's name above anyway.
  *
- * <p>Like the EMI plugin, this class is found by Jade's own annotation scan and is
+ * <p>This class is found by Jade's own annotation scan and is
  * referenced from nowhere else in the mod, so the jar is a compile-time dependency only.
  */
 @WailaPlugin
