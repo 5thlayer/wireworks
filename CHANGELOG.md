@@ -4,6 +4,8 @@ Each version has two sections: Players, what a player or pack developer sees, an
 
 ## Unreleased
 
+## 0.2.0
+
 ### Players
 
 - **The poles are named by size.** The Small Pole, Medium Pole, Large Pole (was the Substation) and Creative Pole, with the ids `wireworks:small_pole`, `wireworks:medium_pole`, `wireworks:large_pole` and `wireworks:creative_pole`. There is no remap: a world made with 0.1.0 loses its poles. `wireworks-server.toml`'s `[substation]` section is now `[large]`, and Jade's toggle reads "Pole network". A pack names the poles its own way in its own language file. (#7)
