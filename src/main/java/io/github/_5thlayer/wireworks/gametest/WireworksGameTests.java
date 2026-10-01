@@ -36,6 +36,12 @@ public final class WireworksGameTests {
 
     private static final Identifier PLATFORM = id("gametest/platform");
 
+    /**
+     * Set by the Library's own {@code gameTestServer} run. A Consumer's game test server also has
+     * game tests enabled, and there the test group would be claimed before the Consumer's own.
+     */
+    private static final String OWN_RUN = "wireworks.gametest";
+
     private static final DeferredRegister<MapCodec<? extends GameTestInstance>> TEST_TYPES =
             DeferredRegister.create(Registries.TEST_INSTANCE_TYPE, Wireworks.MOD_ID);
 
@@ -48,14 +54,14 @@ public final class WireworksGameTests {
 
     public static void register(IEventBus modBus) {
         TEST_TYPES.register(modBus);
-        if (GameTestHooks.isGametestEnabled()) {
-            TestConsumer.register(modBus);
-            // A Consumer's statement; Wireworks states no group of its own (ADR-0006).
-            FastReplace.group(id("gametest_poles"), block -> block instanceof SupplyAreaPoleBlock pole
-                    && !(pole instanceof CreativeSupplyAreaPoleBlock) && pole.tier() != PoleTier.SUBSTATION,
-                    PoleColumnReplace.BUILDER);
+        if (!GameTestHooks.isGametestEnabled() || !Boolean.getBoolean(OWN_RUN)) {
+            return;
         }
-        // Posted only when game tests are enabled, so a production server never registers the tests.
+        TestConsumer.register(modBus);
+        // A Consumer's statement; Wireworks states no group of its own (ADR-0006).
+        FastReplace.group(id("gametest_poles"), block -> block instanceof SupplyAreaPoleBlock pole
+                && !(pole instanceof CreativeSupplyAreaPoleBlock) && pole.tier() != PoleTier.SUBSTATION,
+                PoleColumnReplace.BUILDER);
         modBus.addListener(WireworksGameTests::registerTests);
     }
 

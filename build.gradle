@@ -52,6 +52,8 @@ neoForge {
         gameTestServer {
             type = 'gameTestServer'
             gameDirectory = project.file('run/gametest')
+            // Registers the Library's tests and test group; a Consumer's game test server leaves it unset.
+            systemProperty 'wireworks.gametest', 'true'
             programArguments.addAll '--tests', "${mod_id}:*", '--report', gameTestReport.absolutePath
         }
     }
