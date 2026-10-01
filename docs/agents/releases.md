@@ -6,7 +6,7 @@ A Library that names its Modrinth and CurseForge projects in `gradle.properties`
 
 ## The changelog
 
-Each change a Consumer can use or will notice adds its line under `## Unreleased` in `CHANGELOG.md` when it lands, written for a Consumer's author in the glossary's terms, with its issue number. A release ships what Unreleased lists, so the changelog is written as the work is done and never reconstructed from commits.
+Each change a player or a Consumer can use or will notice adds its line under `## Unreleased` in `CHANGELOG.md` when it lands, in the glossary's terms, with its issue number: under `### Players` what a player or pack developer sees, under `### Consumers` what a mod building against Wireworks can use. The section is the release's notes on Modrinth and CurseForge, so Players comes first. A release ships what Unreleased lists, so the changelog is written as the work is done and never reconstructed from commits.
 
 ## Cutting a release
 
