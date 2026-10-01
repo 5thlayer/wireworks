@@ -6,7 +6,11 @@ package io.github._5thlayer.wireworks;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
@@ -17,13 +21,12 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/** The poles' blocks, items, block entity type and the held wire end. */
+/** The poles' blocks, items, block entity type, creative tab and the held wire end. */
 public final class WireworksRegistries {
 
     private static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(Wireworks.MOD_ID);
@@ -32,6 +35,8 @@ public final class WireworksRegistries {
             DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, Wireworks.MOD_ID);
     private static final DeferredRegister<DataComponentType<?>> DATA_COMPONENTS =
             DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, Wireworks.MOD_ID);
+    private static final DeferredRegister<CreativeModeTab> CREATIVE_TABS =
+            DeferredRegister.create(Registries.CREATIVE_MODE_TAB, Wireworks.MOD_ID);
 
     private static final Map<PoleTier, DeferredBlock<SupplyAreaPoleBlock>> POLES = new EnumMap<>(PoleTier.class);
     private static final Map<PoleTier, DeferredItem<SupplyAreaPoleItem>> POLE_ITEMS = new EnumMap<>(PoleTier.class);
@@ -63,6 +68,14 @@ public final class WireworksRegistries {
                             .networkSynchronized(GlobalPos.STREAM_CODEC)
                             .build());
 
+    /** The Library's creative tab, {@code wireworks:items}: every pole. */
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> CREATIVE_TAB =
+            CREATIVE_TABS.register("items", () -> CreativeModeTab.builder()
+                    .title(Component.translatable("itemGroup.wireworks.items"))
+                    .icon(() -> new ItemStack(poleItem(PoleTier.LARGE).get()))
+                    .displayItems((parameters, output) -> poleItems().forEach(output::accept))
+                    .build());
+
     private WireworksRegistries() {
     }
 
@@ -72,6 +85,11 @@ public final class WireworksRegistries {
 
     public static DeferredItem<SupplyAreaPoleItem> poleItem(PoleTier tier) {
         return POLE_ITEMS.get(tier);
+    }
+
+    /** Every pole's item, the tiers in order and the creative pole last. */
+    private static Stream<Item> poleItems() {
+        return Stream.concat(POLE_ITEMS.values().stream(), Stream.of(CREATIVE_POLE_ITEM)).map(DeferredItem::get);
     }
 
     private static Set<Block> poleBlocks() {
@@ -85,13 +103,13 @@ public final class WireworksRegistries {
         ITEMS.register(modBus);
         BLOCK_ENTITIES.register(modBus);
         DATA_COMPONENTS.register(modBus);
+        CREATIVE_TABS.register(modBus);
         modBus.addListener(WireworksRegistries::addToCreativeTabs);
     }
 
     private static void addToCreativeTabs(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.FUNCTIONAL_BLOCKS) {
-            List.copyOf(POLE_ITEMS.values()).forEach(item -> event.accept(item.get()));
-            event.accept(CREATIVE_POLE_ITEM.get());
+            poleItems().forEach(event::accept);
         }
     }
 }

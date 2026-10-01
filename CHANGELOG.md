@@ -7,11 +7,13 @@ Each version has two sections: Players, what a player or pack developer sees, an
 ### Players
 
 - **The poles are named by size.** The Small Pole, Medium Pole, Large Pole (was the Substation) and Creative Pole, with the ids `wireworks:small_pole`, `wireworks:medium_pole`, `wireworks:large_pole` and `wireworks:creative_pole`. There is no remap: a world made with 0.1.0 loses its poles. `wireworks-server.toml`'s `[substation]` section is now `[large]`, and Jade's toggle reads "Pole network". A pack names the poles its own way in its own language file. (#7)
+- **A Wireworks creative tab** holds every pole, the creative pole last. The poles stay in Functional Blocks too.
 - **Fast Replace between pole tiers.** A pole clicked on a column of another tier swaps the whole column, keeping its wires, for one pole charged and one handed back. The creative pole stays out. (#6)
 
 ### Consumers
 
 - Wireworks states a default Replace group, `PoleColumnReplace.DEFAULT_GROUP`, at common setup. A pack that states its own pole group with `PoleColumnReplace.BUILDER` at mod construction still gets its group for the tiers it names. (#6)
+- The creative tab is `wireworks:items`, held as `WireworksRegistries.CREATIVE_TAB`.
 - `PoleTier.SUBSTATION` is now `PoleTier.LARGE`, `PoleTier.blockName()` gives `<tier>_pole`, and `CreativeSupplyAreaPoleBlock.BLOCK_NAME` is `creative_pole`. (#7)
 - `PoleLinks` is now `PoleNetworks`, and `PoleLinks.linked` is `PoleNetworks.withinReach`. The reach-only `networks(List)` is gone, and `PendingEnd.stillHeld` takes the player as a `PendingEnd.Holder`. None of them is named API, and the Pack calls none of them. (#5)
 

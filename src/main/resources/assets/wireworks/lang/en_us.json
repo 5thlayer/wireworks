@@ -8,6 +8,7 @@
   "item.wireworks.large_pole": "Large Pole",
   "item.wireworks.medium_pole": "Medium Pole",
   "item.wireworks.small_pole": "Small Pole",
+  "itemGroup.wireworks.items": "Wireworks",
   "message.wireworks.other_tier": "A %s cannot extend a %s column.",
   "message.wireworks.replace_refused": "The pole column cannot be replaced here.",
   "tooltip.wireworks.hold_shift": "Hold Shift for more",

@@ -62,6 +62,7 @@ public final class WireworksGameTests {
         var environment = event.registerEnvironment(id("default"), new TestEnvironmentDefinition.AllOf(List.of()));
         var tests = new Registrar(event, environment);
         LoadTests.register(tests);
+        CreativeTabTests.register(tests);
         ConfigTests.register(tests);
         ElectricNetworkTests.register(tests);
         PoleWireTests.register(tests);
