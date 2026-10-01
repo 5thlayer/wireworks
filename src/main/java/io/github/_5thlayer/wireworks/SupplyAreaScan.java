@@ -20,7 +20,7 @@ import net.minecraft.world.level.block.state.BlockState;
  * not obvious. A slave Steam Engine resolves to its master, which may stand outside the area
  * entirely; a machine's hull block answers its controller's face and is never a consumer in its own
  * right. A naive "does this block have an Energy capability" sweep gets both wrong and lights up
- * blocks the network never feeds -- an overlay lying more precisely than before.
+ * blocks the network never feeds.
  *
  * <p>The rule itself is {@link SupplyScan#classify}, which is Minecraft-free and unit-tested in
  * {@code SupplyScanTest}. This class is only the part that needs a {@link Level}: gathering the

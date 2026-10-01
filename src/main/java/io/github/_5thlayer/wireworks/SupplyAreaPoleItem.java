@@ -33,9 +33,9 @@ import net.minecraft.world.item.component.TooltipDisplay;
  * The recipe says nothing about reach.
  *
  * <p>The <b>Supply Area Box</b> shows where the area lands (ADR 0005), but only while a pole is held
- * or looked at, and it says nothing about wireless reach or about the area being measured at the
- * base. Those are still this tooltip's
- * alone, and the numbers here are what the box is read against.
+ * or looked at, and it says nothing about the pole being wireless or about the area being measured
+ * at the base. Those are this tooltip's alone, and the numbers here are what the box is read
+ * against.
  *
  * <p>So it is stated here, in three lines, always shown rather than hidden behind Shift. This is
  * not detail a player goes looking for; it is the block's basic contract, and a tooltip nobody

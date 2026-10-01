@@ -32,7 +32,7 @@ import org.joml.Vector3f;
  * wires the pole would add ({@link PreviewWires}).
  *
  * <p>Minecraft is three dimensional and the area is a three dimensional region, so the box is drawn as
- * one: a surface draped over the terrain would show holes where the area does not stop.
+ * one.
  *
  * <h2>One builder, two call sites</h2>
  *

@@ -27,8 +27,7 @@ import java.util.WeakHashMap;
  * <p>A pole reports itself every tick it runs. A pole that did not report -- broken, unloaded, or
  * turned into a column extension -- is dropped at the level tick. Any change to the set of poles,
  * or a wire made or cut ({@link LevelWires}), rebuilds the networks from the wires between the poles
- * standing (ADR 0004, superseding ADR 0003's "no stored topology"). A merge and a split are still
- * the same recomputation.
+ * standing (ADR 0004). A merge and a split are the same recomputation.
  *
  * <h2>One settlement per network</h2>
  *

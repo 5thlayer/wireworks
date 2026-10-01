@@ -49,7 +49,7 @@ public final class PoleWiring {
     }
 
     /**
-     * The wires the Placement Preview draws for a held pole (ADR 0005): the same {@link #onPlace} the
+     * The wires the Placement Preview draws for a held pole (ADR 0004): the same {@link #onPlace} the
      * server runs, asked of a hypothetical pole at the aimed spot, and nothing where the placement
      * only grows a column, since a column that grew adds no wire.
      *

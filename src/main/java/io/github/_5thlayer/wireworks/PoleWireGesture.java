@@ -109,7 +109,7 @@ public final class PoleWireGesture {
         }
     }
 
-    private static void release(ItemStack tool, ServerLevel level, Player holder, boolean mainHand) {
+    private static void release(ItemStack tool, ServerLevel level, Player player, boolean mainHand) {
         GlobalPos pending = tool.get(WireworksRegistries.PENDING_WIRE.get());
         if (pending == null) {
             return;
@@ -122,13 +122,13 @@ public final class PoleWireGesture {
         PoleTier tier = standing
                 ? ((SupplyAreaPoleBlock) level.getBlockState(anchor).getBlock()).tier()
                 : PoleTier.SMALL;
-        PendingEnd.Holder held = new PendingEnd.Holder(holder.getX(), holder.getY(), holder.getZ(),
-                holder.blockInteractionRange(), mainHand, sameDimension);
+        PendingEnd.Holder held = new PendingEnd.Holder(player.getX(), player.getY(), player.getZ(),
+                player.blockInteractionRange(), mainHand, sameDimension);
         if (!PendingEnd.stillHeld(LevelWires.pole(anchor, tier), standing, held)) {
             tool.remove(WireworksRegistries.PENDING_WIRE.get());
             // The snap: dropping an end is heard at the player, since nothing else shows it. A
             // chain's break, so it is none of the made, cut or refused sounds.
-            level.playSound(null, holder.blockPosition(), SoundEvents.CHAIN_BREAK,
+            level.playSound(null, player.blockPosition(), SoundEvents.CHAIN_BREAK,
                     SoundSource.PLAYERS, 1.0F, 1.0F);
         }
     }
