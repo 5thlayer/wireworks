@@ -10,7 +10,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Which wires a placed pole adds (FactoryWorks ADR-0068): every pole in reach sharing no neighbour with it, at
+ * Which wires a placed pole adds (ADR 0004): every pole in reach sharing no neighbour with it, at
  * most five, nearest first.
  */
 class PoleWiringPlacementTest {

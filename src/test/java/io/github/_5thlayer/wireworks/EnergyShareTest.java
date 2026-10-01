@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * What a pole does when its area asks for more than the grid is giving it. The argument for
- * water-filling over first-come-first-served is on {@link EnergyShare} and in FactoryWorks ADR-0036.
+ * water-filling over first-come-first-served is on {@link EnergyShare} and in ADR 0002.
  */
 class EnergyShareTest {
 

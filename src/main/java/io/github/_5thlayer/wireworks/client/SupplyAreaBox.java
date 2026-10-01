@@ -27,42 +27,29 @@ import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
 import org.joml.Vector3f;
 
 /**
- * The Supply Area Box (factoryworks#158, FactoryWorks ADR-0070): a pole's supply area drawn as the volume it covers.
+ * The Supply Area Box (ADR 0005): a pole's supply area drawn as the volume it covers, the third thing
+ * the Placement Preview shows after the translucent block (Groundworks ADR 0001 and 0002) and the
+ * wires the pole would add ({@link PreviewWires}).
  *
- * <p>A pole's area used to be invisible, and factoryworks#147 answered that with text, which states the
- * footprint without saying where it lands. This is the third thing the Placement Preview shows,
- * after FactoryWorks ADR-0069's translucent block and factoryworks#298's wires.
- *
- * <h2>Why a volume and not a surface</h2>
- *
- * <p>The ticket was first written as a 2D overlay draped per column, resting on the highest block of
- * each. It cannot be made honest. A column with nothing solid inside the band gets no quad, so the
- * sheet has a hole wherever terrain falls away -- and a hole reads as "the area stops here", which
- * is false: a platform built out over that drop is inside the band and would be powered. The
- * converse is no better: a column covering two levels at once, a machine on a platform and a floor
- * below it, can only draw the upper, leaving a powered floor invisible. Minecraft is three
- * dimensional and the area is a three dimensional region, so the box is drawn as one.
+ * <p>Minecraft is three dimensional and the area is a three dimensional region, so the box is drawn as
+ * one: a surface draped over the terrain would show holes where the area does not stop.
  *
  * <h2>One builder, two call sites</h2>
  *
  * <p>{@link #offsets} is the whole geometry, and it is a function of the tier alone -- nothing here
  * reads the world. The held item's preview and the placed pole's renderer both draw what it
- * returns, so they cannot disagree about where the area is, which is FactoryWorks ADR-0069's rule applied to the
- * overlay. The bounds come from {@link SupplyArea#bounds}: the substation's even-sided area takes
- * its extra block on the negative side, and a renderer that centred the box instead would be wrong
- * by half a block on the one tier where it shows.
+ * returns, so they cannot disagree about where the area is, which is the placement plan's rule
+ * applied to the overlay. The bounds come from {@link SupplyArea#bounds}: the substation's
+ * even-sided area takes its extra block on the negative side, and a renderer that centred the box
+ * instead would be wrong by half a block on the one tier where it shows.
  *
  * <h2>The machines are outlined too</h2>
  *
- * <p>The box alone was not readable in a built base: it says where the footprint lands, and a player
- * reading it wants to know which machines are inside -- a question no box shape can answer, because
- * membership depends on the band and the box has no face at a machine's height. So every block the
- * pole reaches is outlined in the same yellow ({@link SuppliedMachines}), which answers it exactly.
- *
- * <p>That reverses a limit FactoryWorks ADR-0070 first accepted -- "the overlay says where the footprint lands,
- * not whether a given block is powered" -- and it is reversed on the strength of the human check the
- * ADR asked for. The outlines are the scan's own answer, not a capability sweep, so they agree with
- * the network by construction rather than by coincidence.
+ * <p>The box says where the footprint lands, and a player reading it wants to know which machines are
+ * inside -- a question no box shape can answer, because membership depends on the band and the box
+ * has no face at a machine's height. So every block the pole reaches is outlined in the same yellow
+ * ({@link SuppliedMachines}). The outlines are the scan's own answer, not a capability sweep, so
+ * they agree with the network by construction rather than by coincidence.
  *
  * <h2>Edges only, and drawn through terrain</h2>
  *
@@ -83,13 +70,12 @@ public final class SupplyAreaBox {
 
     /**
      * Bright yellow, Factorio's own electric-network colour, and the one tint no other pole gesture
-     * uses: green, orange, red and brown are a wire tool's outcomes (FactoryWorks ADR-0068) and
+     * uses: green, orange, red and brown are a wire tool's outcomes (ADR 0004) and
      * white and red are the placement preview's accepted and refused.
      *
      * <p><b>One state, never changing.</b> It does not turn red on a refused placement -- the red
-     * block already says that -- and it must not come to react to network load when factoryworks#157 lands. The
-     * box describes an area, not an outcome; whether machines in it are being fed is the Jade line's
-     * answer, on the machine.
+     * block already says that -- and it does not react to network load. The box describes an area,
+     * not an outcome; whether machines in it are being fed is the Jade line's answer, on the machine.
      */
     private static final int COLOUR = 0xFFFFE04C;
 

@@ -17,7 +17,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 import java.util.List;
 
 /**
- * Every wire with an end in one chunk, server to client (FactoryWorks ADR-0068).
+ * Every wire with an end in one chunk, server to client (ADR 0004).
  *
  * <p>Sent when a player starts watching the chunk and again whenever a wire touching it is made or
  * cut. The client replaces the chunk's wires whole rather than applying a change, so a wire cut

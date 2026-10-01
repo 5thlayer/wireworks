@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * A wire tool's second click on a pole (FactoryWorks ADR-0068): it wires an unwired pair, cuts a wired
+ * A wire tool's second click on a pole (ADR 0004): it wires an unwired pair, cuts a wired
  * one, cancels on the anchor itself, and refuses a pair out of reach without changing anything.
  */
 class PoleWiringClickTest {

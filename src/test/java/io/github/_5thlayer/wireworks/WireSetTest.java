@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * The level's stored wires (FactoryWorks ADR-0068). {@code JsonOps} stands in for NBT: the set holds only ints
+ * The level's stored wires (ADR 0004). {@code JsonOps} stands in for NBT: the set holds only ints
  * and lists.
  */
 class WireSetTest {
@@ -90,7 +90,7 @@ class WireSetTest {
         assertEquals(3, client.all().size());
     }
 
-    /** A column that grew downwards or was trimmed from the bottom keeps its wires (factoryworks#309). */
+    /** A column that grew downwards or was trimmed from the bottom keeps its wires. */
     @Test
     void rekeyingMovesEveryWireOfAPoleToTheNewBase() {
         WireSet wires = new WireSet();

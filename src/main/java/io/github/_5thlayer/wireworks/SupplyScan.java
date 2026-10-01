@@ -11,7 +11,7 @@ import java.util.function.Function;
 
 /**
  * How a pole's area becomes three lists: every block resolved to the energy owner it answers to,
- * each owner kept once, and the owner -- not the block -- given a role (factoryworks#292, FactoryWorks ADR-0062).
+ * each owner kept once, and the owner -- not the block -- given a role (ADR 0003).
  *
  * <p>A block is not a machine. Oritech's Steam Engine is three failures to a scan that files by
  * position: its machine-core hull blocks answer the controller's energy face with an untagged

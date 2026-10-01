@@ -28,7 +28,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * The wires a held pole would add, drawn with its Placement Preview (factoryworks#298, FactoryWorks ADR-0068).
+ * The wires a held pole would add, drawn with its Placement Preview (ADR 0004, ADR 0005).
  *
  * <p>The selection is the server's own {@link PoleWiring#wouldAdd} -- no triangles, at most five,
  * nearest first -- asked of a hypothetical pole at the previewed spot, so the preview cannot promise
@@ -36,7 +36,7 @@ import net.minecraft.world.phys.Vec3;
  * client's block entities and the wires in {@link ClientWires}, so there is no packet and no round
  * trip.
  *
- * <p>Faded rather than tinted: green, orange and red belong to the hand gesture's slack (FactoryWorks ADR-0068)
+ * <p>Faded rather than tinted: green, orange and red belong to the hand gesture's slack (ADR 0004)
  * and would read here as the outcome of a click that is not being made.
  */
 public final class PreviewWires {
@@ -49,8 +49,7 @@ public final class PreviewWires {
 
     /**
      * Draws the wires the plan's pole would add, or nothing: a refused plan puts no pole down, a
-     * placement that only grows a column adds no wire (factoryworks#309), and a replaced column keeps its own
-     * (factoryworks#389).
+     * placement that only grows a column adds no wire, and a replaced column keeps its own (ADR 0006).
      */
     public static void draw(SubmitNodeCollector collector, PoseStack poseStack, ClientLevel level,
             Vec3 camera, PlacementPlan plan) {

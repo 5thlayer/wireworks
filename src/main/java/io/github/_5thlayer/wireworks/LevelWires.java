@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * A level's wires, saved with it (FactoryWorks ADR-0068). The rules are {@link PoleWiring}'s and the storage
+ * A level's wires, saved with it (ADR 0004). The rules are {@link PoleWiring}'s and the storage
  * {@link WireSet}'s; this is where the two meet a world.
  */
 public final class LevelWires extends SavedData {
@@ -86,8 +86,8 @@ public final class LevelWires extends SavedData {
             return;
         }
         // A pole placed under a standing column of the same tier is that column growing downwards,
-        // not a new pole (factoryworks#309): its wires move to the new base and it adds none of its own. Where
-        // the placement also joins a column below, the new base is that lower column's.
+        // not a new pole: its wires move to the new base and it adds none of its own. Where the
+        // placement also joins a column below, the new base is that lower column's.
         BlockPos above = pos.above();
         if (level.getBlockState(above).is(level.getBlockState(pos).getBlock())) {
             BlockPos base = PoleColumn.baseOf(level, pos);

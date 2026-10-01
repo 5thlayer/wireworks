@@ -9,7 +9,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * A pole is a column: a base where the footprint belongs, and extensions above it (FactoryWorks ADR-0036).
+ * A pole is a column: a base where the footprint belongs, and extensions above it (ADR 0002).
  *
  * <h2>Why the pole has a height at all</h2>
  *

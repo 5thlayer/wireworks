@@ -20,14 +20,14 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 /**
- * Every Electric Network in a level, and the tick that settles them (FactoryWorks ADR-0062).
+ * Every Electric Network in a level, and the tick that settles them (ADR 0003).
  *
  * <h2>Networks follow the stored wires</h2>
  *
  * <p>A pole reports itself every tick it runs. A pole that did not report -- broken, unloaded, or
  * turned into a column extension -- is dropped at the level tick. Any change to the set of poles,
  * or a wire made or cut ({@link LevelWires}), rebuilds the networks from the wires between the poles
- * standing (FactoryWorks ADR-0068, superseding FactoryWorks ADR-0062's "no stored topology"). A merge and a split are still
+ * standing (ADR 0004, superseding ADR 0003's "no stored topology"). A merge and a split are still
  * the same recomputation.
  *
  * <h2>One settlement per network</h2>

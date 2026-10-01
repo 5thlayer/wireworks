@@ -5,11 +5,13 @@ package io.github._5thlayer.wireworks;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * One tick of an Electric Network's books (FactoryWorks ADR-0062): generators before accumulators, only
+ * One tick of an Electric Network's books (ADR 0003): generators before accumulators, only
  * generator surplus charges, and generators share their load in proportion to what each can give.
  */
 class NetworkBalanceTest {
@@ -61,7 +63,7 @@ class NetworkBalanceTest {
     void proportionalRemaindersAreNotLost() {
         NetworkBalance.Settlement s = NetworkBalance.settle(
                 new long[]{100, 100, 100}, NONE, NONE, new long[]{100});
-        assertEquals(100, java.util.Arrays.stream(s.generatorDraws()).sum());
+        assertEquals(100, Arrays.stream(s.generatorDraws()).sum());
     }
 
     @Test
@@ -75,10 +77,10 @@ class NetworkBalanceTest {
     void whatIsDrawnEqualsWhatIsDelivered() {
         NetworkBalance.Settlement s = NetworkBalance.settle(
                 new long[]{70, 30}, new long[]{40, 40}, new long[]{0, 0}, new long[]{90, 45, 20});
-        long in = java.util.Arrays.stream(s.generatorDraws()).sum()
-                + java.util.Arrays.stream(s.accumulatorDischarges()).sum();
-        long out = java.util.Arrays.stream(s.consumerGrants()).sum()
-                + java.util.Arrays.stream(s.accumulatorCharges()).sum();
+        long in = Arrays.stream(s.generatorDraws()).sum()
+                + Arrays.stream(s.accumulatorDischarges()).sum();
+        long out = Arrays.stream(s.consumerGrants()).sum()
+                + Arrays.stream(s.accumulatorCharges()).sum();
         assertEquals(in, out);
         assertEquals(155, out);
     }

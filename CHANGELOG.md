@@ -4,6 +4,10 @@ Each version has two sections: Players, what a player or pack developer sees, an
 
 ## Unreleased
 
+### Consumers
+
+- `PoleLinks` is now `PoleNetworks`, and `PoleLinks.linked` is `PoleNetworks.withinReach`. The reach-only `networks(List)` is gone, and `PendingEnd.stillHeld` takes the player as a `PendingEnd.Holder`. None of them is named API, and the Pack calls none of them. (#5)
+
 ## 0.1.0
 
 ### Players

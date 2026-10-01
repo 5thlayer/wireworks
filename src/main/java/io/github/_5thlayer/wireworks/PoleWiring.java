@@ -9,7 +9,7 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * The wiring rules (FactoryWorks ADR-0068). Pure: no Minecraft types.
+ * The wiring rules (ADR 0004). Pure: no Minecraft types.
  */
 public final class PoleWiring {
 
@@ -49,9 +49,9 @@ public final class PoleWiring {
     }
 
     /**
-     * The wires the Placement Preview draws for a held pole (factoryworks#298): the same
-     * {@link #onPlace} the server runs, asked of a hypothetical pole at the aimed spot, and nothing
-     * where the placement only grows a column, since a column that grew adds no wire (factoryworks#309).
+     * The wires the Placement Preview draws for a held pole (ADR 0005): the same {@link #onPlace} the
+     * server runs, asked of a hypothetical pole at the aimed spot, and nothing where the placement
+     * only grows a column, since a column that grew adds no wire.
      *
      * @param joinsAColumn the placement would extend or join a standing column rather than start one
      */

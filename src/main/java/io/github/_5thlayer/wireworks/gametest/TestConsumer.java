@@ -23,6 +23,8 @@ import net.neoforged.neoforge.transfer.energy.EnergyHandler;
 import net.neoforged.neoforge.transfer.transaction.SnapshotJournal;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
+import java.util.Set;
+
 /**
  * A machine for the tests to feed, since Wireworks ships none: a block whose FE face takes up to
  * {@link #CAPACITY} and gives nothing back. Registered only when game tests are enabled.
@@ -38,7 +40,7 @@ final class TestConsumer {
     static final DeferredBlock<ConsumerBlock> BLOCK = BLOCKS.registerBlock("gametest_consumer", ConsumerBlock::new);
     static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ConsumerEntity>> TYPE =
             BLOCK_ENTITIES.register("gametest_consumer",
-                    () -> new BlockEntityType<>(ConsumerEntity::new, java.util.Set.of(BLOCK.get())));
+                    () -> new BlockEntityType<>(ConsumerEntity::new, Set.of(BLOCK.get())));
 
     private TestConsumer() {
     }

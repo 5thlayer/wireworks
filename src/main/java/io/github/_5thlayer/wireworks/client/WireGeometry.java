@@ -20,8 +20,8 @@ import org.joml.Matrix4f;
  *
  * <p>Vanilla's own leash colour is fixed, and every wire Wireworks draws that is not plain brown --
  * the hand gesture's slack ({@link PoleWireRenderer}) and the Placement Preview's would-be wires
- * (factoryworks#298) -- needs its own. One copy of the curve rather than one per caller, so a wire drawn by the
- * preview hangs exactly where the wire it promises will hang.
+ * (ADR 0005) -- needs its own. One copy of the curve rather than one per caller, so a wire drawn by
+ * the preview hangs exactly where the wire it promises will hang.
  */
 public final class WireGeometry {
 

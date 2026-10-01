@@ -12,7 +12,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.level.LevelEvent;
 
 /**
- * The client half of the Electric Network (factoryworks#281): the wire between linked poles.
+ * The client half of the Electric Network: the wire between wired poles (ADR 0004).
  *
  * <p>Called only on the client, from {@code Wireworks}.
  */
@@ -23,7 +23,7 @@ public final class PoleWireClient {
 
     public static void register(IEventBus modBus) {
         modBus.addListener(PoleWireClient::registerRenderers);
-        // The Supply Area Box (factoryworks#158): its line pipeline ignores depth, which no stock line type
+        // The Supply Area Box (ADR 0005): its line pipeline ignores depth, which no stock line type
         // does, so it has to be registered before the first frame that draws one.
         SupplyAreaBox.register(modBus);
         NeoForge.EVENT_BUS.addListener(PreviewOverlay::onOverlay);

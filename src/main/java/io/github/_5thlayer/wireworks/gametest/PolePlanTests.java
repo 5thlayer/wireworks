@@ -25,7 +25,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * A held pole's Placement Plan against what the click does (FactoryWorks ADR-0069): an accepted plan
+ * A held pole's Placement Plan against what the click does (Groundworks ADR 0001 and 0002): an accepted plan
  * must put every block down in the state it named, and a refused one must change nothing, read
  * before the click as well as after.
  */

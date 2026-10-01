@@ -58,7 +58,7 @@ public final class WireworksGameTests {
             return;
         }
         TestConsumer.register(modBus);
-        // A Consumer's statement; Wireworks states no group of its own (ADR-0006).
+        // A Consumer's statement; Wireworks states no group of its own (ADR 0006).
         FastReplace.group(id("gametest_poles"), block -> block instanceof SupplyAreaPoleBlock pole
                 && !(pole instanceof CreativeSupplyAreaPoleBlock) && pole.tier() != PoleTier.SUBSTATION,
                 PoleColumnReplace.BUILDER);

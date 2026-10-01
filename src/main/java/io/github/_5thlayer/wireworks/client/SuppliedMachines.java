@@ -16,7 +16,7 @@ import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Which machines a pole reaches, for the Supply Area Box to outline (factoryworks#158, FactoryWorks ADR-0070), cached.
+ * Which machines a pole reaches, for the Supply Area Box to outline (ADR 0005), cached.
  *
  * <p>The answer is {@link SupplyAreaScan}'s -- the same scan the pole runs to build its network, so
  * the outlines cannot claim a machine the network would not feed, or miss one it would.
@@ -55,7 +55,7 @@ public final class SuppliedMachines {
      *
      * <p>All three roles together: a consumer, a generator and an accumulator are all things this
      * pole is connected to, and telling them apart is the Jade line's job rather than a second
-     * colour's (FactoryWorks ADR-0070 keeps the box one colour). An owner standing <em>outside</em> the area is
+     * colour's (ADR 0005 keeps the box one colour). An owner standing <em>outside</em> the area is
      * included where it stands -- a slave Steam Engine's master is what the network actually draws,
      * so an outline beyond the box is the truth about the row rather than a leak.
      */

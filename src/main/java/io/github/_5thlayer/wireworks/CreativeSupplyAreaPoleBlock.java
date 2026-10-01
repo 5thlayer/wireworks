@@ -25,9 +25,8 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
  *
  * <h2>It ships</h2>
  *
- * <p>Creative tab and {@code /give}, with no recipe, which is what keeps it out of survival -- the same arrangement vanilla's creative-only blocks have. It
- * is not gated behind a dev flag: a gate is another dial with its own failure mode, and the thing
- * it would protect against is a player who has already opened the creative menu.
+ * <p>Creative tab and {@code /give}, with no recipe, which is what keeps it out of survival -- the
+ * same arrangement vanilla's creative-only blocks have.
  */
 public class CreativeSupplyAreaPoleBlock extends SupplyAreaPoleBlock {
 

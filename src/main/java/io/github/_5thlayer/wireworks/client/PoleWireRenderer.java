@@ -38,9 +38,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The wire between linked poles (factoryworks#281, FactoryWorks ADR-0068): cosmetic, and drawn with vanilla's leash geometry.
+ * The wire between wired poles (ADR 0004): cosmetic, and drawn with vanilla's leash geometry.
  *
- * <p>Each base pole draws the stored wires it is the first end of ({@link ClientWires}, FactoryWorks ADR-0068),
+ * <p>Each base pole draws the stored wires it is the first end of ({@link ClientWires}, ADR 0004),
  * from the top of its column to the top of the other's. A wire whose other end is not a loaded base
  * is not drawn, so breaking a pole takes its wires with it before the server's resend arrives.
  *
@@ -135,7 +135,7 @@ public final class PoleWireRenderer
     }
 
     /**
-     * The Supply Area Box for a placed pole (factoryworks#158, FactoryWorks ADR-0070), drawn only while it is the pole the
+     * The Supply Area Box for a placed pole (ADR 0005), drawn only while it is the pole the
      * local player is looking at.
      *
      * <p><b>Only the aimed pole.</b> Drawing every loaded pole's box would carpet a built base in
@@ -144,7 +144,7 @@ public final class PoleWireRenderer
      * "do my two poles cover the gap" is answered by aiming at each in turn.
      *
      * <p>Looking at any segment of the column counts, and the box is the base's, the same way the
-     * capability and the Jade line read from the base whatever segment is held against (factoryworks#147).
+     * capability and the Jade line read from the base whatever segment is held against.
      */
     private static void extractSupplyArea(Level level, BlockPos base, State state) {
         Minecraft minecraft = Minecraft.getInstance();

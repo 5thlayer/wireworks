@@ -30,12 +30,11 @@ import net.minecraft.world.item.component.TooltipDisplay;
  *
  * <p>Every other way a player learns a machine is missing here. There is no cable to trace, so the
  * shape of the network cannot be read off the world. There is no GUI, so nothing can be inspected.
- * The recipe says nothing about reach. The area itself used to be invisible with it, which left a
- * block whose entire behaviour had to be taken on trust unless it was stated somewhere.
+ * The recipe says nothing about reach.
  *
- * <p>The <b>Supply Area Box</b> now shows where the area lands (factoryworks#158, FactoryWorks ADR-0070), so the area is no
- * longer invisible -- but it is shown only while a pole is held or looked at, and it says nothing
- * about wireless reach or about the area being measured at the base. Those are still this tooltip's
+ * <p>The <b>Supply Area Box</b> shows where the area lands (ADR 0005), but only while a pole is held
+ * or looked at, and it says nothing about wireless reach or about the area being measured at the
+ * base. Those are still this tooltip's
  * alone, and the numbers here are what the box is read against.
  *
  * <p>So it is stated here, in three lines, always shown rather than hidden behind Shift. This is
@@ -56,8 +55,8 @@ public class SupplyAreaPoleItem extends BlockItem implements PlansPlacement {
     }
 
     /**
-     * The pole's plan (factoryworks#297, FactoryWorks ADR-0069): ordinary placement, except where the aim lands on a pole,
-     * where the column rule takes over.
+     * The pole's plan (Groundworks ADR 0001 and 0002): ordinary placement, except where the aim lands
+     * on a pole, where the column rule takes over.
      *
      * <p><b>The extension shows the real result</b>, not the spot vanilla would have chosen. A pole
      * aimed at any segment of a same-tier column previews the segment that would land on

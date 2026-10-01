@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Every wire in a level (FactoryWorks ADR-0068), stored once each, as a pair of pole bases.
+ * Every wire in a level (ADR 0004), stored once each, as a pair of pole bases.
  *
  * <p>Pure: DataFixerUpper's codec, no Minecraft types.
  */
@@ -51,9 +51,9 @@ public final class WireSet {
     }
 
     /**
-     * Moves every wire at {@code from} to {@code to}: a column whose base changed keeps its wires
-     * (factoryworks#309). A wire that would now join the column to itself is dropped, and two wires to the same
-     * third pole collapse into one, the set being unordered pairs.
+     * Moves every wire at {@code from} to {@code to}: a column whose base changed keeps its wires,
+     * since it is still the same pole. A wire that would now join the column to itself is dropped, and
+     * two wires to the same third pole collapse into one, the set being unordered pairs.
      */
     public void rekey(PoleNetworks.Pos from, PoleNetworks.Pos to) {
         List<PoleNetworks.Wire> moving = wires.stream()

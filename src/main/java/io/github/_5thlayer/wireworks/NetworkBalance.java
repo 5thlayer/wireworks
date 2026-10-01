@@ -4,7 +4,7 @@
 package io.github._5thlayer.wireworks;
 
 /**
- * One tick of an Electric Network's books (FactoryWorks ADR-0062), in Factorio's order.
+ * One tick of an Electric Network's books (ADR 0003), in Factorio's order.
  *
  * <ol>
  *   <li>Consumers are fed from generators first.</li>

@@ -3,20 +3,20 @@
 
 package io.github._5thlayer.wireworks;
 
-import java.util.List;
+import io.github._5thlayer.groundworks.PlacementPlan;
+import io.github._5thlayer.groundworks.Placements;
 
-import net.minecraft.world.level.storage.loot.LootParams;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
-import io.github._5thlayer.groundworks.PlacementPlan;
-import io.github._5thlayer.groundworks.Placements;
-import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
@@ -27,13 +27,16 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraft.server.level.ServerLevel;
+
+import java.util.List;
 
 /**
- * A Factorio electric pole (FactoryWorks ADR-0036, FactoryWorks ADR-0062): it supplies every machine standing in its area, and
+ * A Factorio electric pole (ADR 0002, ADR 0003): it supplies every machine standing in its area, and
  * the poles its wires join are one Electric Network.
  *
  * <p>The wires are saved with the level ({@link LevelWires}); the networks are recomputed from them
@@ -72,7 +75,7 @@ public class SupplyAreaPoleBlock extends Block implements EntityBlock {
     }
 
     @Override
-    protected VoxelShape getShape(BlockState state, net.minecraft.world.level.BlockGetter level,
+    protected VoxelShape getShape(BlockState state, BlockGetter level,
                                   BlockPos pos, CollisionContext context) {
         return SHAPE;
     }
@@ -92,9 +95,8 @@ public class SupplyAreaPoleBlock extends Block implements EntityBlock {
      * had to be smaller still.
      *
      * <p><b>The pole in hand is not consumed.</b> A column is one pole however tall it is: its height
-     * is a wiring decision, not a cost, and paying a pole per segment was punishing enough in play
-     * that poles were left short. Breaking the column pays back the one item it cost, since a
-     * segment dropped by the cascade carries no loot.
+     * is a wiring decision, not a cost (ADR 0002). Breaking the column pays back the one item it cost,
+     * since a segment dropped by the cascade carries no loot.
      *
      * <p>A pole of another tier does nothing at all, and says why, rather than falling through to
      * ordinary placement. Falling through would set a second, separate pole against the side of this
@@ -107,15 +109,13 @@ public class SupplyAreaPoleBlock extends Block implements EntityBlock {
                                               BlockHitResult hit) {
         if (!(stack.getItem() instanceof SupplyAreaPoleItem item)) {
             // Includes the empty hand and every other item, which must fall through to their own
-            // placement. Removing the top segment bare-handed would be the natural inverse of this,
-            // and is deliberately absent: breaking is already how blocks come off, and a bare-hand
-            // interaction that deletes part of a build loses substations to misclicks.
+            // placement.
             return InteractionResult.TRY_WITH_EMPTY_HAND;
         }
 
-        // The column rule is asked for, not restated (FactoryWorks ADR-0069): this executes the same plan the
-        // preview draws, so the two cannot disagree about where a segment lands or whether one
-        // may.
+        // The column rule is asked for, not restated (Groundworks ADR 0001 and 0002): this executes
+        // the same plan the preview draws, so the two cannot disagree about where a segment lands or
+        // whether one may.
         PlacementPlan plan = Placements.planFor(item, new BlockPlaceContext(level, player, hand, stack, hit));
         if (plan != null && plan.isRefused() && player instanceof ServerPlayer server) {
             String reason = plan.refusal() == WireworksRefusal.OTHER_TIER ? OTHER_TIER_KEY : null;
@@ -138,28 +138,24 @@ public class SupplyAreaPoleBlock extends Block implements EntityBlock {
         }
         level.setBlockAndUpdate(segment.pos(), segment.state());
         level.playSound(null, segment.pos(), getSoundType(state, level, segment.pos(), player).getPlaceSound(),
-                net.minecraft.sounds.SoundSource.BLOCKS, 1.0F, 1.0F);
-        // The item is not consumed: a column is one pole, however tall, and height is a wiring
-        // decision rather than a cost (FactoryWorks ADR-0036). Paying a pole per segment made raising one
-        // punishing enough that players left poles short. The other half of "one pole" is the
-        // teardown below: a broken column pays out exactly the one item it cost.
+                SoundSource.BLOCKS, 1.0F, 1.0F);
         return InteractionResult.SUCCESS;
     }
 
 
-    /** A placed base wires itself (FactoryWorks ADR-0068). */
+    /** A placed base wires itself (ADR 0004). */
     @Override
     protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState,
                            boolean movedByPiston) {
         super.onPlace(state, level, pos, oldState, movedByPiston);
-        // A Fast Replace swaps one pole for another in place: the column keeps its wires (ADR-0006).
+        // A Fast Replace swaps one pole for another in place: the column keeps its wires (ADR 0006).
         if (level instanceof ServerLevel server && !(oldState.getBlock() instanceof SupplyAreaPoleBlock)) {
             LevelWires.of(server).placed(server, pos);
         }
     }
 
     /**
-     * Only a base drops a pole: a column is one item however tall (FactoryWorks ADR-0036).
+     * Only a base drops a pole: a column is one item however tall (ADR 0002).
      *
      * <p>Without this, extending for free and breaking the top segment back off would be a pole
      * duplicator, and it would look like ordinary play rather than an exploit. The loot table is the
@@ -177,9 +173,8 @@ public class SupplyAreaPoleBlock extends Block implements EntityBlock {
     /**
      * Breaking any segment drops the column above it.
      *
-     * <p>Chains and scaffolding both do this, so the muscle memory is already there,
-     * and the alternative -- leaving segments floating where their base was -- is a lie about a
-     * structure the player thinks of as one object. Recursion is via {@code destroyBlock}, which
+     * <p>Chains and scaffolding both do this, so the muscle memory is already there, and a column is
+     * one object to the player. Recursion is via {@code destroyBlock}, which
      * re-enters here for the block above, so the column unwinds one segment at a time.
      */
     @Override
@@ -190,7 +185,7 @@ public class SupplyAreaPoleBlock extends Block implements EntityBlock {
         if (level.getBlockState(pos).getBlock() instanceof SupplyAreaPoleBlock) {
             return;
         }
-        // A base's wires go with it; an extension holds none (FactoryWorks ADR-0068).
+        // A base's wires go with it; an extension holds none (ADR 0004).
         if (!level.getBlockState(pos.below()).is(this)) {
             LevelWires.of(level).broken(level, pos);
         }

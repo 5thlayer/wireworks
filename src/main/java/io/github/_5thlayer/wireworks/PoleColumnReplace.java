@@ -21,7 +21,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * Groundworks' builder for a pole's Fast Replace: the whole aimed column swapped to the held tier,
  * base first, for one pole charged and one handed back. Wireworks states no Replace group; a
- * Consumer passes this to {@code FastReplace.group} with the tiers it groups (ADR-0006).
+ * Consumer passes this to {@code FastReplace.group} with the tiers it groups (ADR 0006).
  */
 public final class PoleColumnReplace implements ReplaceBuilder {
 

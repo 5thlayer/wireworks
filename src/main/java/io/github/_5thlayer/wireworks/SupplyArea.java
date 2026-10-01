@@ -22,7 +22,7 @@ public final class SupplyArea {
     /**
      * The area's extent as offsets from the pole's base, inclusive on both ends.
      *
-     * <p>This is what the <b>Supply Area Box</b> is drawn from (factoryworks#158, FactoryWorks ADR-0070). The overlay shows
+     * <p>This is what the <b>Supply Area Box</b> is drawn from (ADR 0005). The overlay shows
      * the area's whole volume rather than a surface, so the extent is the only thing a renderer
      * needs -- and it is asked for here rather than recomputed client-side, because the substation's
      * even-sided offset is exactly the arithmetic that looks right while being half a block wrong.

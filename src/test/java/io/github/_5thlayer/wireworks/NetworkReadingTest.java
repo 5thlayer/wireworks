@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/** What Jade prints for a network (factoryworks#285): Factorio's hover summary, from one tick's committed flows. */
+/** What Jade prints for a network: Factorio's hover summary, from one tick's committed flows. */
 class NetworkReadingTest {
 
     private static NetworkReading reading(long produced, long delivered, long demanded) {

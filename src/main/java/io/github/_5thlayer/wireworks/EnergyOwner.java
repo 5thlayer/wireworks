@@ -22,7 +22,7 @@ public interface EnergyOwner {
     /** The block whose energy this one's face stands for, or {@code null} if it is its own. */
     BlockPos wireworks$energyOwner();
 
-    /** A block entity's owner, or failing that a hull block's (factoryworks#328), or {@code null}. */
+    /** A block entity's owner, or failing that a hull block's, or {@code null}. */
     static BlockPos of(Level level, BlockPos pos) {
         if (level.getBlockEntity(pos) instanceof EnergyOwner owned) {
             return owned.wireworks$energyOwner();

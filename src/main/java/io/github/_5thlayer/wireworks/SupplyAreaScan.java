@@ -12,11 +12,11 @@ import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * What a pole standing here reaches: every block in its supply area, sorted into roles by the energy
- * owner it answers to (factoryworks#292, FactoryWorks ADR-0062).
+ * owner it answers to (ADR 0003).
  *
  * <p>This is the scan the pole runs to build its network, and it is <b>also</b> what the Supply Area
- * Box outlines (factoryworks#158). Extracted so there is one of it rather than two: a client that re-derived
- * "which machines are in here" would drift from the server's answer, and the ways it would drift are
+ * Box outlines (ADR 0005). There is one of it rather than two: a client that re-derived "which
+ * machines are in here" would drift from the server's answer, and the ways it would drift are
  * not obvious. A slave Steam Engine resolves to its master, which may stand outside the area
  * entirely; a machine's hull block answers its controller's face and is never a consumer in its own
  * right. A naive "does this block have an Energy capability" sweep gets both wrong and lights up
@@ -34,7 +34,7 @@ public final class SupplyAreaScan {
     /**
      * Every owner a pole of this tier based at {@code origin} would reach, by role.
      *
-     * <p>The pole's own block is skipped -- it exposes no face to itself (FactoryWorks ADR-0062) -- and an
+     * <p>The pole's own block is skipped -- it exposes no face to itself (ADR 0003) -- and an
      * unloaded position contributes nothing rather than being guessed at.
      */
     public static SupplyScan.Roles<BlockPos> of(Level level, BlockPos origin, PoleTier tier) {
@@ -45,7 +45,7 @@ public final class SupplyAreaScan {
                 positions.add(pos.immutable());
             }
         });
-        // Every block stands for its energy owner (factoryworks#292): a machine's hull for its controller, a
+        // Every block stands for its energy owner: a machine's hull for its controller, a
         // slave engine for its master. The owner may lie outside this area; it is still the one the
         // network draws, and it is kept once however many of its blocks are in here.
         return SupplyScan.classify(positions,

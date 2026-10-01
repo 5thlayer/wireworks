@@ -30,8 +30,9 @@ import snownee.jade.api.config.IPluginConfig;
  * area is measured at the base. This is the other half: the two numbers that can only be read from
  * a running pole, at the moment a player is standing in front of one asking why a machine is dark.
  *
- * <p>Below those, the pole's whole Electric Network as Factorio's hover summary shows it (factoryworks#285):
- * satisfaction, production, consumption and accumulators. The graphs over time are factoryworks#286.
+ * <p>Below those, the pole's whole Electric Network as Factorio's hover summary shows it:
+ * satisfaction, production, consumption and accumulators. The graphs over time are
+ * 5thlayer/factoryworks#286.
  *
  * <p>The first two are chosen to separate the only two failure modes a player cannot otherwise tell apart.
  * <strong>Out of range</strong> reads as a machine count that does not include the machine in

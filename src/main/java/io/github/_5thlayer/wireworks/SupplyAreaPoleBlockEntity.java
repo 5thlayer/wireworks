@@ -23,7 +23,7 @@ import java.util.List;
  *
  * <h2>The pole moves no energy itself</h2>
  *
- * <p>FactoryWorks ADR-0062 makes the network the carrier. A pole reports itself to {@link ElectricNetworks}
+ * <p>ADR 0003 makes the network the carrier. A pole reports itself to {@link ElectricNetworks}
  * every tick and rescans its area now and then; the network, once per level tick, settles every
  * pole wired into it in one set of books. A pole holds no buffer and has no energy face: nothing feeds
  * it, because generators are pulled from where they stand.
@@ -35,7 +35,7 @@ import java.util.List;
  * machine whose face allows extraction would otherwise be drained as a generator.
  *
  * <p>The tag read is the energy owner's, not the block's: {@link SupplyScan} resolves a hull block to
- * its controller and a slave engine to its master first, and keeps each owner once (factoryworks#292).
+ * its controller and a slave engine to its master first, and keeps each owner once.
  *
  * <h2>Why the lists are cached</h2>
  *
@@ -81,7 +81,7 @@ public class SupplyAreaPoleBlockEntity extends BlockEntity {
     }
 
     /**
-     * Whether this pole is an unlimited generator: the creative pole (factoryworks#272). Read off the
+     * Whether this pole is an unlimited generator: the creative pole (ADR 0002). Read off the
      * blockstate, because a chunk load rebuilds a block entity from the type and never asks the
      * block which of the poles it is.
      */
@@ -115,7 +115,7 @@ public class SupplyAreaPoleBlockEntity extends BlockEntity {
         return lastReading.demanded();
     }
 
-    /** The pole's network as it stood after the last tick (factoryworks#285). Jade reads this. */
+    /** The pole's network as it stood after the last tick. Jade reads this. */
     public NetworkReading networkReading() {
         return lastReading;
     }
@@ -137,7 +137,7 @@ public class SupplyAreaPoleBlockEntity extends BlockEntity {
     }
 
     private void scan(Level level) {
-        // The scan is SupplyAreaScan's, shared with the Supply Area Box's outlines (factoryworks#158) so the
+        // The scan is SupplyAreaScan's, shared with the Supply Area Box's outlines (ADR 0005) so the
         // overlay cannot disagree with the network about what this pole reaches.
         SupplyScan.Roles<BlockPos> roles = SupplyAreaScan.of(level, getBlockPos(), tier());
         consumers = roles.consumers();

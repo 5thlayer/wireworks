@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * What the Placement Preview draws for a held pole (factoryworks#298, FactoryWorks ADR-0068): exactly the wires placing it
+ * What the Placement Preview draws for a held pole (ADR 0004, ADR 0005): exactly the wires placing it
  * would add, and none where the placement only grows a column.
  */
 class PoleWiringPreviewTest {

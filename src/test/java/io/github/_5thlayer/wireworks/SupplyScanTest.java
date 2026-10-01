@@ -11,7 +11,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * A supply area's blocks sorted into roles by the energy owner they answer to (factoryworks#292, FactoryWorks ADR-0062).
+ * A supply area's blocks sorted into roles by the energy owner they answer to (ADR 0003).
  *
  * <p>Positions are strings here: the rule is only about which block stands for which, and a
  * {@code BlockPos} would drag Minecraft onto a classpath that deliberately has none.

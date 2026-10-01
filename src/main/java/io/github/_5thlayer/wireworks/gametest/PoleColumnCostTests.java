@@ -21,7 +21,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * A column is one pole however tall it is (FactoryWorks ADR-0036): raising one costs nothing, and breaking one
+ * A column is one pole however tall it is (ADR 0002): raising one costs nothing, and breaking one
  * pays back the single item it cost.
  *
  * <p>Neither half means anything without the other, which is why they are one file. Free extension

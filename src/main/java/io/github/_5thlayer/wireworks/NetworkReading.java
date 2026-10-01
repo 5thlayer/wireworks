@@ -4,7 +4,7 @@
 package io.github._5thlayer.wireworks;
 
 /**
- * One tick of an Electric Network as a player reads it (factoryworks#285): Factorio's hover summary.
+ * One tick of an Electric Network as a player reads it: Factorio's hover summary.
  *
  * <p>Every flow is what the settle step <em>committed</em>, not what it planned, so an aborted tick
  * reads as nothing moved. Pure: no Minecraft types.
