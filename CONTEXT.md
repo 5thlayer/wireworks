@@ -16,12 +16,12 @@ _Avoid_: client (collides with the game's client side), dependent, integration
 ### Poles
 
 **Supply Area Pole**:
-A pole of one tier, small, medium or substation, or the creative pole. It has no energy face of its own: it reaches every FE block in its **Supply Area** and joins its **Electric Network** by **Wire**s.
+A pole of one tier, small, medium or large, or the creative pole. It has no energy face of its own: it reaches every FE block in its **Supply Area** and joins its **Electric Network** by **Wire**s.
 _Avoid_: power pole, node, transmitter
 
 **Tier**:
-A pole's geometry: its supply size and its **Wire Reach**, set in `wireworks-server.toml` and Factorio's by default. A tier grants no power of its own.
-_Avoid_: level, voltage
+A pole's geometry, small, medium or large: its supply size and its **Wire Reach**, set in `wireworks-server.toml` and Factorio's by default. A tier grants no power of its own. A pack may name the poles its own way.
+_Avoid_: level, voltage, substation (Factorio's name for the large pole)
 
 **Supply Area**:
 The square a pole supplies, its supply size on a side and two blocks up and down, measured at the base of its **Pole Column**. An even side is offset half a block.
@@ -32,7 +32,7 @@ A pole stacked up to five blocks tall, which is still one pole: raising it costs
 _Avoid_: tower, stack
 
 **Creative Pole**:
-A pole with the substation's area that generates without limit, for trying a machine without a power chain. It has no recipe.
+A pole with the large pole's area that generates without limit, for trying a machine without a power chain. It has no recipe.
 _Avoid_: infinite source, debug pole
 
 ### Networks
