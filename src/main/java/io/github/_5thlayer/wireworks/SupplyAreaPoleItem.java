@@ -4,7 +4,6 @@
 package io.github._5thlayer.wireworks;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
@@ -117,7 +116,7 @@ public class SupplyAreaPoleItem extends BlockItem implements PlansPlacement {
             tooltip.accept(Component.translatable("tooltip.wireworks.pole.creative")
                     .withStyle(ChatFormatting.LIGHT_PURPLE));
         }
-        if (!Minecraft.getInstance().hasShiftDown()) {
+        if (!flag.hasShiftDown()) {
             tooltip.accept(Component.translatable("tooltip.wireworks.hold_shift")
                     .withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
             return;
