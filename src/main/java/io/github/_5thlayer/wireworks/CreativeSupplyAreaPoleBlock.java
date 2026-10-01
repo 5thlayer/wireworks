@@ -13,9 +13,9 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
  *
  * <h2>It is a subclass, not a fourth {@link PoleTier}</h2>
  *
- * <p>{@code PoleTier} is Factorio's ladder of poles, and the config, the blocks and the recipes each
- * walk {@code PoleTier.values()}. A dev tool has nothing to say in any of them, so this is a separate
- * block wearing the substation's footprint: the largest area, so a machine can go anywhere nearby.
+ * <p>{@code PoleTier} is Factorio's ladder of poles, and the config and the registered blocks each
+ * walk {@code PoleTier.values()}. A dev tool has nothing to say in either, so this is a separate block
+ * wearing the substation's footprint: the largest area, so a machine can go anywhere nearby.
  *
  * <p>Everything else is inherited and stays shared: the column, the scan, the water-fill
  * rationing, the Jade line and the network it links into. What is being tested has to be the thing

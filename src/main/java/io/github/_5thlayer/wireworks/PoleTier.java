@@ -4,7 +4,6 @@
 package io.github._5thlayer.wireworks;
 
 import java.util.Locale;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * The three electric poles. A tier carries geometry and nothing else: a supply area and a wire
@@ -27,8 +26,6 @@ public enum PoleTier {
      * below through the ceiling.
      */
     public static final int VERTICAL_RADIUS = 2;
-
-    private static final AtomicInteger CONFIGURATIONS = new AtomicInteger();
 
     private final int defaultSupplySize;
     private final double defaultWireReach;
@@ -65,12 +62,6 @@ public enum PoleTier {
         }
         this.supplySize = supplySize;
         this.wireReach = wireReach;
-        CONFIGURATIONS.incrementAndGet();
-    }
-
-    /** How many times a tier has been configured: a change means a reach may have shortened. */
-    public static int configurations() {
-        return CONFIGURATIONS.get();
     }
 
     /** The longest wire any tier reaches, which bounds how far a wire is drawn from. */

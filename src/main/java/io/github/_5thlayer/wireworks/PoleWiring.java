@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 
 /**
  * The wiring rules (FactoryWorks ADR-0068). Pure: no Minecraft types.
@@ -47,24 +46,6 @@ public final class PoleWiring {
         }
         wires.add(pos(anchor), pos(target));
         return Click.WIRED;
-    }
-
-    /**
-     * The wires whose two poles no longer reach each other: a pole replaced by a shorter-reaching
-     * tier, or a config that shortened a reach. A wire only exists within reach, so these are cut.
-     * A wire with an end not in {@code standing} is left alone, since its tier is not known.
-     */
-    public static List<PoleLinks.Wire> beyondReach(Collection<PoleLinks.Wire> wires,
-                                                   Map<PoleLinks.Pos, PoleLinks.Pole> standing) {
-        List<PoleLinks.Wire> beyond = new ArrayList<>();
-        for (PoleLinks.Wire wire : wires) {
-            PoleLinks.Pole a = standing.get(wire.a());
-            PoleLinks.Pole b = standing.get(wire.b());
-            if (a != null && b != null && !PoleLinks.linked(a, b)) {
-                beyond.add(wire);
-            }
-        }
-        return beyond;
     }
 
     /**

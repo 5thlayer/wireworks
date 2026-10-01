@@ -48,16 +48,11 @@ public final class PoleColumnReplace implements ReplaceBuilder {
         for (int i = 0; i < height; i++) {
             blocks.add(new PlacementPlan.Placed(base.above(i), segment));
         }
-        // A column of the new tier right below or above would become one column with this one, and
-        // the wires of whichever loses its base would be left naming a position that is not one.
-        boolean joins = level.getBlockState(base.below()).is(item.getBlock())
-                || level.getBlockState(base.above(height)).is(item.getBlock());
-        return PlacementPlan.replacing(blocks, joins ? WireworksRefusal.JOINS_A_COLUMN : null);
+        return PlacementPlan.replacing(blocks, null);
     }
 
     @Override
     public Component message(Refusal refusal) {
-        return Component.translatable(refusal == WireworksRefusal.JOINS_A_COLUMN
-                ? "message.wireworks.replace_joins_column" : "message.wireworks.replace_refused");
+        return Component.translatable("message.wireworks.replace_refused");
     }
 }

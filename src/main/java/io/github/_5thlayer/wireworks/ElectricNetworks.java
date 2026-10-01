@@ -52,12 +52,9 @@ public final class ElectricNetworks {
 
     private final Map<BlockPos, SupplyAreaPoleBlockEntity> poles = new LinkedHashMap<>();
     private final Map<BlockPos, Long> lastReport = new LinkedHashMap<>();
-    private final Map<BlockPos, PoleTier> tiers = new LinkedHashMap<>();
     private List<List<SupplyAreaPoleBlockEntity>> networks = List.of();
     private Map<BlockPos, Long> accumulatorFlows = Map.of();
     private boolean dirty;
-    /** The {@link PoleTier#configurations()} the networks were last built under. */
-    private int configuration = -1;
 
     private ElectricNetworks() {
     }
@@ -68,10 +65,7 @@ public final class ElectricNetworks {
 
     void report(SupplyAreaPoleBlockEntity pole) {
         BlockPos pos = pole.getBlockPos();
-        // A Fast Replace changes a pole's tier where it stands, and with it the reach of its wires.
-        boolean replaced = poles.put(pos, pole) != pole;
-        boolean retiered = tiers.put(pos, pole.tier()) != pole.tier();
-        if (replaced || retiered) {
+        if (poles.put(pos, pole) != pole) {
             dirty = true;
         }
         lastReport.put(pos, pole.getLevel().getGameTime());
@@ -146,15 +140,9 @@ public final class ElectricNetworks {
             SupplyAreaPoleBlockEntity pole = poles.get(entry.getKey());
             if (entry.getValue() < now - 1 || pole.isRemoved()) {
                 poles.remove(entry.getKey());
-                tiers.remove(entry.getKey());
                 stale.remove();
                 dirty = true;
             }
-        }
-        // A reach the config changed can leave a wire beyond it, which the rebuild cuts.
-        if (configuration != PoleTier.configurations()) {
-            configuration = PoleTier.configurations();
-            dirty = true;
         }
         if (dirty) {
             rebuild(level);
@@ -170,16 +158,10 @@ public final class ElectricNetworks {
     private void rebuild(Level level) {
         List<SupplyAreaPoleBlockEntity> all = new ArrayList<>(poles.values());
         List<PoleLinks.Pole> shapes = new ArrayList<>(all.size());
-        Map<PoleLinks.Pos, PoleLinks.Pole> standing = new LinkedHashMap<>();
         for (SupplyAreaPoleBlockEntity pole : all) {
-            PoleLinks.Pole shape = pole.shape();
-            shapes.add(shape);
-            standing.put(new PoleLinks.Pos(shape.x(), shape.y(), shape.z()), shape);
+            shapes.add(pole.shape());
         }
-        // Cut first, so the networks are built from the wires that remain.
-        LevelWires wires = LevelWires.of((net.minecraft.server.level.ServerLevel) level);
-        wires.cutBeyondReach((net.minecraft.server.level.ServerLevel) level, standing);
-        int[] ids = PoleLinks.networks(shapes, wires.wires().all());
+        int[] ids = PoleLinks.networks(shapes, LevelWires.of((net.minecraft.server.level.ServerLevel) level).wires().all());
         List<List<SupplyAreaPoleBlockEntity>> built = new ArrayList<>();
         for (int i = 0; i < all.size(); i++) {
             while (built.size() <= ids[i]) {
