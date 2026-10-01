@@ -7,11 +7,6 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import com.mojang.serialization.MapCodec;
-import io.github._5thlayer.groundworks.FastReplace;
-import io.github._5thlayer.wireworks.CreativeSupplyAreaPoleBlock;
-import io.github._5thlayer.wireworks.PoleColumnReplace;
-import io.github._5thlayer.wireworks.PoleTier;
-import io.github._5thlayer.wireworks.SupplyAreaPoleBlock;
 import io.github._5thlayer.wireworks.Wireworks;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
@@ -38,7 +33,7 @@ public final class WireworksGameTests {
 
     /**
      * Set by the Library's own {@code gameTestServer} run. A Consumer's game test server also has
-     * game tests enabled, and there the test group would be claimed before the Consumer's own.
+     * game tests enabled, and there the test pack's group would be claimed before the Consumer's own.
      */
     private static final String OWN_RUN = "wireworks.gametest";
 
@@ -58,10 +53,7 @@ public final class WireworksGameTests {
             return;
         }
         TestConsumer.register(modBus);
-        // A Consumer's statement; Wireworks states no group of its own (ADR 0006).
-        FastReplace.group(id("gametest_poles"), block -> block instanceof SupplyAreaPoleBlock pole
-                && !(pole instanceof CreativeSupplyAreaPoleBlock) && pole.tier() != PoleTier.SUBSTATION,
-                PoleColumnReplace.BUILDER);
+        PoleReplaceTests.statePackGroup();
         modBus.addListener(WireworksGameTests::registerTests);
     }
 

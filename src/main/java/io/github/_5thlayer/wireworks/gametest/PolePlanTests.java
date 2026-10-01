@@ -19,6 +19,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
@@ -75,10 +76,13 @@ final class PolePlanTests {
         helper.succeed();
     }
 
-    /** Drawn at the column's top, where the player was plainly asking for a segment. */
+    /**
+     * Drawn at the column's top, where the player was plainly asking for a segment. A creative
+     * column, which no Replace group holds, so the click is the pole's own and not a replace.
+     */
     private static void otherTier(GameTestHelper helper) {
-        column(helper, 3);
-        PlacementPlan plan = check(helper, pole(PoleTier.SUBSTATION), ABOVE_FLOOR, Direction.NORTH, true);
+        column(helper, WireworksRegistries.CREATIVE_POLE.get(), 3);
+        PlacementPlan plan = check(helper, pole(PoleTier.MEDIUM), ABOVE_FLOOR, Direction.NORTH, true);
         refusal(helper, plan, WireworksRefusal.OTHER_TIER);
         if (plan.blocks().getFirst().pos().getY() != helper.absolutePos(ABOVE_FLOOR).getY() + 3) {
             helper.fail("the other-tier refusal was drawn somewhere other than the top of the "
@@ -132,8 +136,12 @@ final class PolePlanTests {
     }
 
     private static void column(GameTestHelper helper, int segments) {
+        column(helper, WireworksRegistries.pole(PoleTier.SMALL).get(), segments);
+    }
+
+    private static void column(GameTestHelper helper, Block pole, int segments) {
         for (int i = 0; i < segments; i++) {
-            helper.setBlock(ABOVE_FLOOR.above(i), WireworksRegistries.pole(PoleTier.SMALL).get());
+            helper.setBlock(ABOVE_FLOOR.above(i), pole);
         }
     }
 

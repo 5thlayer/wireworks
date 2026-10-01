@@ -10,31 +10,37 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import io.github._5thlayer.groundworks.FastReplace;
 import io.github._5thlayer.groundworks.PlacementPlan;
 import io.github._5thlayer.groundworks.Placements;
 import io.github._5thlayer.groundworks.Refusal;
 import io.github._5thlayer.wireworks.LevelWires;
 import io.github._5thlayer.wireworks.PoleColumn;
+import io.github._5thlayer.wireworks.PoleColumnReplace;
 import io.github._5thlayer.wireworks.PoleNetworks;
 import io.github._5thlayer.wireworks.PoleTier;
+import io.github._5thlayer.wireworks.SupplyAreaPoleBlock;
 import io.github._5thlayer.wireworks.SupplyAreaPoleBlockEntity;
+import io.github._5thlayer.wireworks.Wireworks;
 import io.github._5thlayer.wireworks.WireworksRefusal;
 import io.github._5thlayer.wireworks.WireworksRegistries;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * A pole column's Fast Replace through {@link io.github._5thlayer.wireworks.PoleColumnReplace}, in
- * the test group {@link WireworksGameTests} states: small and medium, the substation alone. Each
- * test clicks through the player's game mode, where Groundworks takes the click, and holds the world,
- * the wires and the inventory to the plan.
+ * A pole column's Fast Replace through {@link PoleColumnReplace}: in Wireworks' default group, which
+ * holds the three tiers and not the creative pole, and in a group a pack states, which claims its
+ * tiers before the default does. Each test clicks through the player's game mode, where Groundworks
+ * takes the click, and holds the world, the wires and the inventory to the plan.
  */
 final class PoleReplaceTests {
 
@@ -50,29 +56,64 @@ final class PoleReplaceTests {
     private static final String OTHER_TIER_KEY = "message.wireworks.other_tier";
     private static final String NO_ROOM_KEY = "message.groundworks.fast_replace_no_room_to_return";
 
+    /** Read on the server thread only, where a test's body runs whole. */
+    private static boolean packGrouped;
+
     private PoleReplaceTests() {
+    }
+
+    /**
+     * States the group a pack would, small and medium with the large pole left out, as the
+     * FactoryWorks Pack's is: at mod construction, so before Wireworks' default. It claims only
+     * while a test holds {@link #packGrouped}, so every other test meets the default.
+     */
+    static void statePackGroup() {
+        FastReplace.group(Identifier.fromNamespaceAndPath(Wireworks.MOD_ID, "gametest_pack_poles"),
+                block -> packGrouped && (block == pole(PoleTier.SMALL) || block == pole(PoleTier.MEDIUM)),
+                PoleColumnReplace.BUILDER);
     }
 
     static void register(WireworksGameTests.Registrar tests) {
         tests.test("replace_small_pole_column_with_medium", 20,
-                helper -> replaces(helper, PoleTier.SMALL, PoleTier.MEDIUM, 1));
+                helper -> replaces(helper, pole(PoleTier.SMALL), pole(PoleTier.MEDIUM), 1));
         tests.test("replace_medium_pole_column_with_small", 20,
-                helper -> replaces(helper, PoleTier.MEDIUM, PoleTier.SMALL, 0));
+                helper -> replaces(helper, pole(PoleTier.MEDIUM), pole(PoleTier.SMALL), 0));
         tests.test("replace_small_pole_column_with_medium_at_its_top", 20,
-                helper -> replaces(helper, PoleTier.SMALL, PoleTier.MEDIUM, 2));
-        tests.test("replace_pole_refuses_a_substation_on_a_small_column", 20,
-                helper -> refuses(helper, PoleTier.SMALL, 3, PoleTier.SUBSTATION, 2, false,
+                helper -> replaces(helper, pole(PoleTier.SMALL), pole(PoleTier.MEDIUM), 2));
+        tests.test("replace_small_pole_column_with_large", 20,
+                helper -> replaces(helper, pole(PoleTier.SMALL), pole(PoleTier.SUBSTATION), 2));
+        tests.test("replace_medium_pole_column_with_large", 20,
+                helper -> replaces(helper, pole(PoleTier.MEDIUM), pole(PoleTier.SUBSTATION), 1));
+        tests.test("replace_large_pole_column_with_small", 20,
+                helper -> replaces(helper, pole(PoleTier.SUBSTATION), pole(PoleTier.SMALL), 0));
+        tests.test("replace_pole_refuses_a_medium_pole_on_a_creative_column", 20,
+                helper -> refuses(helper, creativePole(), 1, pole(PoleTier.MEDIUM), 0, false,
                         WireworksRefusal.OTHER_TIER, OTHER_TIER_KEY));
-        tests.test("replace_pole_refuses_a_small_pole_on_a_substation", 20,
-                helper -> refuses(helper, PoleTier.SUBSTATION, 1, PoleTier.SMALL, 0, false,
+        tests.test("replace_pole_refuses_a_creative_pole_on_a_small_column", 20,
+                helper -> refuses(helper, pole(PoleTier.SMALL), 3, creativePole(), 2, false,
                         WireworksRefusal.OTHER_TIER, OTHER_TIER_KEY));
         tests.test("replace_pole_refused_with_no_room_changes_nothing", 20,
-                helper -> refuses(helper, PoleTier.SMALL, 3, PoleTier.MEDIUM, 2, true,
+                helper -> refuses(helper, pole(PoleTier.SMALL), 3, pole(PoleTier.MEDIUM), 2, true,
                         Refusal.FastReplace.NO_ROOM_TO_RETURN, NO_ROOM_KEY));
+        tests.test("replace_pole_in_a_pack_group_replaces_small_with_medium", 20,
+                helper -> packGrouped(() -> replaces(helper, pole(PoleTier.SMALL), pole(PoleTier.MEDIUM), 1)));
+        tests.test("replace_pole_in_a_pack_group_refuses_a_large_pole_on_a_small_column", 20,
+                helper -> packGrouped(() -> refuses(helper, pole(PoleTier.SMALL), 3, pole(PoleTier.SUBSTATION), 2,
+                        false, WireworksRefusal.OTHER_TIER, OTHER_TIER_KEY)));
+    }
+
+    /** Runs a test's body, which plans and clicks within the tick, with the pack's group stated. */
+    private static void packGrouped(Runnable body) {
+        packGrouped = true;
+        try {
+            body.run();
+        } finally {
+            packGrouped = false;
+        }
     }
 
     /** A three-segment column of {@code from}, clicked at segment {@code aimed} with {@code to}. */
-    private static void replaces(GameTestHelper helper, PoleTier from, PoleTier to, int aimed) {
+    private static void replaces(GameTestHelper helper, SupplyAreaPoleBlock from, SupplyAreaPoleBlock to, int aimed) {
         standing(helper, from, 3);
         BlockPos base = helper.absolutePos(ABOVE_FLOOR);
         Set<PoleNetworks.Wire> wires = wires(helper);
@@ -82,13 +123,13 @@ final class PoleReplaceTests {
             helper.fail("the fixture was not wired base to neighbour only", ABOVE_FLOOR);
         }
         ListeningPlayer player = new ListeningPlayer(helper, STAND);
-        player.setItemInHand(InteractionHand.MAIN_HAND, pole(to, 2));
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(to, 2));
         BlockPos target = ABOVE_FLOOR.above(aimed);
         BlockHitResult hit = hit(helper, target);
         PlacementPlan plan = plan(helper, player, hit, target);
 
         List<BlockPos> column = List.of(base, base.above(), base.above(2));
-        BlockState segment = WireworksRegistries.pole(to).get().defaultBlockState();
+        BlockState segment = to.defaultBlockState();
         List<PlacementPlan.Placed> expected = column.stream().map(pos -> new PlacementPlan.Placed(pos, segment)).toList();
         if (plan.isRefused() || !plan.replaces().equals(column) || !plan.blocks().equals(expected)) {
             helper.fail("the plan was not a replace of the whole column by " + to + ": " + plan, target);
@@ -109,21 +150,21 @@ final class PoleReplaceTests {
         if (!wires(helper).equals(wires)) {
             helper.fail("the replace changed the wires from " + wires + " to " + wires(helper), ABOVE_FLOOR);
         }
-        if (helper.getBlockEntity(ABOVE_FLOOR, SupplyAreaPoleBlockEntity.class).tier() != to) {
+        if (helper.getBlockEntity(ABOVE_FLOOR, SupplyAreaPoleBlockEntity.class).tier() != to.tier()) {
             helper.fail("the column's base is not a " + to + " pole", ABOVE_FLOOR);
         }
         ItemStack hand = player.getMainHandItem();
-        if (!hand.is(WireworksRegistries.poleItem(to).get()) || hand.getCount() != 1) {
+        if (!hand.is(to.asItem()) || hand.getCount() != 1) {
             helper.fail("the hand holds " + hand + " where one " + to + " pole should be left", target);
         }
-        int returned = player.getInventory().countItem(WireworksRegistries.poleItem(from).get());
+        int returned = player.getInventory().countItem(from.asItem());
         if (returned != 1) {
             helper.fail(returned + " " + from + " poles came back, not one", target);
         }
         helper.succeed();
     }
 
-    private static void refuses(GameTestHelper helper, PoleTier standing, int height, PoleTier held, int aimed,
+    private static void refuses(GameTestHelper helper, Block standing, int height, Block held, int aimed,
                                 boolean full, Refusal expected, String reason) {
         standing(helper, standing, height);
         ListeningPlayer player = new ListeningPlayer(helper, STAND);
@@ -132,7 +173,7 @@ final class PoleReplaceTests {
                 player.getInventory().setItem(slot, new ItemStack(Items.STONE, 64));
             }
         }
-        player.setItemInHand(InteractionHand.MAIN_HAND, pole(held, 2));
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(held, 2));
         BlockPos target = ABOVE_FLOOR.above(aimed);
         BlockHitResult hit = hit(helper, target);
         PlacementPlan plan = plan(helper, player, hit, target);
@@ -155,13 +196,13 @@ final class PoleReplaceTests {
         helper.succeed();
     }
 
-    /** A column of {@code tier} on the floor, a small pole wired to its base, and one wired past it. */
-    private static void standing(GameTestHelper helper, PoleTier tier, int height) {
+    /** A column of {@code pole} on the floor, a small pole wired to its base, and one wired past it. */
+    private static void standing(GameTestHelper helper, Block pole, int height) {
         for (int i = 0; i < height; i++) {
-            helper.setBlock(ABOVE_FLOOR.above(i), WireworksRegistries.pole(tier).get());
+            helper.setBlock(ABOVE_FLOOR.above(i), pole);
         }
-        helper.setBlock(NEIGHBOUR, WireworksRegistries.pole(PoleTier.SMALL).get());
-        helper.setBlock(BESIDE, WireworksRegistries.pole(PoleTier.SMALL).get());
+        helper.setBlock(NEIGHBOUR, pole(PoleTier.SMALL));
+        helper.setBlock(BESIDE, pole(PoleTier.SMALL));
     }
 
     private static PlacementPlan plan(GameTestHelper helper, ListeningPlayer player, BlockHitResult hit, BlockPos target) {
@@ -210,7 +251,11 @@ final class PoleReplaceTests {
         return player.getInventory().getNonEquipmentItems().stream().map(ItemStack::copy).toList();
     }
 
-    private static ItemStack pole(PoleTier tier, int count) {
-        return new ItemStack(WireworksRegistries.pole(tier).get(), count);
+    private static SupplyAreaPoleBlock pole(PoleTier tier) {
+        return WireworksRegistries.pole(tier).get();
+    }
+
+    private static SupplyAreaPoleBlock creativePole() {
+        return WireworksRegistries.CREATIVE_POLE.get();
     }
 }

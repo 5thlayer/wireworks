@@ -42,9 +42,21 @@ aborts.
 **Fast Replace is Groundworks'.** ADR-0002 and FactoryWorks ADR-0082 had the Pack swap a pole column
 for another tier. Groundworks' ADR 0008 moves the click, the charge and the refund into Groundworks;
 Wireworks gives the column builder, `PoleColumnReplace`, and keeps a column's wires across the swap,
-and a pack states which tiers form a group by passing the builder to `FastReplace.group`. Wireworks
-states no group, so a group is never claimed before the pack's. Without one, a pole aimed at a column
-of another tier is refused.
+and states a default group, `wireworks:poles`: small, medium and large, without the creative pole.
+A block belongs to the first group stated that claims it, so Wireworks states its default at common
+setup, once every mod is constructed. A pack that passes the
+builder to `FastReplace.group` at its own construction claims first, and its group replaces the
+default for each tier it holds; a tier it leaves out stays in the default, alone among the tiers the
+pack took. The FactoryWorks Pack groups small and medium and so keeps the large pole apart. A pole
+aimed at a column no group shares with it, the creative pole's or another group's, is refused.
+
+- *Considered: a tag for the default's members, as `wireworks:wire_tools` is.* Not needed: a pack's
+  group already takes the tiers it names, and a pack that wants a tier in no group can state it
+  alone.
+- *Considered: a way in Groundworks for a later group to supersede an earlier one.* Not needed while
+  stating last is enough. A pack that states its group after construction races the default, and so
+  does a pole put in one of Groundworks' `replace_group` tags, which Groundworks states at common
+  setup too: a pack groups its poles in code.
 
 **The placement plan and its preview are Groundworks'** (FactoryWorks ADR-0069, Groundworks ADR 0001
 and 0002). Wireworks plans the pole column through it and draws the supply area and the wires on its

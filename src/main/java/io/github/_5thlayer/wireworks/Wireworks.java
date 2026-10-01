@@ -27,6 +27,7 @@ public final class Wireworks {
         WireworksRegistries.register(modBus);
         WireworksConfig.register(container, modBus);
         modBus.addListener(Wireworks::registerPayloads);
+        PoleColumnReplace.register(modBus);
         // No pole moves energy without this: poles only report and scan, and the networks settle here.
         NeoForge.EVENT_BUS.addListener(ElectricNetworks::onLevelTick);
         NeoForge.EVENT_BUS.addListener(ElectricNetworks::onLevelUnload);

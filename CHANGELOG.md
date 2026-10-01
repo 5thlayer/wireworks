@@ -4,7 +4,13 @@ Each version has two sections: Players, what a player or pack developer sees, an
 
 ## Unreleased
 
+### Players
+
+- **Fast Replace between pole tiers.** A pole clicked on a column of another tier swaps the whole column, keeping its wires, for one pole charged and one handed back. The creative pole stays out. (#6)
+
 ### Consumers
+
+- Wireworks states a default Replace group, `PoleColumnReplace.DEFAULT_GROUP`, at common setup. A pack that states its own pole group with `PoleColumnReplace.BUILDER` at mod construction still gets its group for the tiers it names. (#6)
 
 - `PoleLinks` is now `PoleNetworks`, and `PoleLinks.linked` is `PoleNetworks.withinReach`. The reach-only `networks(List)` is gone, and `PendingEnd.stillHeld` takes the player as a `PendingEnd.Holder`. None of them is named API, and the Pack calls none of them. (#5)
 
