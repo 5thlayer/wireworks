@@ -160,7 +160,8 @@ public class SupplyAreaPoleBlock extends Block implements EntityBlock {
     protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState,
                            boolean movedByPiston) {
         super.onPlace(state, level, pos, oldState, movedByPiston);
-        if (level instanceof ServerLevel server && !oldState.is(this)) {
+        // A Fast Replace swaps one pole for another in place: the column keeps its wires (ADR-0006).
+        if (level instanceof ServerLevel server && !(oldState.getBlock() instanceof SupplyAreaPoleBlock)) {
             LevelWires.of(server).placed(server, pos);
         }
     }
@@ -184,6 +185,10 @@ public class SupplyAreaPoleBlock extends Block implements EntityBlock {
     @Override
     protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos,
                                                boolean movedByPiston) {
+        // Vanilla sets the new state before this runs, so a pole there is a Fast Replace, not a break.
+        if (level.getBlockState(pos).getBlock() instanceof SupplyAreaPoleBlock) {
+            return;
+        }
         // A base's wires go with it; an extension holds none (FactoryWorks ADR-0068).
         if (!level.getBlockState(pos.below()).is(this)) {
             LevelWires.of(level).broken(level, pos);

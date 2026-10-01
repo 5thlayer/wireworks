@@ -7,6 +7,11 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import com.mojang.serialization.MapCodec;
+import io.github._5thlayer.groundworks.FastReplace;
+import io.github._5thlayer.wireworks.CreativeSupplyAreaPoleBlock;
+import io.github._5thlayer.wireworks.PoleColumnReplace;
+import io.github._5thlayer.wireworks.PoleTier;
+import io.github._5thlayer.wireworks.SupplyAreaPoleBlock;
 import io.github._5thlayer.wireworks.Wireworks;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
@@ -45,6 +50,10 @@ public final class WireworksGameTests {
         TEST_TYPES.register(modBus);
         if (GameTestHooks.isGametestEnabled()) {
             TestConsumer.register(modBus);
+            // A Consumer's statement; Wireworks states no group of its own (ADR-0006).
+            FastReplace.group(id("gametest_poles"), block -> block instanceof SupplyAreaPoleBlock pole
+                    && !(pole instanceof CreativeSupplyAreaPoleBlock) && pole.tier() != PoleTier.SUBSTATION,
+                    PoleColumnReplace.BUILDER);
         }
         // Posted only when game tests are enabled, so a production server never registers the tests.
         modBus.addListener(WireworksGameTests::registerTests);
@@ -60,6 +69,7 @@ public final class WireworksGameTests {
         PoleColumnCostTests.register(tests);
         WireGestureTests.register(tests);
         PolePlanTests.register(tests);
+        PoleReplaceTests.register(tests);
     }
 
     private static Identifier id(String path) {

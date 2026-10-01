@@ -39,9 +39,10 @@ aborts.
 
 **Fast Replace is Groundworks'.** ADR-0002 and FactoryWorks ADR-0082 had the Pack swap a pole column
 for another tier. Groundworks' ADR 0008 moves the click, the charge and the refund into Groundworks;
-Wireworks gives the column builder and keeps a column's wires across the swap, and a pack states
-which tiers form a group (5thlayer/wireworks#3). Until then, a pole aimed at a column of another tier
-is refused.
+Wireworks gives the column builder, `PoleColumnReplace`, and keeps a column's wires across the swap,
+and a pack states which tiers form a group by passing the builder to `FastReplace.group`. Wireworks
+states no group, so a group is never claimed before the pack's. Without one, a pole aimed at a column
+of another tier is refused.
 
 **The placement plan and its preview are Groundworks'** (FactoryWorks ADR-0069, Groundworks ADR 0001
 and 0002). Wireworks plans the pole column through it and draws the supply area and the wires on its
