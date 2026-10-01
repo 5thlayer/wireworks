@@ -59,6 +59,7 @@ public final class WireworksGameTests {
         PoleWireTests.register(tests);
         PoleColumnCostTests.register(tests);
         WireGestureTests.register(tests);
+        PolePlanTests.register(tests);
     }
 
     private static Identifier id(String path) {
