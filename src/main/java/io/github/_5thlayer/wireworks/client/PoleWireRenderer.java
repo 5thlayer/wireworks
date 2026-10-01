@@ -17,7 +17,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.joml.Matrix4f;
 import io.github._5thlayer.wireworks.PoleColumn;
-import io.github._5thlayer.wireworks.PoleLinks;
+import io.github._5thlayer.wireworks.PoleNetworks;
 import io.github._5thlayer.wireworks.PoleTier;
 import io.github._5thlayer.wireworks.ClientWires;
 import io.github._5thlayer.wireworks.SupplyAreaPoleBlockEntity;
@@ -107,9 +107,9 @@ public final class PoleWireRenderer
         }
         extractSupplyArea(level, pole.getBlockPos(), state);
         BlockPos from = pole.getBlockPos();
-        PoleLinks.Pos self = new PoleLinks.Pos(from.getX(), from.getY(), from.getZ());
+        PoleNetworks.Pos self = new PoleNetworks.Pos(from.getX(), from.getY(), from.getZ());
         Vec3 start = attachPoint(level, from);
-        for (PoleLinks.Wire stored : ClientWires.wires().all()) {
+        for (PoleNetworks.Wire stored : ClientWires.wires().all()) {
             // A stored wire's first end sorts first by position, so exactly one end draws it.
             if (!stored.a().equals(self) || previewsCut(level, stored)) {
                 continue;
@@ -170,7 +170,7 @@ public final class PoleWireRenderer
      * Whether the local player's held end and looked-at pole are this stored wire: its orange slack
      * is drawn over it instead, since the two would hang on the same curve and fight for the pixels.
      */
-    private static boolean previewsCut(Level level, PoleLinks.Wire stored) {
+    private static boolean previewsCut(Level level, PoleNetworks.Wire stored) {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.player == null || !(minecraft.hitResult instanceof BlockHitResult hit)
                 || !(level.getBlockState(hit.getBlockPos()).getBlock() instanceof SupplyAreaPoleBlock)) {
@@ -180,14 +180,14 @@ public final class PoleWireRenderer
         if (pending == null || !pending.dimension().equals(level.dimension())) {
             return false;
         }
-        PoleLinks.Pos anchor = pos(pending.pos());
-        PoleLinks.Pos target = pos(PoleColumn.baseOf(level, hit.getBlockPos()));
+        PoleNetworks.Pos anchor = pos(pending.pos());
+        PoleNetworks.Pos target = pos(PoleColumn.baseOf(level, hit.getBlockPos()));
         return (stored.a().equals(anchor) && stored.b().equals(target))
                 || (stored.a().equals(target) && stored.b().equals(anchor));
     }
 
-    private static PoleLinks.Pos pos(BlockPos at) {
-        return new PoleLinks.Pos(at.getX(), at.getY(), at.getZ());
+    private static PoleNetworks.Pos pos(BlockPos at) {
+        return new PoleNetworks.Pos(at.getX(), at.getY(), at.getZ());
     }
 
     private static void extractSlack(Level level, BlockPos from, Vec3 start, float partialTicks, State state) {
@@ -206,8 +206,8 @@ public final class PoleWireRenderer
         if (minecraft.hitResult instanceof BlockHitResult hit
                 && level.getBlockState(hit.getBlockPos()).getBlock() instanceof SupplyAreaPoleBlock targetBlock) {
             BlockPos base = PoleColumn.baseOf(level, hit.getBlockPos());
-            PoleLinks.Pole anchor = new PoleLinks.Pole(from.getX(), from.getY(), from.getZ(), anchorBlock.tier());
-            PoleLinks.Pole target = new PoleLinks.Pole(base.getX(), base.getY(), base.getZ(), targetBlock.tier());
+            PoleNetworks.Pole anchor = new PoleNetworks.Pole(from.getX(), from.getY(), from.getZ(), anchorBlock.tier());
+            PoleNetworks.Pole target = new PoleNetworks.Pole(base.getX(), base.getY(), base.getZ(), targetBlock.tier());
             // Looking at another pole previews the wire itself, ending where it would hang.
             if (!base.equals(from)) {
                 end = attachPoint(level, base);

@@ -15,7 +15,7 @@ import io.github._5thlayer.groundworks.Placements;
 import io.github._5thlayer.groundworks.Refusal;
 import io.github._5thlayer.wireworks.LevelWires;
 import io.github._5thlayer.wireworks.PoleColumn;
-import io.github._5thlayer.wireworks.PoleLinks;
+import io.github._5thlayer.wireworks.PoleNetworks;
 import io.github._5thlayer.wireworks.PoleTier;
 import io.github._5thlayer.wireworks.SupplyAreaPoleBlockEntity;
 import io.github._5thlayer.wireworks.WireworksRefusal;
@@ -75,7 +75,7 @@ final class PoleReplaceTests {
     private static void replaces(GameTestHelper helper, PoleTier from, PoleTier to, int aimed) {
         standing(helper, from, 3);
         BlockPos base = helper.absolutePos(ABOVE_FLOOR);
-        Set<PoleLinks.Wire> wires = wires(helper);
+        Set<PoleNetworks.Wire> wires = wires(helper);
         LevelWires levelWires = LevelWires.of(helper.getLevel());
         if (!levelWires.contains(base, helper.absolutePos(NEIGHBOUR))
                 || levelWires.contains(base, helper.absolutePos(BESIDE))) {
@@ -140,7 +140,7 @@ final class PoleReplaceTests {
             helper.fail("expected the refusal " + expected + " but the plan was " + plan, target);
         }
         Map<BlockPos, BlockState> world = world(helper);
-        Set<PoleLinks.Wire> wires = wires(helper);
+        Set<PoleNetworks.Wire> wires = wires(helper);
         List<ItemStack> inventory = inventory(player);
 
         click(helper, player, hit);
@@ -195,11 +195,11 @@ final class PoleReplaceTests {
     }
 
     /** The wires with an end in this fixture: the level's are shared with every test beside it. */
-    private static Set<PoleLinks.Wire> wires(GameTestHelper helper) {
-        Set<PoleLinks.Pos> ends = new HashSet<>();
+    private static Set<PoleNetworks.Wire> wires(GameTestHelper helper) {
+        Set<PoleNetworks.Pos> ends = new HashSet<>();
         for (BlockPos pos : List.of(ABOVE_FLOOR, NEIGHBOUR, BESIDE)) {
             BlockPos absolute = helper.absolutePos(pos);
-            ends.add(new PoleLinks.Pos(absolute.getX(), absolute.getY(), absolute.getZ()));
+            ends.add(new PoleNetworks.Pos(absolute.getX(), absolute.getY(), absolute.getZ()));
         }
         return LevelWires.of(helper.getLevel()).wires().all().stream()
                 .filter(wire -> ends.contains(wire.a()) || ends.contains(wire.b()))

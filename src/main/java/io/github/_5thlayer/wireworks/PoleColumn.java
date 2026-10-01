@@ -36,7 +36,7 @@ import net.minecraft.world.level.block.state.BlockState;
  * only the base's is ticked or consulted: {@link SupplyAreaPoleBlock#getTicker} gates on
  * {@link #isBase}, so an extension never reports to its network and never scans. Placing a pole
  * directly <em>beneath</em> a standing one makes that one an extension; the network drops it on the
- * next tick and links the new base instead. A pole holds no energy, so nothing is stranded.
+ * next tick and counts the new base instead. A pole holds no energy, so nothing is stranded.
  */
 public final class PoleColumn {
 

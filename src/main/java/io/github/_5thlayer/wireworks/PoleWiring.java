@@ -28,12 +28,12 @@ public final class PoleWiring {
     }
 
     /** Whether a second click on {@code target} would be refused; the slack wire turns red on it. */
-    public static boolean refuses(PoleLinks.Pole anchor, PoleLinks.Pole target) {
-        return !pos(anchor).equals(pos(target)) && !PoleLinks.linked(anchor, target);
+    public static boolean refuses(PoleNetworks.Pole anchor, PoleNetworks.Pole target) {
+        return !pos(anchor).equals(pos(target)) && !PoleNetworks.withinReach(anchor, target);
     }
 
     /** Applies a wire tool's second click, on {@code target}, to the wire set. */
-    public static Click click(PoleLinks.Pole anchor, PoleLinks.Pole target, WireSet wires) {
+    public static Click click(PoleNetworks.Pole anchor, PoleNetworks.Pole target, WireSet wires) {
         if (pos(anchor).equals(pos(target))) {
             return Click.CANCELLED;
         }
@@ -55,25 +55,25 @@ public final class PoleWiring {
      *
      * @param joinsAColumn the placement would extend or join a standing column rather than start one
      */
-    public static List<PoleLinks.Pole> wouldAdd(PoleLinks.Pole placed, Collection<PoleLinks.Pole> standing,
+    public static List<PoleNetworks.Pole> wouldAdd(PoleNetworks.Pole placed, Collection<PoleNetworks.Pole> standing,
                                                 WireSet wires, boolean joinsAColumn) {
         return joinsAColumn ? List.of() : onPlace(placed, standing, wires);
     }
 
     /** The standing poles a newly placed pole wires itself to. */
-    public static List<PoleLinks.Pole> onPlace(PoleLinks.Pole placed, Collection<PoleLinks.Pole> standing,
+    public static List<PoleNetworks.Pole> onPlace(PoleNetworks.Pole placed, Collection<PoleNetworks.Pole> standing,
                                                WireSet wires) {
-        List<PoleLinks.Pole> candidates = new ArrayList<>(standing);
-        candidates.sort(Comparator.<PoleLinks.Pole>comparingLong(other -> distanceSquared(placed, other))
-                .thenComparingInt(PoleLinks.Pole::x)
-                .thenComparingInt(PoleLinks.Pole::y)
-                .thenComparingInt(PoleLinks.Pole::z));
-        List<PoleLinks.Pole> wired = new ArrayList<>();
-        for (PoleLinks.Pole other : candidates) {
+        List<PoleNetworks.Pole> candidates = new ArrayList<>(standing);
+        candidates.sort(Comparator.<PoleNetworks.Pole>comparingLong(other -> distanceSquared(placed, other))
+                .thenComparingInt(PoleNetworks.Pole::x)
+                .thenComparingInt(PoleNetworks.Pole::y)
+                .thenComparingInt(PoleNetworks.Pole::z));
+        List<PoleNetworks.Pole> wired = new ArrayList<>();
+        for (PoleNetworks.Pole other : candidates) {
             if (wired.size() == AUTO_WIRES) {
                 break;
             }
-            if (PoleLinks.linked(placed, other) && !sharesANeighbour(other, wired, wires)) {
+            if (PoleNetworks.withinReach(placed, other) && !sharesANeighbour(other, wired, wires)) {
                 wired.add(other);
             }
         }
@@ -81,8 +81,8 @@ public final class PoleWiring {
     }
 
     /** Whether {@code other} is already wired to a pole the placed one has just wired to. */
-    private static boolean sharesANeighbour(PoleLinks.Pole other, List<PoleLinks.Pole> wired, WireSet wires) {
-        for (PoleLinks.Pole chosen : wired) {
+    private static boolean sharesANeighbour(PoleNetworks.Pole other, List<PoleNetworks.Pole> wired, WireSet wires) {
+        for (PoleNetworks.Pole chosen : wired) {
             if (wires.contains(pos(chosen), pos(other))) {
                 return true;
             }
@@ -90,11 +90,11 @@ public final class PoleWiring {
         return false;
     }
 
-    private static PoleLinks.Pos pos(PoleLinks.Pole p) {
-        return new PoleLinks.Pos(p.x(), p.y(), p.z());
+    private static PoleNetworks.Pos pos(PoleNetworks.Pole p) {
+        return new PoleNetworks.Pos(p.x(), p.y(), p.z());
     }
 
-    private static long distanceSquared(PoleLinks.Pole a, PoleLinks.Pole b) {
+    private static long distanceSquared(PoleNetworks.Pole a, PoleNetworks.Pole b) {
         long dx = a.x() - b.x();
         long dy = a.y() - b.y();
         long dz = a.z() - b.z();

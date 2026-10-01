@@ -9,16 +9,16 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.level.block.Blocks;
 
 /**
- * Whether power crosses a wire (#280, ADR-0062).
+ * Whether power crosses a wire (ADR 0003, ADR 0004).
  *
- * <p>{@code PoleLinksTest} holds which poles link and {@code NetworkBalanceTest} what one network
- * pays out. Neither can see that the level actually settles linked poles as one set of books:
+ * <p>{@code PoleNetworksTest} holds which poles are one network and {@code NetworkBalanceTest} what
+ * one network pays out. Neither can see that the level actually settles wired poles as one set of books:
  * that a pole reports to the network, that the network is rebuilt when a pole arrives or leaves,
  * and that the settle tick is listened for at all.
  *
  * <h2>The layout</h2>
  *
- * <p>A creative pole at x 1 -- an unlimited generator whose 18x18 area reaches x 9 -- and an
+ * <p>A creative pole at x 1 -- an unlimited generator whose 18x18 area reaches x 9 -- and a
  * consumer at x 10, outside it. A small pole between them covers the consumer. Seven blocks
  * from the creative pole the small pole is within its 7.5 reach, and eight blocks away it is not.
  * The consumer can only be fed across the wire.
@@ -26,8 +26,8 @@ import net.minecraft.world.level.block.Blocks;
 final class ElectricNetworkTests {
 
     private static final BlockPos CREATIVE = new BlockPos(1, 1, 3);
-    private static final BlockPos LINKED = new BlockPos(8, 1, 3);
-    private static final BlockPos UNLINKED = new BlockPos(9, 1, 3);
+    private static final BlockPos IN_REACH = new BlockPos(8, 1, 3);
+    private static final BlockPos OUT_OF_REACH = new BlockPos(9, 1, 3);
     private static final BlockPos CONSUMER = new BlockPos(10, 1, 3);
 
     /** Past one rescan interval (40) plus the tick the network is rebuilt on. */
@@ -39,12 +39,12 @@ final class ElectricNetworkTests {
     static void register(WireworksGameTests.Registrar tests) {
         tests.test("power_crosses_a_wire", 100, ElectricNetworkTests::powerCrossesAWire);
         tests.test("power_stops_beyond_reach", 100, ElectricNetworkTests::powerStopsBeyondReach);
-        tests.test("breaking_the_link_splits_the_network", 200,
-                ElectricNetworkTests::breakingTheLinkSplits);
+        tests.test("breaking_a_wired_pole_splits_the_network", 200,
+                ElectricNetworkTests::breakingAWiredPoleSplits);
     }
 
     private static void powerCrossesAWire(GameTestHelper helper) {
-        place(helper, LINKED);
+        place(helper, IN_REACH);
         helper.startSequence()
                 .thenIdle(SETTLE)
                 .thenExecute(() -> {
@@ -57,7 +57,7 @@ final class ElectricNetworkTests {
     }
 
     private static void powerStopsBeyondReach(GameTestHelper helper) {
-        place(helper, UNLINKED);
+        place(helper, OUT_OF_REACH);
         helper.startSequence()
                 .thenIdle(SETTLE)
                 .thenExecute(() -> {
@@ -70,12 +70,9 @@ final class ElectricNetworkTests {
                 .thenSucceed();
     }
 
-    /**
-     * The split half of "no stored topology": a network that kept its poles after one was broken
-     * would keep feeding a consumer nothing is wired to.
-     */
-    private static void breakingTheLinkSplits(GameTestHelper helper) {
-        place(helper, LINKED);
+    /** A network that kept its poles after one was broken would keep feeding a consumer nothing is wired to. */
+    private static void breakingAWiredPoleSplits(GameTestHelper helper) {
+        place(helper, IN_REACH);
         helper.startSequence()
                 .thenIdle(SETTLE)
                 .thenExecute(() -> {

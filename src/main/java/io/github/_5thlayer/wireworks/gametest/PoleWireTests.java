@@ -14,7 +14,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 /**
  * A stored wire, not reach, joins two poles (#296, ADR-0068).
  *
- * <p>{@code PoleNetworksFromWiresTest}, {@code PoleWiringPlacementTest} and
+ * <p>{@code PoleNetworksTest}, {@code PoleWiringPlacementTest} and
  * {@code PoleWiringClickTest} hold the rules. What none of them can see is that the level keeps the
  * wires, that placing a pole writes them, and that the network is rebuilt from them when one is cut.
  *

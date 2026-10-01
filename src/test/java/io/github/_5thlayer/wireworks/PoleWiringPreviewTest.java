@@ -16,14 +16,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 class PoleWiringPreviewTest {
 
-    private static PoleLinks.Pole small(int x, int y, int z) {
-        return new PoleLinks.Pole(x, y, z, PoleTier.SMALL);
+    private static PoleNetworks.Pole small(int x, int y, int z) {
+        return new PoleNetworks.Pole(x, y, z, PoleTier.SMALL);
     }
 
     @Test
     void thePreviewNamesTheWiresAPlacementWouldAdd() {
-        PoleLinks.Pole placed = small(0, 64, 0);
-        List<PoleLinks.Pole> standing = List.of(small(5, 64, 0), small(0, 64, 5));
+        PoleNetworks.Pole placed = small(0, 64, 0);
+        List<PoleNetworks.Pole> standing = List.of(small(5, 64, 0), small(0, 64, 5));
         WireSet wires = new WireSet();
         assertEquals(PoleWiring.onPlace(placed, standing, wires),
                 PoleWiring.wouldAdd(placed, standing, wires, false));
@@ -31,14 +31,14 @@ class PoleWiringPreviewTest {
 
     @Test
     void aPlacementThatOnlyGrowsAColumnDrawsNoWires() {
-        PoleLinks.Pole placed = small(0, 64, 0);
-        List<PoleLinks.Pole> standing = List.of(small(5, 64, 0));
+        PoleNetworks.Pole placed = small(0, 64, 0);
+        List<PoleNetworks.Pole> standing = List.of(small(5, 64, 0));
         assertTrue(PoleWiring.wouldAdd(placed, standing, new WireSet(), true).isEmpty());
     }
 
     @Test
     void thePreviewChangesNoWire() {
-        PoleLinks.Pole placed = small(0, 64, 0);
+        PoleNetworks.Pole placed = small(0, 64, 0);
         WireSet wires = new WireSet();
         PoleWiring.wouldAdd(placed, List.of(small(5, 64, 0)), wires, false);
         assertTrue(wires.all().isEmpty());
@@ -46,7 +46,7 @@ class PoleWiringPreviewTest {
 
     @Test
     void aPoleOutOfReachIsNotDrawn() {
-        PoleLinks.Pole placed = small(0, 64, 0);
+        PoleNetworks.Pole placed = small(0, 64, 0);
         assertTrue(PoleWiring.wouldAdd(placed, List.of(small(20, 64, 0)), new WireSet(), false).isEmpty());
     }
 }

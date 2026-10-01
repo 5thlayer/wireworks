@@ -5,7 +5,7 @@ package io.github._5thlayer.wireworks.network;
 
 import io.github._5thlayer.wireworks.Wireworks;
 import io.github._5thlayer.wireworks.ClientWires;
-import io.github._5thlayer.wireworks.PoleLinks;
+import io.github._5thlayer.wireworks.PoleNetworks;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -23,21 +23,21 @@ import java.util.List;
  * cut. The client replaces the chunk's wires whole rather than applying a change, so a wire cut
  * while nobody watched either end cannot survive on a client that comes back.
  */
-public record PoleWiresPacket(int chunkX, int chunkZ, List<PoleLinks.Wire> wires) implements CustomPacketPayload {
+public record PoleWiresPacket(int chunkX, int chunkZ, List<PoleNetworks.Wire> wires) implements CustomPacketPayload {
 
     public static final Type<PoleWiresPacket> TYPE = new Type<>(
             Identifier.fromNamespaceAndPath(Wireworks.MOD_ID, "pole_wires"));
 
-    private static final StreamCodec<ByteBuf, PoleLinks.Pos> POS = StreamCodec.composite(
-            ByteBufCodecs.VAR_INT, PoleLinks.Pos::x,
-            ByteBufCodecs.VAR_INT, PoleLinks.Pos::y,
-            ByteBufCodecs.VAR_INT, PoleLinks.Pos::z,
-            PoleLinks.Pos::new);
+    private static final StreamCodec<ByteBuf, PoleNetworks.Pos> POS = StreamCodec.composite(
+            ByteBufCodecs.VAR_INT, PoleNetworks.Pos::x,
+            ByteBufCodecs.VAR_INT, PoleNetworks.Pos::y,
+            ByteBufCodecs.VAR_INT, PoleNetworks.Pos::z,
+            PoleNetworks.Pos::new);
 
-    private static final StreamCodec<ByteBuf, PoleLinks.Wire> WIRE = StreamCodec.composite(
-            POS, PoleLinks.Wire::a,
-            POS, PoleLinks.Wire::b,
-            PoleLinks.Wire::new);
+    private static final StreamCodec<ByteBuf, PoleNetworks.Wire> WIRE = StreamCodec.composite(
+            POS, PoleNetworks.Wire::a,
+            POS, PoleNetworks.Wire::b,
+            PoleNetworks.Wire::new);
 
     public static final StreamCodec<ByteBuf, PoleWiresPacket> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.VAR_INT, PoleWiresPacket::chunkX,

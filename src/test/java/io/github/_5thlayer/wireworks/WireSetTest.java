@@ -17,8 +17,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 class WireSetTest {
 
-    private static PoleLinks.Pos at(int x, int y, int z) {
-        return new PoleLinks.Pos(x, y, z);
+    private static PoleNetworks.Pos at(int x, int y, int z) {
+        return new PoleNetworks.Pos(x, y, z);
     }
 
     @Test
@@ -94,9 +94,9 @@ class WireSetTest {
     @Test
     void rekeyingMovesEveryWireOfAPoleToTheNewBase() {
         WireSet wires = new WireSet();
-        PoleLinks.Pos base = new PoleLinks.Pos(0, 64, 0);
-        PoleLinks.Pos lower = new PoleLinks.Pos(0, 63, 0);
-        PoleLinks.Pos other = new PoleLinks.Pos(5, 64, 0);
+        PoleNetworks.Pos base = new PoleNetworks.Pos(0, 64, 0);
+        PoleNetworks.Pos lower = new PoleNetworks.Pos(0, 63, 0);
+        PoleNetworks.Pos other = new PoleNetworks.Pos(5, 64, 0);
         wires.add(base, other);
         wires.rekey(base, lower);
         assertFalse(wires.contains(base, other));
@@ -106,8 +106,8 @@ class WireSetTest {
     @Test
     void rekeyingDropsAWireThatWouldJoinTheColumnToItself() {
         WireSet wires = new WireSet();
-        PoleLinks.Pos joined = new PoleLinks.Pos(0, 64, 0);
-        PoleLinks.Pos base = new PoleLinks.Pos(0, 63, 0);
+        PoleNetworks.Pos joined = new PoleNetworks.Pos(0, 64, 0);
+        PoleNetworks.Pos base = new PoleNetworks.Pos(0, 63, 0);
         wires.add(joined, base);
         wires.rekey(joined, base);
         assertTrue(wires.all().isEmpty());
@@ -116,9 +116,9 @@ class WireSetTest {
     @Test
     void rekeyingCollapsesTwoWiresToTheSameThirdPole() {
         WireSet wires = new WireSet();
-        PoleLinks.Pos joined = new PoleLinks.Pos(0, 64, 0);
-        PoleLinks.Pos base = new PoleLinks.Pos(0, 63, 0);
-        PoleLinks.Pos third = new PoleLinks.Pos(5, 64, 0);
+        PoleNetworks.Pos joined = new PoleNetworks.Pos(0, 64, 0);
+        PoleNetworks.Pos base = new PoleNetworks.Pos(0, 63, 0);
+        PoleNetworks.Pos third = new PoleNetworks.Pos(5, 64, 0);
         wires.add(joined, third);
         wires.add(base, third);
         wires.rekey(joined, base);
@@ -129,10 +129,10 @@ class WireSetTest {
     @Test
     void rekeyingAPoleWithNoWiresChangesNothing() {
         WireSet wires = new WireSet();
-        PoleLinks.Pos a = new PoleLinks.Pos(0, 64, 0);
-        PoleLinks.Pos b = new PoleLinks.Pos(5, 64, 0);
+        PoleNetworks.Pos a = new PoleNetworks.Pos(0, 64, 0);
+        PoleNetworks.Pos b = new PoleNetworks.Pos(5, 64, 0);
         wires.add(a, b);
-        wires.rekey(new PoleLinks.Pos(9, 64, 9), new PoleLinks.Pos(9, 63, 9));
+        wires.rekey(new PoleNetworks.Pos(9, 64, 9), new PoleNetworks.Pos(9, 63, 9));
         assertEquals(1, wires.all().size());
         assertTrue(wires.contains(a, b));
     }

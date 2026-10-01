@@ -25,7 +25,7 @@ import java.util.List;
  *
  * <p>FactoryWorks ADR-0062 makes the network the carrier. A pole reports itself to {@link ElectricNetworks}
  * every tick and rescans its area now and then; the network, once per level tick, settles every
- * pole it links in one set of books. A pole holds no buffer and has no energy face: nothing feeds
+ * pole wired into it in one set of books. A pole holds no buffer and has no energy face: nothing feeds
  * it, because generators are pulled from where they stand.
  *
  * <h2>Roles are decided by tag</h2>
@@ -75,10 +75,9 @@ public class SupplyAreaPoleBlockEntity extends BlockEntity {
                         + " at " + getBlockPos() + ", which is not a pole");
     }
 
-    /** This pole as {@link PoleLinks} sees it: where it stands and how far it reaches. */
-    public PoleLinks.Pole shape() {
-        BlockPos p = getBlockPos();
-        return new PoleLinks.Pole(p.getX(), p.getY(), p.getZ(), tier());
+    /** This pole as {@link PoleNetworks} sees it: where it stands and how far it reaches. */
+    public PoleNetworks.Pole shape() {
+        return LevelWires.pole(getBlockPos(), tier());
     }
 
     /**

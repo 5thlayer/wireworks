@@ -3,11 +3,13 @@
 
 package io.github._5thlayer.wireworks.client;
 
+import io.github._5thlayer.wireworks.ClientWires;
 import io.github._5thlayer.wireworks.WireworksRegistries;
 
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.level.LevelEvent;
 
 /**
  * The client half of the Electric Network (factoryworks#281): the wire between linked poles.
@@ -25,12 +27,12 @@ public final class PoleWireClient {
         // does, so it has to be registered before the first frame that draws one.
         SupplyAreaBox.register(modBus);
         NeoForge.EVENT_BUS.addListener(PreviewOverlay::onOverlay);
-        NeoForge.EVENT_BUS.addListener(io.github._5thlayer.wireworks.ClientWires::onLevelUnload);
+        NeoForge.EVENT_BUS.addListener(ClientWires::onLevelUnload);
         NeoForge.EVENT_BUS.addListener(PoleWireClient::onLevelUnload);
     }
 
     /** The box's machine scan is cached, and a cached answer must not outlive its world. */
-    private static void onLevelUnload(net.neoforged.neoforge.event.level.LevelEvent.Unload event) {
+    private static void onLevelUnload(LevelEvent.Unload event) {
         if (event.getLevel().isClientSide()) {
             SuppliedMachines.clear();
         }

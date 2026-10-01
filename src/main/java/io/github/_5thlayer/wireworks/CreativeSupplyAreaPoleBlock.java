@@ -18,7 +18,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
  * wearing the substation's footprint: the largest area, so a machine can go anywhere nearby.
  *
  * <p>Everything else is inherited and stays shared: the column, the scan, the water-fill
- * rationing, the Jade line and the network it links into. What is being tested has to be the thing
+ * rationing, the Jade line and the network it is wired into. What is being tested has to be the thing
  * that ships, so the only difference is that {@link ElectricNetworks} counts it as a generator --
  * and that is decided from the blockstate rather than from here, because Minecraft rebuilds a block
  * entity from the type when a chunk loads and never asks the block again.

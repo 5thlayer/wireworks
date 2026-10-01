@@ -61,27 +61,27 @@ public final class PoleWireGesture {
                 : InteractionResult.SUCCESS);
     }
 
-    private static InteractionResult click(ServerLevel server, ItemStack pick, BlockPos clicked, Player player) {
+    private static InteractionResult click(ServerLevel server, ItemStack tool, BlockPos clicked, Player player) {
         Level level = server;
         BlockPos base = PoleColumn.baseOf(level, clicked);
-        GlobalPos pending = pick.get(WireworksRegistries.PENDING_WIRE.get());
+        GlobalPos pending = tool.get(WireworksRegistries.PENDING_WIRE.get());
         if (pending == null || !pending.dimension().equals(level.dimension())) {
-            pick.set(WireworksRegistries.PENDING_WIRE.get(), GlobalPos.of(level.dimension(), base));
+            tool.set(WireworksRegistries.PENDING_WIRE.get(), GlobalPos.of(level.dimension(), base));
             return InteractionResult.SUCCESS_SERVER;
         }
         PoleWiring.Click click = LevelWires.of(server).click(server, pending.pos(), base);
         switch (click) {
             case WIRED -> {
-                pick.remove(WireworksRegistries.PENDING_WIRE.get());
+                tool.remove(WireworksRegistries.PENDING_WIRE.get());
                 play(server, base, SoundEvents.TRIPWIRE_ATTACH);
                 alongWire(server, pending.pos(), base, ParticleTypes.ELECTRIC_SPARK);
             }
             case CUT -> {
-                pick.remove(WireworksRegistries.PENDING_WIRE.get());
+                tool.remove(WireworksRegistries.PENDING_WIRE.get());
                 play(server, base, SoundEvents.TRIPWIRE_DETACH);
                 alongWire(server, pending.pos(), base, ParticleTypes.SMOKE);
             }
-            case CANCELLED -> pick.remove(WireworksRegistries.PENDING_WIRE.get());
+            case CANCELLED -> tool.remove(WireworksRegistries.PENDING_WIRE.get());
             // The end stays held: a refusal changes nothing, the held end included.
             // Not DISPENSER_FAIL: it plays random/click, the same file as TRIPWIRE_ATTACH. Played at
             // the player, not the pole: vanilla attenuates the crafter's fail over 3 blocks, and a
@@ -109,8 +109,8 @@ public final class PoleWireGesture {
         }
     }
 
-    private static void release(ItemStack pick, ServerLevel level, Player holder, boolean mainHand) {
-        GlobalPos pending = pick.get(WireworksRegistries.PENDING_WIRE.get());
+    private static void release(ItemStack tool, ServerLevel level, Player holder, boolean mainHand) {
+        GlobalPos pending = tool.get(WireworksRegistries.PENDING_WIRE.get());
         if (pending == null) {
             return;
         }
@@ -122,11 +122,10 @@ public final class PoleWireGesture {
         PoleTier tier = standing
                 ? ((SupplyAreaPoleBlock) level.getBlockState(anchor).getBlock()).tier()
                 : PoleTier.SMALL;
-        PoleLinks.Pole pole = new PoleLinks.Pole(anchor.getX(), anchor.getY(), anchor.getZ(), tier);
-        double range = holder.blockInteractionRange();
-        if (!PendingEnd.stillHeld(pole, holder.getX(), holder.getY(), holder.getZ(), range,
-                standing, mainHand, sameDimension)) {
-            pick.remove(WireworksRegistries.PENDING_WIRE.get());
+        PendingEnd.Holder held = new PendingEnd.Holder(holder.getX(), holder.getY(), holder.getZ(),
+                holder.blockInteractionRange(), mainHand, sameDimension);
+        if (!PendingEnd.stillHeld(LevelWires.pole(anchor, tier), standing, held)) {
+            tool.remove(WireworksRegistries.PENDING_WIRE.get());
             // The snap: dropping an end is heard at the player, since nothing else shows it. A
             // chain's break, so it is none of the made, cut or refused sounds.
             level.playSound(null, holder.blockPosition(), SoundEvents.CHAIN_BREAK,

@@ -3,12 +3,6 @@
 
 package io.github._5thlayer.wireworks;
 
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Stream;
-
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
@@ -21,6 +15,13 @@ import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
+
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /** The poles' blocks, items, block entity type and the held wire end. */
 public final class WireworksRegistries {
@@ -76,7 +77,7 @@ public final class WireworksRegistries {
     private static Set<Block> poleBlocks() {
         return Stream.concat(POLES.values().stream(), Stream.of(CREATIVE_POLE))
                 .map(DeferredBlock::get)
-                .collect(java.util.stream.Collectors.toUnmodifiableSet());
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     static void register(IEventBus modBus) {

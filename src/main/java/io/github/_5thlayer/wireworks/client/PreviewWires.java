@@ -9,7 +9,7 @@ import java.util.List;
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github._5thlayer.wireworks.ClientWires;
 import io.github._5thlayer.wireworks.PoleColumn;
-import io.github._5thlayer.wireworks.PoleLinks;
+import io.github._5thlayer.wireworks.PoleNetworks;
 import io.github._5thlayer.wireworks.PoleTier;
 import io.github._5thlayer.wireworks.PoleWiring;
 import io.github._5thlayer.wireworks.SupplyAreaPoleBlock;
@@ -71,15 +71,15 @@ public final class PreviewWires {
         // it lands on, and a column that merely grew is not a new pole.
         boolean joinsAColumn = level.getBlockState(pos.below()).is(block)
                 || level.getBlockState(pos.above()).is(block);
-        PoleLinks.Pole would = new PoleLinks.Pole(pos.getX(), pos.getY(), pos.getZ(), block.tier());
-        List<PoleLinks.Pole> targets = PoleWiring.wouldAdd(would, standingNear(level, pos, block.tier()),
+        PoleNetworks.Pole would = new PoleNetworks.Pole(pos.getX(), pos.getY(), pos.getZ(), block.tier());
+        List<PoleNetworks.Pole> targets = PoleWiring.wouldAdd(would, standingNear(level, pos, block.tier()),
                 ClientWires.wires(), joinsAColumn);
         if (targets.isEmpty()) {
             return;
         }
         // The pole is not placed yet, so its column is the one block the preview draws.
         Vec3 start = new Vec3(pos.getX() + 0.5, pos.getY() + WireGeometry.ATTACH_HEIGHT, pos.getZ() + 0.5);
-        for (PoleLinks.Pole target : targets) {
+        for (PoleNetworks.Pole target : targets) {
             BlockPos base = new BlockPos(target.x(), target.y(), target.z());
             EntityRenderState.LeashState wire = new EntityRenderState.LeashState();
             wire.start = start;
@@ -102,9 +102,9 @@ public final class PreviewWires {
      * reach is the shorter of its two ends', so the held pole's own reach bounds the search, exactly
      * as the server's does.
      */
-    private static List<PoleLinks.Pole> standingNear(ClientLevel level, BlockPos pos, PoleTier tier) {
+    private static List<PoleNetworks.Pole> standingNear(ClientLevel level, BlockPos pos, PoleTier tier) {
         int reach = (int) Math.ceil(tier.wireReach());
-        List<PoleLinks.Pole> found = new ArrayList<>();
+        List<PoleNetworks.Pole> found = new ArrayList<>();
         for (int cx = SectionPos.blockToSectionCoord(pos.getX() - reach);
              cx <= SectionPos.blockToSectionCoord(pos.getX() + reach); cx++) {
             for (int cz = SectionPos.blockToSectionCoord(pos.getZ() - reach);
@@ -117,7 +117,7 @@ public final class PreviewWires {
                     BlockPos at = be.getBlockPos();
                     if (level.getBlockState(at).getBlock() instanceof SupplyAreaPoleBlock other
                             && !at.equals(pos) && PoleColumn.isBase(level, at)) {
-                        found.add(new PoleLinks.Pole(at.getX(), at.getY(), at.getZ(), other.tier()));
+                        found.add(new PoleNetworks.Pole(at.getX(), at.getY(), at.getZ(), other.tier()));
                     }
                 }
             }

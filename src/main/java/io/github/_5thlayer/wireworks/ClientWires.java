@@ -18,7 +18,7 @@ public final class ClientWires {
     private ClientWires() {
     }
 
-    public static void accept(int chunkX, int chunkZ, List<PoleLinks.Wire> sent) {
+    public static void accept(int chunkX, int chunkZ, List<PoleNetworks.Wire> sent) {
         wires.replaceTouching(chunkX, chunkZ, sent);
     }
 

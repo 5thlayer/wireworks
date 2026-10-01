@@ -17,7 +17,7 @@ package io.github._5thlayer.wireworks;
  * @param stored       FE held by the network's accumulators after the tick
  * @param capacity     FE the network's accumulators can hold
  * @param accumulators how many accumulators the network has
- * @param poles        how many poles are linked into the network
+ * @param poles        how many poles are wired into the network
  */
 public record NetworkReading(long produced, long delivered, long demanded, long charged,
                              long discharged, long stored, long capacity, int accumulators,

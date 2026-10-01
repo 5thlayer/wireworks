@@ -4,7 +4,9 @@
 package io.github._5thlayer.wireworks;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.transfer.energy.EnergyHandler;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
@@ -30,7 +32,7 @@ import java.util.WeakHashMap;
  *
  * <h2>One settlement per network</h2>
  *
- * <p>A block inside two linked poles' areas is one consumer, not two: the member poles' lists are
+ * <p>A block inside two wired poles' areas is one consumer, not two: the member poles' lists are
  * unioned by position before anything is probed. Room and offer are each measured with an insert or
  * extract inside a transaction that is then aborted, since the transfer API has no "how much"
  * question, and {@link NetworkBalance} decides the flows. Sources are weighted by what they offer
@@ -76,7 +78,7 @@ public final class ElectricNetworks {
         dirty = true;
     }
 
-    /** The poles linked into the same network as this one, itself included. */
+    /** The poles wired into the same network as this one, itself included. */
     public List<SupplyAreaPoleBlockEntity> networkOf(SupplyAreaPoleBlockEntity pole) {
         for (List<SupplyAreaPoleBlockEntity> network : networks) {
             if (network.contains(pole)) {
@@ -113,7 +115,7 @@ public final class ElectricNetworks {
      * Forget an unloaded level. A weak key is not enough: the poles held as values point back at
      * their level, so the key would never be collected.
      */
-    public static void onLevelUnload(net.neoforged.neoforge.event.level.LevelEvent.Unload event) {
+    public static void onLevelUnload(LevelEvent.Unload event) {
         if (event.getLevel() instanceof Level level) {
             BY_LEVEL.remove(level);
         }
@@ -157,11 +159,11 @@ public final class ElectricNetworks {
 
     private void rebuild(Level level) {
         List<SupplyAreaPoleBlockEntity> all = new ArrayList<>(poles.values());
-        List<PoleLinks.Pole> shapes = new ArrayList<>(all.size());
+        List<PoleNetworks.Pole> shapes = new ArrayList<>(all.size());
         for (SupplyAreaPoleBlockEntity pole : all) {
             shapes.add(pole.shape());
         }
-        int[] ids = PoleLinks.networks(shapes, LevelWires.of((net.minecraft.server.level.ServerLevel) level).wires().all());
+        int[] ids = PoleNetworks.networks(shapes, LevelWires.of((ServerLevel) level).wires().all());
         List<List<SupplyAreaPoleBlockEntity>> built = new ArrayList<>();
         for (int i = 0; i < all.size(); i++) {
             while (built.size() <= ids[i]) {

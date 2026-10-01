@@ -19,14 +19,14 @@ import java.util.Set;
  */
 public final class WireSet {
 
-    private static final Codec<PoleLinks.Pos> POS = Codec.INT.listOf(3, 3).xmap(
-            l -> new PoleLinks.Pos(l.get(0), l.get(1), l.get(2)),
+    private static final Codec<PoleNetworks.Pos> POS = Codec.INT.listOf(3, 3).xmap(
+            l -> new PoleNetworks.Pos(l.get(0), l.get(1), l.get(2)),
             p -> List.of(p.x(), p.y(), p.z()));
 
-    private static final Codec<PoleLinks.Wire> WIRE = RecordCodecBuilder.create(i -> i.group(
-            POS.fieldOf("a").forGetter(PoleLinks.Wire::a),
-            POS.fieldOf("b").forGetter(PoleLinks.Wire::b)
-    ).apply(i, PoleLinks.Wire::new));
+    private static final Codec<PoleNetworks.Wire> WIRE = RecordCodecBuilder.create(i -> i.group(
+            POS.fieldOf("a").forGetter(PoleNetworks.Wire::a),
+            POS.fieldOf("b").forGetter(PoleNetworks.Wire::b)
+    ).apply(i, PoleNetworks.Wire::new));
 
     public static final Codec<WireSet> CODEC = WIRE.listOf().xmap(
             list -> {
@@ -36,17 +36,17 @@ public final class WireSet {
             },
             set -> List.copyOf(set.wires));
 
-    private final Set<PoleLinks.Wire> wires = new LinkedHashSet<>();
+    private final Set<PoleNetworks.Wire> wires = new LinkedHashSet<>();
 
-    public void add(PoleLinks.Pos a, PoleLinks.Pos b) {
+    public void add(PoleNetworks.Pos a, PoleNetworks.Pos b) {
         wires.add(pair(a, b));
     }
 
-    public void remove(PoleLinks.Pos a, PoleLinks.Pos b) {
+    public void remove(PoleNetworks.Pos a, PoleNetworks.Pos b) {
         wires.remove(pair(a, b));
     }
 
-    public boolean contains(PoleLinks.Pos a, PoleLinks.Pos b) {
+    public boolean contains(PoleNetworks.Pos a, PoleNetworks.Pos b) {
         return wires.contains(pair(a, b));
     }
 
@@ -55,13 +55,13 @@ public final class WireSet {
      * (factoryworks#309). A wire that would now join the column to itself is dropped, and two wires to the same
      * third pole collapse into one, the set being unordered pairs.
      */
-    public void rekey(PoleLinks.Pos from, PoleLinks.Pos to) {
-        List<PoleLinks.Wire> moving = wires.stream()
+    public void rekey(PoleNetworks.Pos from, PoleNetworks.Pos to) {
+        List<PoleNetworks.Wire> moving = wires.stream()
                 .filter(w -> w.a().equals(from) || w.b().equals(from))
                 .toList();
-        for (PoleLinks.Wire wire : moving) {
+        for (PoleNetworks.Wire wire : moving) {
             wires.remove(wire);
-            PoleLinks.Pos other = wire.a().equals(from) ? wire.b() : wire.a();
+            PoleNetworks.Pos other = wire.a().equals(from) ? wire.b() : wire.a();
             if (!other.equals(to)) {
                 add(to, other);
             }
@@ -69,12 +69,12 @@ public final class WireSet {
     }
 
     /** Cuts every wire with an end at {@code pole}, which is what breaking it does. */
-    public void removeAllOf(PoleLinks.Pos pole) {
+    public void removeAllOf(PoleNetworks.Pos pole) {
         wires.removeIf(w -> w.a().equals(pole) || w.b().equals(pole));
     }
 
     /** Every wire with an end in chunk ({@code chunkX}, {@code chunkZ}): what a client watching it is sent. */
-    public List<PoleLinks.Wire> touching(int chunkX, int chunkZ) {
+    public List<PoleNetworks.Wire> touching(int chunkX, int chunkZ) {
         return wires.stream().filter(w -> inChunk(w, chunkX, chunkZ)).toList();
     }
 
@@ -82,25 +82,25 @@ public final class WireSet {
      * A client's copy of a chunk's wires, replaced whole when the chunk is sent. A wire cut while no
      * end was watched is dropped here, when either end is watched again.
      */
-    public void replaceTouching(int chunkX, int chunkZ, Collection<PoleLinks.Wire> sent) {
+    public void replaceTouching(int chunkX, int chunkZ, Collection<PoleNetworks.Wire> sent) {
         wires.removeIf(w -> inChunk(w, chunkX, chunkZ));
         sent.forEach(w -> add(w.a(), w.b()));
     }
 
-    private static boolean inChunk(PoleLinks.Wire w, int chunkX, int chunkZ) {
+    private static boolean inChunk(PoleNetworks.Wire w, int chunkX, int chunkZ) {
         return inChunk(w.a(), chunkX, chunkZ) || inChunk(w.b(), chunkX, chunkZ);
     }
 
-    private static boolean inChunk(PoleLinks.Pos p, int chunkX, int chunkZ) {
+    private static boolean inChunk(PoleNetworks.Pos p, int chunkX, int chunkZ) {
         return (p.x() >> 4) == chunkX && (p.z() >> 4) == chunkZ;
     }
 
     /** One wire per unordered pair: the end that sorts first by position is always {@code a}. */
-    private static PoleLinks.Wire pair(PoleLinks.Pos a, PoleLinks.Pos b) {
-        return sortsFirst(a, b) ? new PoleLinks.Wire(a, b) : new PoleLinks.Wire(b, a);
+    private static PoleNetworks.Wire pair(PoleNetworks.Pos a, PoleNetworks.Pos b) {
+        return sortsFirst(a, b) ? new PoleNetworks.Wire(a, b) : new PoleNetworks.Wire(b, a);
     }
 
-    private static boolean sortsFirst(PoleLinks.Pos a, PoleLinks.Pos b) {
+    private static boolean sortsFirst(PoleNetworks.Pos a, PoleNetworks.Pos b) {
         if (a.x() != b.x()) {
             return a.x() < b.x();
         }
@@ -110,7 +110,7 @@ public final class WireSet {
         return a.z() <= b.z();
     }
 
-    public Set<PoleLinks.Wire> all() {
+    public Set<PoleNetworks.Wire> all() {
         return Collections.unmodifiableSet(wires);
     }
 }
