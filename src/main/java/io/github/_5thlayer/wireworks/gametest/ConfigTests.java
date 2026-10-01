@@ -8,7 +8,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 
 /**
  * {@code wireworks-server.toml} reaches the tiers in a running game. The build copies
- * {@code src/gametest/wireworks-server.toml} into the server's config, with the substation off its
+ * {@code src/gametest/wireworks-server.toml} into the server's config, with the large pole off its
  * defaults; a tier still on its defaults means the config loaded but never configured it.
  */
 final class ConfigTests {
@@ -21,14 +21,14 @@ final class ConfigTests {
     }
 
     private static void reachesTheTiers(GameTestHelper helper) {
-        PoleTier tier = PoleTier.SUBSTATION;
+        PoleTier tier = PoleTier.LARGE;
         if (tier.supplySize() != 16 || tier.wireReach() != 21.5) {
-            helper.fail("the substation supplies " + tier.supplySize() + " and reaches " + tier.wireReach()
-                    + ", not the 16 and 21.5 that src/gametest/wireworks-server.toml configures");
+            helper.fail("the [large] section did not reach the large pole: it supplies " + tier.supplySize()
+                    + " and reaches " + tier.wireReach() + ", not the 16 and 21.5 that src/gametest/wireworks-server.toml configures");
             return;
         }
         if (PoleTier.maxWireReach() != 21.5) {
-            helper.fail("the longest wire is " + PoleTier.maxWireReach() + ", not the substation's configured 21.5");
+            helper.fail("the longest wire is " + PoleTier.maxWireReach() + ", not the large pole's configured 21.5");
             return;
         }
         helper.succeed();

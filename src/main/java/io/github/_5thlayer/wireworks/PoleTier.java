@@ -6,11 +6,11 @@ package io.github._5thlayer.wireworks;
 import java.util.Locale;
 
 /**
- * The three electric poles. A tier carries geometry and nothing else: a supply area and a wire
- * reach, which a Consumer sets in {@code wireworks-server.toml} ({@link WireworksConfig}).
+ * The three tiers: small, medium and large. A tier carries geometry and nothing else: a supply
+ * area and a wire reach, which a Consumer sets in {@code wireworks-server.toml}
+ * ({@link WireworksConfig}).
  *
- * <p>The defaults are Factorio's small, medium and substation poles: 5x5, 7x7 and 18x18, reaching
- * 7.5, 9 and 18 blocks.
+ * <p>The defaults are Factorio's: 5x5, 7x7 and 18x18, reaching 7.5, 9 and 18 blocks.
  *
  * <p>An even-sided area on a one-block pole is offset half a block, keeping the block count exact
  * ({@link SupplyArea}).
@@ -18,7 +18,7 @@ import java.util.Locale;
 public enum PoleTier {
     SMALL(5, 7.5),
     MEDIUM(7, 9.0),
-    SUBSTATION(18, 18.0);
+    LARGE(18, 18.0);
 
     /**
      * How far up and down a pole supplies, for every tier. Two blocks either way covers a machine on
@@ -86,7 +86,7 @@ public enum PoleTier {
     }
 
     public String blockName() {
-        return serializedName() + "_electric_pole";
+        return serializedName() + "_pole";
     }
 
     public String serializedName() {

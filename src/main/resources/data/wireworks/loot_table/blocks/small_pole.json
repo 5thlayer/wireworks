@@ -6,7 +6,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "wireworks:small_electric_pole"
+          "name": "wireworks:small_pole"
         }
       ],
       "conditions": [

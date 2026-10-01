@@ -11,7 +11,7 @@ BG=(24,26,32)
 ACCENT=(232,140,60)   # copper, the default wire
 AREA=(255,214,90)     # a pole's supply area
 FADE=40  # 0 leaves the scene at full strength, 255 hides it
-POLES=['small_electric_pole','medium_electric_pole','substation_electric_pole','medium_electric_pole']
+POLES=['small_pole','medium_pole','large_pole','medium_pole']
 _cache={}
 def tex(path,s):
     if (path,s) not in _cache:

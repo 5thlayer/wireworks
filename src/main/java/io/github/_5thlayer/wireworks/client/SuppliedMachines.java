@@ -23,7 +23,7 @@ import org.jspecify.annotations.Nullable;
  *
  * <h2>Why this is cached rather than asked per frame</h2>
  *
- * <p>A substation's area is 18x18x5 = 1620 blocks and the scan is a capability lookup per block.
+ * <p>A large pole's area is 18x18x5 = 1620 blocks and the scan is a capability lookup per block.
  * That is the cost the pole's own scan already refuses to pay every tick, and a renderer pays it
  * sixty times a second rather than twenty. So the same answer is kept for
  * {@link #RESCAN_INTERVAL} -- the pole's own interval, for the pole's own reason: machines do not

@@ -81,11 +81,11 @@ final class PoleReplaceTests {
         tests.test("replace_small_pole_column_with_medium_at_its_top", 20,
                 helper -> replaces(helper, pole(PoleTier.SMALL), pole(PoleTier.MEDIUM), 2));
         tests.test("replace_small_pole_column_with_large", 20,
-                helper -> replaces(helper, pole(PoleTier.SMALL), pole(PoleTier.SUBSTATION), 2));
+                helper -> replaces(helper, pole(PoleTier.SMALL), pole(PoleTier.LARGE), 2));
         tests.test("replace_medium_pole_column_with_large", 20,
-                helper -> replaces(helper, pole(PoleTier.MEDIUM), pole(PoleTier.SUBSTATION), 1));
+                helper -> replaces(helper, pole(PoleTier.MEDIUM), pole(PoleTier.LARGE), 1));
         tests.test("replace_large_pole_column_with_small", 20,
-                helper -> replaces(helper, pole(PoleTier.SUBSTATION), pole(PoleTier.SMALL), 0));
+                helper -> replaces(helper, pole(PoleTier.LARGE), pole(PoleTier.SMALL), 0));
         tests.test("replace_pole_refuses_a_medium_pole_on_a_creative_column", 20,
                 helper -> refuses(helper, creativePole(), 1, pole(PoleTier.MEDIUM), 0, false,
                         WireworksRefusal.OTHER_TIER, OTHER_TIER_KEY));
@@ -98,7 +98,7 @@ final class PoleReplaceTests {
         tests.test("replace_pole_in_a_pack_group_replaces_small_with_medium", 20,
                 helper -> packGrouped(() -> replaces(helper, pole(PoleTier.SMALL), pole(PoleTier.MEDIUM), 1)));
         tests.test("replace_pole_in_a_pack_group_refuses_a_large_pole_on_a_small_column", 20,
-                helper -> packGrouped(() -> refuses(helper, pole(PoleTier.SMALL), 3, pole(PoleTier.SUBSTATION), 2,
+                helper -> packGrouped(() -> refuses(helper, pole(PoleTier.SMALL), 3, pole(PoleTier.LARGE), 2,
                         false, WireworksRefusal.OTHER_TIER, OTHER_TIER_KEY)));
     }
 

@@ -39,7 +39,7 @@ import java.util.List;
  *
  * <h2>Why the lists are cached</h2>
  *
- * <p>A substation's area is 18x18x5 = 1620 blocks. A capability lookup per block per tick is not
+ * <p>A large pole's area is 18x18x5 = 1620 blocks. A capability lookup per block per tick is not
  * affordable, and it is also pointless: machines do not appear and vanish every tick. The area is
  * rescanned on {@link #RESCAN_INTERVAL}, so a newly placed machine waits at most two seconds.
  */

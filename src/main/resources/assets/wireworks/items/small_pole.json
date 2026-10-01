@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "wireworks:item/medium_electric_pole"
+    "model": "wireworks:item/small_pole"
   }
 }

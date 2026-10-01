@@ -1,20 +1,18 @@
 #!/usr/bin/env python3
-"""Build the creative pole's sprite: the substation's own art, recoloured pink.
+"""Build the creative pole's sprite: the large pole's own art, recoloured pink.
 
-The creative pole is a dev tool that wears the substation's footprint and, until this script
-existed, the substation's texture as well -- which is the one thing about it a player cannot check.
-A tool whose whole job is "place it, place a machine, read Jade" has to be *visibly* not the block
+The creative pole is a dev tool that wears the large pole's footprint. A tool whose whole job is "place it, place a machine, read Jade" has to be *visibly* not the block
 it imitates: one left behind in a test world otherwise powers a factory that looks self-sufficient,
 and nothing in the world says which of the two poles is doing it. Pink is the convention for a
 creative-only block, so pink it is.
 
-**Derived rather than drawn.** The substation's sprite is the subject and this is a recolour of it,
-so that a redrawn substation carries its shading, its silhouette and its pixel count straight
-through to the creative pole instead of leaving a stale hand-painted copy nobody re-derives. Each
+**Derived rather than drawn.** The large pole's sprite is the subject and this is a recolour of it,
+so that the large pole's sprite, redrawn, carries its shading, its silhouette and its pixel count
+straight through to the creative pole instead of leaving a stale hand-painted copy nobody re-derives. Each
 pixel keeps its own brightness and is re-lit in {CREATIVE_PINK:#08x}: the ramp, and therefore the
-shading, is the substation's.
+shading, is the large pole's.
 
-Run after the substation's texture changes:
+Run after the large pole's texture changes:
 
     scripts/build-creative-pole-texture.py
 
@@ -30,11 +28,11 @@ import zlib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 TEXTURES = ROOT / "src/main/resources/assets/wireworks/textures/block"
-SOURCE = TEXTURES / "substation_electric_pole.png"
-OUT = TEXTURES / "creative_electric_pole.png"
+SOURCE = TEXTURES / "large_pole.png"
+OUT = TEXTURES / "creative_pole.png"
 
 #: The colour a mid-bright pixel lands on. Chosen to read as pink against both the stone and the
-#: copper machines are built out of, and far enough from the substation's blue that the
+#: copper machines are built out of, and far enough from the large pole's blue that the
 #: two do not pass for each other at a glance.
 CREATIVE_PINK = 0xE65AC8
 
@@ -127,11 +125,11 @@ def luma(pixel):
 def recolour(rows, colour):
     """Re-light every pixel in `colour`, keeping its own brightness relative to that colour's.
 
-    Not a multiply by the colour, which is the right move on a *greyscale* layer. The substation's sprite is already blue, so multiplying would carry the blue through and
+    Not a multiply by the colour, which is the right move on a *greyscale* layer. The large pole's sprite is already blue, so multiplying would carry the blue through and
     land on a muddy purple; dividing by the target's own luma instead makes a mid-bright source
     pixel come out as exactly `colour` and the rest of the ramp fall either side of it. The
-    midpoint is the sprite's own mean brightness rather than a constant, so a substation redrawn
-    lighter or darker still lands on the same pink.
+    midpoint is the sprite's own mean brightness rather than a constant, so a large pole's sprite
+    redrawn lighter or darker still lands on the same pink.
     """
     base = ((colour >> 16) & 0xFF, (colour >> 8) & 0xFF, colour & 0xFF)
     midpoint = sum(luma(px) for row in rows for px in row if px[3] > 0) / max(
@@ -154,7 +152,7 @@ def recolour(rows, colour):
 
 def main():
     if not SOURCE.is_file():
-        print("FAIL %s is missing -- the creative pole's art is the substation's" %
+        print("FAIL %s is missing -- the creative pole's art is the large pole's" %
               SOURCE.relative_to(ROOT))
         return 1
     image = png_bytes(recolour(read_png(SOURCE), CREATIVE_PINK))

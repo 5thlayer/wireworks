@@ -36,7 +36,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import java.util.List;
 
 /**
- * A Factorio electric pole (ADR 0002, ADR 0003): it supplies every machine standing in its area, and
+ * A pole after Factorio's (ADR 0002, ADR 0003): it supplies every machine standing in its area, and
  * the poles its wires join are one Electric Network.
  *
  * <p>The wires are saved with the level ({@link LevelWires}); the networks are recomputed from them

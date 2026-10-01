@@ -30,8 +30,8 @@ class PoleReachTest {
 
     @Test
     void theShorterReachOfTheTwoDecides() {
-        // A substation reaches 18, a small pole 7.5: at 12 apart neither end may be the long one.
-        assertFalse(PoleNetworks.withinReach(new PoleNetworks.Pole(0, 0, 0, PoleTier.SUBSTATION), small(12, 0, 0)));
+        // A large pole reaches 18, a small pole 7.5: at 12 apart neither end may be the long one.
+        assertFalse(PoleNetworks.withinReach(new PoleNetworks.Pole(0, 0, 0, PoleTier.LARGE), small(12, 0, 0)));
     }
 
     @Test

@@ -47,9 +47,9 @@ class SupplyAreaTest {
 
     @Test
     void theVerticalBandIsShallowerThanTheHorizontalReach() {
-        assertFalse(SupplyArea.covers(PoleTier.SUBSTATION, 0, PoleTier.VERTICAL_RADIUS + 1, 0));
-        assertTrue(SupplyArea.covers(PoleTier.SUBSTATION, 0, PoleTier.VERTICAL_RADIUS, 0));
-        assertFalse(SupplyArea.covers(PoleTier.SUBSTATION, 0, -(PoleTier.VERTICAL_RADIUS + 1), 0));
+        assertFalse(SupplyArea.covers(PoleTier.LARGE, 0, PoleTier.VERTICAL_RADIUS + 1, 0));
+        assertTrue(SupplyArea.covers(PoleTier.LARGE, 0, PoleTier.VERTICAL_RADIUS, 0));
+        assertFalse(SupplyArea.covers(PoleTier.LARGE, 0, -(PoleTier.VERTICAL_RADIUS + 1), 0));
     }
 
     @Test
@@ -70,7 +70,7 @@ class SupplyAreaTest {
     void theVolumeIsTheSupplySquareTimesTheBand() {
         assertEquals(5 * 5 * 5, SupplyArea.volume(PoleTier.SMALL));
         assertEquals(7 * 7 * 5, SupplyArea.volume(PoleTier.MEDIUM));
-        assertEquals(18 * 18 * 5, SupplyArea.volume(PoleTier.SUBSTATION));
+        assertEquals(18 * 18 * 5, SupplyArea.volume(PoleTier.LARGE));
     }
 
     @Test
@@ -110,9 +110,9 @@ class SupplyAreaTest {
     }
 
     @Test
-    void theSubstationCoversEverythingASmallPoleDoes() {
+    void theLargePoleCoversEverythingASmallPoleDoes() {
         SupplyArea.forEachOffset(PoleTier.SMALL, (dx, dy, dz) ->
-                assertTrue(SupplyArea.covers(PoleTier.SUBSTATION, dx, dy, dz)));
+                assertTrue(SupplyArea.covers(PoleTier.LARGE, dx, dy, dz)));
     }
 
     @Test

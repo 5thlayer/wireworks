@@ -6,7 +6,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "wireworks:substation_electric_pole"
+          "name": "wireworks:large_pole"
         }
       ],
       "conditions": [

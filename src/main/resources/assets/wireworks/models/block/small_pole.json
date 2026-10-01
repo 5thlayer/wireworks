@@ -1,8 +1,8 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "pole": "wireworks:block/substation_electric_pole",
-    "particle": "wireworks:block/substation_electric_pole"
+    "pole": "wireworks:block/small_pole",
+    "particle": "wireworks:block/small_pole"
   },
   "elements": [
     {

@@ -14,7 +14,7 @@ import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
-/** Electric poles: a pole powers every machine inside its supply area, and wires join poles into networks. */
+/** Poles after Factorio's: a pole powers every machine inside its supply area, and wires join poles into networks. */
 @Mod(Wireworks.MOD_ID)
 public final class Wireworks {
 

@@ -13,9 +13,9 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
  *
  * <h2>It is a subclass, not a fourth {@link PoleTier}</h2>
  *
- * <p>{@code PoleTier} is Factorio's ladder of poles, and the config and the registered blocks each
+ * <p>{@code PoleTier} is the ladder of pole tiers, and the config and the registered blocks each
  * walk {@code PoleTier.values()}. A dev tool has nothing to say in either, so this is a separate block
- * wearing the substation's footprint: the largest area, so a machine can go anywhere nearby.
+ * wearing the large pole's footprint: the largest area, so a machine can go anywhere nearby.
  *
  * <p>Everything else is inherited and stays shared: the column, the scan, the water-fill
  * rationing, the Jade line and the network it is wired into. What is being tested has to be the thing
@@ -31,9 +31,9 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 public class CreativeSupplyAreaPoleBlock extends SupplyAreaPoleBlock {
 
     /** The registry path. Not derived from a tier -- it is not on the ladder. */
-    public static final String BLOCK_NAME = "creative_electric_pole";
+    public static final String BLOCK_NAME = "creative_pole";
 
     public CreativeSupplyAreaPoleBlock(BlockBehaviour.Properties props) {
-        super(PoleTier.SUBSTATION, props);
+        super(PoleTier.LARGE, props);
     }
 }

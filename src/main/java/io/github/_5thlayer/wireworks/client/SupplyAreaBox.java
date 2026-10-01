@@ -39,7 +39,7 @@ import org.joml.Vector3f;
  * <p>{@link #offsets} is the whole geometry, and it is a function of the tier alone -- nothing here
  * reads the world. The held item's preview and the placed pole's renderer both draw what it
  * returns, so they cannot disagree about where the area is, which is the placement plan's rule
- * applied to the overlay. The bounds come from {@link SupplyArea#bounds}: the substation's
+ * applied to the overlay. The bounds come from {@link SupplyArea#bounds}: the large pole's
  * even-sided area takes its extra block on the negative side, and a renderer that centred the box
  * instead would be wrong by half a block on the one tier where it shows.
  *
@@ -55,7 +55,7 @@ import org.joml.Vector3f;
  *
  * <p>No fill. The player is almost always <em>inside</em> the volume -- the band is two blocks
  * either way and they stand on the ground the pole does -- so a fill would be a full-screen colour
- * wash over exactly the machines being positioned, and an 18-wide substation seen from outside
+ * wash over exactly the machines being positioned, and a large pole's 18-wide area seen from outside
  * would be a wall between the player and their own base. Vanilla draws the structure block's
  * bounding box as edges only at the same scale, for the same reason.
  *

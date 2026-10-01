@@ -24,7 +24,7 @@ public final class SupplyArea {
      *
      * <p>This is what the <b>Supply Area Box</b> is drawn from (ADR 0005). The overlay shows
      * the area's whole volume rather than a surface, so the extent is the only thing a renderer
-     * needs -- and it is asked for here rather than recomputed client-side, because the substation's
+     * needs -- and it is asked for here rather than recomputed client-side, because the large pole's
      * even-sided offset is exactly the arithmetic that looks right while being half a block wrong.
      * One source for the box and the scan is what keeps them describing the same region.
      */
