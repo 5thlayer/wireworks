@@ -18,3 +18,12 @@
 [large]
 	supplySize = 16
 	wireReach = 21.5
+
+# The Solar Panel's and the Accumulator's defaults, since the tests state their numbers: 30 FE/t,
+# and 50,000 FE at 150 FE/t.
+[solar_panel]
+	peak_watts = 60000
+
+[accumulator]
+	capacity_joules = 5000000
+	max_watts = 300000

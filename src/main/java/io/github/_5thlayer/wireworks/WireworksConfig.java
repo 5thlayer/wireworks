@@ -13,8 +13,10 @@ import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 /**
- * {@code wireworks-server.toml}: each pole tier's supply area and wire reach. A server config, so
- * the client draws the same areas and reaches the server powers and wires by.
+ * {@code wireworks-server.toml}: each pole tier's supply area and wire reach, the Solar Panel's peak
+ * and the Accumulator's capacity and flow, the last three in Factorio's watts and joules at
+ * {@link ForgeEnergy#JOULES_PER_FE} J per FE. A server config, so the client draws the same areas and
+ * reaches the server powers and wires by.
  */
 public final class WireworksConfig {
 
@@ -23,6 +25,9 @@ public final class WireworksConfig {
 
     private static final Map<PoleTier, Tier> TIERS = new EnumMap<>(PoleTier.class);
     private static final ModConfigSpec SPEC;
+    private static final ModConfigSpec.LongValue SOLAR_PEAK_WATTS;
+    private static final ModConfigSpec.LongValue ACCUMULATOR_CAPACITY_JOULES;
+    private static final ModConfigSpec.LongValue ACCUMULATOR_MAX_WATTS;
 
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
@@ -35,6 +40,18 @@ public final class WireworksConfig {
                             .defineInRange("wireReach", tier.defaultWireReach(), 1.0, 64.0)));
             builder.pop();
         }
+        builder.push("solar_panel");
+        SOLAR_PEAK_WATTS = builder.comment("The power at full daylight, in watts. 60000 is 30 FE/t.")
+                .defineInRange("peak_watts", SolarPanelSpec.DEFAULT_PEAK_WATTS, 0L, 1_000_000_000L);
+        builder.pop();
+        builder.push("accumulator");
+        ACCUMULATOR_CAPACITY_JOULES = builder.comment("What the accumulator holds, in joules. 5000000 is 50000 FE.")
+                .defineInRange("capacity_joules", AccumulatorSpec.DEFAULT_CAPACITY_JOULES,
+                        ForgeEnergy.JOULES_PER_FE, 1_000_000_000_000L);
+        ACCUMULATOR_MAX_WATTS = builder.comment("The power it charges and discharges at, in watts. 300000 is 150 FE/t.")
+                .defineInRange("max_watts", AccumulatorSpec.DEFAULT_MAX_WATTS,
+                        ForgeEnergy.TICKS_PER_SECOND * ForgeEnergy.JOULES_PER_FE, 1_000_000_000_000L);
+        builder.pop();
         SPEC = builder.build();
     }
 
@@ -48,6 +65,8 @@ public final class WireworksConfig {
         modBus.addListener(ModConfigEvent.Unloading.class, event -> {
             if (event.getConfig().getSpec() == SPEC) {
                 TIERS.keySet().forEach(tier -> tier.configure(tier.defaultSupplySize(), tier.defaultWireReach()));
+                SolarPanelSpec.configure(SolarPanelSpec.DEFAULT_PEAK_WATTS);
+                AccumulatorSpec.configure(AccumulatorSpec.DEFAULT_CAPACITY_JOULES, AccumulatorSpec.DEFAULT_MAX_WATTS);
             }
         });
     }
@@ -57,5 +76,7 @@ public final class WireworksConfig {
             return;
         }
         TIERS.forEach((tier, values) -> tier.configure(values.supplySize().get(), values.wireReach().get()));
+        SolarPanelSpec.configure(SOLAR_PEAK_WATTS.get());
+        AccumulatorSpec.configure(ACCUMULATOR_CAPACITY_JOULES.get(), ACCUMULATOR_MAX_WATTS.get());
     }
 }
