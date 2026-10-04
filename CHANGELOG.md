@@ -4,6 +4,16 @@ Each version has two sections: Players, what a player or pack developer sees, an
 
 ## Unreleased
 
+### Players
+
+- **A Solar Panel and an Accumulator.** A game with no Pack has generation and storage on the pole network. The Solar Panel (`wireworks:solar_panel`, a pillar under a 3x3 top layer) makes 30 FE/t at full **Daylight**, ramping down through dusk and up through dawn, and nothing at night or while a block hides the sky above its top layer's centre. The Accumulator (`wireworks:accumulator`, Factorio's flat 2x2) holds 50,000 FE and charges and discharges at 150 FE/t. Each is placed whole from one item, breaks as one and has its own recipe and a place in the Wireworks creative tab. With Jade installed, the panel shows what it is making and the Accumulator whether it is charging, discharging or outside every pole's area. Both wear **stand-in art** until real art is drawn (`docs/placeholder-art.md`). (#8)
+- `wireworks-server.toml` gains `[solar_panel] peak_watts = 60000` and `[accumulator] capacity_joules = 5000000`, `max_watts = 300000`, in Factorio's watts and joules at 100 J per FE. (#8)
+
+### Consumers
+
+- `wireworks:solar_panel` and `wireworks:accumulator` are tagged into `wireworks:generators` and `wireworks:accumulators`, so a pack that tags its own blocks there plays alongside them. Their ids, part blocks (`solar_panel_part`, `accumulator_part`) and registry entries are held on `WireworksRegistries`. (#8)
+- Wireworks now needs Groundworks 0.5.2 or later (`[0.5.2,0.6)`), the first with footprints. (#8)
+
 ## 0.2.0
 
 ### Players

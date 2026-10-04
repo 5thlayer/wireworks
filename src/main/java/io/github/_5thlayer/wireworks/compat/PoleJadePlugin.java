@@ -3,9 +3,14 @@
 
 package io.github._5thlayer.wireworks.compat;
 
+import io.github._5thlayer.wireworks.AccumulatorBlock;
+import io.github._5thlayer.wireworks.AccumulatorBlockEntity;
+import io.github._5thlayer.wireworks.AccumulatorStatus;
 import io.github._5thlayer.wireworks.Wireworks;
 import io.github._5thlayer.wireworks.NetworkReading;
 import io.github._5thlayer.wireworks.PoleColumn;
+import io.github._5thlayer.wireworks.SolarPanelBlock;
+import io.github._5thlayer.wireworks.SolarPanelBlockEntity;
 import io.github._5thlayer.wireworks.SupplyAreaPoleBlock;
 import io.github._5thlayer.wireworks.SupplyAreaPoleBlockEntity;
 import net.minecraft.ChatFormatting;
@@ -24,7 +29,8 @@ import snownee.jade.api.WailaPlugin;
 import snownee.jade.api.config.IPluginConfig;
 
 /**
- * What a pole is doing right now, on the HUD.
+ * What a pole is doing right now, on the HUD, and the same for the Solar Panel and the Accumulator
+ * the Library ships.
  *
  * <p>The item tooltip states what a pole <em>is</em> -- its footprint, that it is wireless, that the
  * area is measured at the base. This is the other half: the two numbers that can only be read from
@@ -62,6 +68,14 @@ public class PoleJadePlugin implements IWailaPlugin {
     private static final String CAPACITY = "NetCapacity";
     private static final String ACCUMULATORS = "NetAccumulators";
     private static final String POLES = "NetPoles";
+    private static final String SOLAR_OUTPUT = "SolarPanelOutput";
+    private static final String SOLAR_SKY_HIDDEN = "SolarPanelSkyHidden";
+    private static final String ACCUMULATOR_STATUS = "AccumulatorStatus";
+
+    private static final Identifier SOLAR_UID =
+            Identifier.fromNamespaceAndPath(Wireworks.MOD_ID, "solar_panel");
+    private static final Identifier ACCUMULATOR_UID =
+            Identifier.fromNamespaceAndPath(Wireworks.MOD_ID, "accumulator");
 
     /**
      * The numbers live on the server, so they have to be asked for.
@@ -139,13 +153,84 @@ public class PoleJadePlugin implements IWailaPlugin {
         }
     };
 
+    private static final IServerDataProvider<BlockAccessor> SOLAR_DATA = new IServerDataProvider<>() {
+        @Override
+        public void appendServerData(CompoundTag tag, BlockAccessor accessor) {
+            if (accessor.getBlockEntity() instanceof SolarPanelBlockEntity panel) {
+                tag.putLong(SOLAR_OUTPUT, panel.currentOutputFe());
+                tag.putBoolean(SOLAR_SKY_HIDDEN, panel.skyHidden());
+            }
+        }
+
+        @Override
+        public Identifier getUid() {
+            return SOLAR_UID;
+        }
+    };
+
+    private static final IBlockComponentProvider SOLAR_TOOLTIP = new IBlockComponentProvider() {
+        @Override
+        public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
+            CompoundTag data = accessor.getServerData();
+            if (!data.contains(SOLAR_OUTPUT)) {
+                return;
+            }
+            if (data.getBooleanOr(SOLAR_SKY_HIDDEN, false)) {
+                tooltip.add(Component.translatable("tooltip.wireworks.solar_panel.jade.roofed")
+                        .withStyle(ChatFormatting.RED));
+                return;
+            }
+            long fe = data.getLongOr(SOLAR_OUTPUT, 0L);
+            tooltip.add(Component.translatable("tooltip.wireworks.solar_panel.jade.output", fe)
+                    .withStyle(fe > 0L ? ChatFormatting.GREEN : ChatFormatting.GRAY));
+        }
+
+        @Override
+        public Identifier getUid() {
+            return SOLAR_UID;
+        }
+    };
+
+    private static final IServerDataProvider<BlockAccessor> ACCUMULATOR_DATA = new IServerDataProvider<>() {
+        @Override
+        public void appendServerData(CompoundTag tag, BlockAccessor accessor) {
+            if (accessor.getBlockEntity() instanceof AccumulatorBlockEntity accumulator) {
+                tag.putInt(ACCUMULATOR_STATUS, accumulator.status().map(Enum::ordinal).orElse(-1));
+            }
+        }
+
+        @Override
+        public Identifier getUid() {
+            return ACCUMULATOR_UID;
+        }
+    };
+
+    /** The charge is Jade's own energy row, read through the face; this names only what that cannot. */
+    private static final IBlockComponentProvider ACCUMULATOR_TOOLTIP = new IBlockComponentProvider() {
+        @Override
+        public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
+            AccumulatorStatus.fromOrdinal(accessor.getServerData().getIntOr(ACCUMULATOR_STATUS, -1))
+                    .ifPresent(status -> tooltip.add(Component.translatable(status.langKey())
+                            .withStyle(status.problem() ? ChatFormatting.RED : ChatFormatting.GREEN)));
+        }
+
+        @Override
+        public Identifier getUid() {
+            return ACCUMULATOR_UID;
+        }
+    };
+
     @Override
     public void register(IWailaCommonRegistration registration) {
         registration.registerBlockDataProvider(DATA, SupplyAreaPoleBlockEntity.class);
+        registration.registerBlockDataProvider(SOLAR_DATA, SolarPanelBlockEntity.class);
+        registration.registerBlockDataProvider(ACCUMULATOR_DATA, AccumulatorBlockEntity.class);
     }
 
     @Override
     public void registerClient(IWailaClientRegistration registration) {
         registration.registerBlockComponent(TOOLTIP, SupplyAreaPoleBlock.class);
+        registration.registerBlockComponent(SOLAR_TOOLTIP, SolarPanelBlock.class);
+        registration.registerBlockComponent(ACCUMULATOR_TOOLTIP, AccumulatorBlock.class);
     }
 }

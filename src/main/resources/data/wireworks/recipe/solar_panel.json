@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "G": "#c:glass_blocks",
+    "D": "minecraft:daylight_detector",
+    "C": "#c:ingots/copper",
+    "R": "#c:dusts/redstone",
+    "I": "#c:storage_blocks/iron"
+  },
+  "pattern": [
+    "GDG",
+    "CRC",
+    " I "
+  ],
+  "result": {
+    "id": "wireworks:solar_panel",
+    "count": 1
+  }
+}

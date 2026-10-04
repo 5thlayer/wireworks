@@ -8,13 +8,14 @@ Wireworks brings Factorio's electric poles to NeoForge. A pole powers every mach
 
 - **Poles in three tiers.** Small, medium and large poles, each with its own supply area and wire reach, plus a creative pole that generates without limit, for trying a machine without a power chain.
 - **Power by area.** Every Forge Energy machine inside a pole's supply area is powered, whichever way it faces.
+- **Generation and storage.** A Solar Panel makes power by the time of day and nothing under a roof, and an Accumulator stores it and gives it back when generators fall short. Each is placed whole from one item and sits on the network with no cable. Both wear stand-in art for now.
 - **Wire a network.** A placed pole wires itself to up to five nearby poles. To add or cut a wire by hand, click one pole with a copper ingot, then another within wire reach. A network shares every generator's output, and charges and draws on its accumulators.
 - **Place a line of poles.** Poles place, extend and preview through [Groundworks](https://github.com/5thlayer/groundworks), which Wireworks bundles inside its jar.
 - **See the network.** With [Jade](https://www.curseforge.com/minecraft/mc-mods/jade) installed, looking at a pole shows its network.
 
 ## For pack developers
 
-Each tier's supply area and wire reach are set in `wireworks-server.toml`, with Factorio's numbers as defaults. Which blocks generate, store and wire is data: tag generators `wireworks:generators`, accumulators `wireworks:accumulators`, and wiring items `wireworks:wire_tools`. A pack names the poles its own way in its own language file, over Wireworks' `block.wireworks.*` and `item.wireworks.*` keys.
+Each tier's supply area and wire reach, the Solar Panel's peak and the Accumulator's capacity and flow are set in `wireworks-server.toml`, with Factorio's numbers as defaults. Which blocks generate, store and wire is data: tag generators `wireworks:generators`, accumulators `wireworks:accumulators`, and wiring items `wireworks:wire_tools`. A pack names the poles its own way in its own language file, over Wireworks' `block.wireworks.*` and `item.wireworks.*` keys.
 
 ## For mod developers
 
