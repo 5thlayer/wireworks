@@ -70,6 +70,10 @@ public final class WireworksGameTests {
         WireGestureTests.register(tests);
         PolePlanTests.register(tests);
         PoleReplaceTests.register(tests);
+        SolarPanelTests.register(tests);
+        AccumulatorTests.register(tests);
+        EnergyFootprintTests.register(tests);
+        EnergyBlockDataTests.register(tests);
     }
 
     private static Identifier id(String path) {
