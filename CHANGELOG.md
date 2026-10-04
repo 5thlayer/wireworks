@@ -4,6 +4,10 @@ Each version has two sections: Players, what a player or pack developer sees, an
 
 ## Unreleased
 
+### Consumers
+
+- Wireworks accepts Groundworks `[0.5.4,0.6)`, from the version it nests, where it accepted `[0.5.2,0.6)`.
+
 ## 0.2.2
 
 ### Players
