@@ -31,9 +31,10 @@ repositories {
 
 def gameTestReport = layout.buildDirectory.file('reports/gametest.xml').get().asFile
 
-// The Groundworks versions the Library nests and, through neoforge.mods.toml, accepts at load. The
-// same range as Beltworks', so a pack holding both loads one Groundworks.
-def groundworksRange = '[0.5,0.6)'
+// The Groundworks versions the Library nests and, through neoforge.mods.toml, accepts at load.
+// 0.5.2 is the first with footprints, and still overlaps Beltworks' range, so a pack holding both
+// loads one Groundworks.
+def groundworksRange = '[0.5.2,0.6)'
 
 neoForge {
     version = neoforge_version
@@ -98,7 +99,7 @@ dependencies {
     jarJar(implementation('io.github.5thlayer:groundworks')) {
         version {
             strictly groundworksRange
-            prefer '0.5.1'
+            prefer '0.5.2'
         }
     }
     // Jade finds the pole's tooltip plugin by its annotation, so the Library runs without it.
