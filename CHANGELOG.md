@@ -4,6 +4,14 @@ Each version has two sections: Players, what a player or pack developer sees, an
 
 ## Unreleased
 
+### Players
+
+- Wireworks now ships Groundworks 0.5.4, so a footprint part left behind by a changed machine shape no longer crashes the game when right-clicked, replaced over or aimed at, and Groundworks' item tags have names in EMI.
+
+### Consumers
+
+- Wireworks nests Groundworks 0.5.4; its range stays `[0.5.2,0.6)`.
+
 ## 0.2.1
 
 ### Players
