@@ -94,6 +94,12 @@ tasks.named('runGameTestServer') {
     }
 }
 
+// Mods on the dev runs that the published jar does not depend on.
+configurations {
+    localRuntime
+    runtimeClasspath.extendsFrom localRuntime
+}
+
 dependencies {
     // Bundled, so the Library runs with nothing else installed.
     jarJar(implementation('io.github.5thlayer:groundworks')) {
@@ -104,6 +110,8 @@ dependencies {
     }
     // Jade finds the pole's tooltip plugin by its annotation, so the Library runs without it.
     compileOnly 'curse.maven:jade-324717:8651070'
+    localRuntime 'curse.maven:jade-324717:8651070'
+    localRuntime 'curse.maven:emi-unofficial-port-1544558:8630349'
 
     // DataFixerUpper, and only that: Codec is Mojang's serialisation library, not a Minecraft type,
     // so the wire store's codec round-trips on a plain JVM. The version is the one Minecraft 26.1.2 ships.
