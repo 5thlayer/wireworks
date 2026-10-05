@@ -15,9 +15,17 @@ _Avoid_: client (collides with the game's client side), dependent, integration
 
 ### Poles
 
-**Supply Area Pole**:
-A pole of one tier, small, medium or large, or the creative pole. It has no energy face of its own: it reaches every FE block in its **Supply Area** and joins its **Electric Network** by **Wire**s.
-_Avoid_: power pole, node, transmitter
+**Distribution Pole**:
+A pole of one tier, small, medium or large, or the creative pole. It has no energy face of its own: it reaches every FE block in its **Supply Area** and joins its **District** by **Wire**s. It never wires to a **Transmission Pole**.
+_Avoid_: Supply Area Pole (the code's name), power pole, node, DC pole
+
+**Transmission Pole**:
+A pole with no **Supply Area** and no tier, which carries **Wire**s far: it powers nothing itself, and reaches **Distribution Pole**s only through a **Transformer**.
+_Avoid_: AC pole, high-voltage pole, pylon, large pole (a Distribution Pole)
+
+**Transformer**:
+The only block that wires to both **Transmission Pole**s and **Distribution Pole**s, and the only joint between the two. It has no **Supply Area**, and energy crosses it either way.
+_Avoid_: substation (Factorio's large pole), converter, step-down
 
 **Tier**:
 A pole's geometry, small, medium or large: its supply size and its **Wire Reach**, set in `wireworks-server.toml` and Factorio's by default. A tier grants no power of its own. A pack may name the poles its own way.
@@ -38,11 +46,19 @@ _Avoid_: infinite source, debug pole
 ### Networks
 
 **Electric Network**:
-Every **Supply Area Pole** joined to another by a **Wire**, directly or through other poles, plus every generator, accumulator and machine standing in any of their areas. One balance: demand is met from generators first and accumulators second, only a generator surplus charges accumulators, and a shortfall is shared out.
-_Avoid_: grid, power net, FE network
+Every **District** and **Transmission Line** joined through **Transformer**s. Each District settles its own book first; the network's book then meets the Districts' shortfalls from their surplus, generator output first and accumulators second, shares a shortfall among Districts in proportion to each one's, and charges accumulators only from generator surplus. A world with no Transformer has one District per network.
+_Avoid_: grid, power net, FE network, AC/DC
+
+**District**:
+Every **Distribution Pole** joined to another by a **Wire**, directly or through other Distribution Poles, plus every generator, accumulator and machine standing in any of their areas. One balance: demand is met from its generators first and its accumulators second, only a generator surplus charges accumulators, and a shortfall is shared out. What it has left over or lacks crosses its Transformers.
+_Avoid_: zone, subnet, area (the **Supply Area**), substation
+
+**Transmission Line**:
+Every **Transmission Pole** joined to another by a **Wire**, plus the **Transformer**s wired to them. It holds no energy and keeps no book of its own: its **Electric Network** does.
+_Avoid_: HV line, AC line, power line
 
 **Wire**:
-A stored connection between two poles' bases, and the only thing that joins poles: two poles in reach but not wired are not connected. A wire can only exist within **Wire Reach**. A placed pole wires itself to up to five nearby poles, and a **Wire Tool** adds or cuts one by hand.
+A stored connection between two poles' bases, and the only thing that joins poles: two poles in reach but not wired are not connected. A wire joins two poles of one system, or either kind of pole to a **Transformer**. A wire can only exist within **Wire Reach**. A placed pole wires itself to up to five nearby poles, and a **Wire Tool** adds or cuts one by hand.
 _Avoid_: link, cable, connection
 
 **Wire Reach**:
