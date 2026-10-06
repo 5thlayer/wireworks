@@ -95,6 +95,6 @@ _Avoid_: controller, master (Oritech's terms for its own engines)
 
 ### Drawing
 
-**Supply Area Box**:
-The yellow wireframe of a pole's whole area, anchored at the base, with an outline around every machine it reaches. Shown while holding a pole or looking at one. It says where the area lands, never whether anything is fed, which the Jade line answers.
-_Avoid_: overlay, range indicator
+**Supply Area Square**:
+The yellow outline of a pole's **Supply Area** on the ground its **Pole Column**'s base stands on, with an outline around every machine it reaches. Shown while holding a pole or looking at one. It says how much ground the area spreads over, not how far up and down it reaches, which the machine outlines and the item tooltip answer, and never whether anything is fed, which the Jade line answers.
+_Avoid_: Supply Area Box (the cube it replaced), overlay, range indicator
