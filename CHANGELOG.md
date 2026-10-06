@@ -4,6 +4,8 @@ Each version has two sections: Players, what a player or pack developer sees, an
 
 ## Unreleased
 
+## 0.3.0
+
 ### Players
 
 - The Transmission Pole: a pole with no tier and no supply area that powers nothing and carries wires 32 blocks by default, stacks as a pole column, and joins only other Transmission Poles. A wire between it and a Distribution Pole is refused, and the refusal says a Transformer joins the two.
