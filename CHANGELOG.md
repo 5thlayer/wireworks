@@ -4,6 +4,8 @@ Each version has two sections: Players, what a player or pack developer sees, an
 
 ## Unreleased
 
+## 0.4.0
+
 ### Players
 
 - The supply area is drawn as a yellow square on the ground the pole stands on, not a box around it. The machines it reaches are still outlined, and the pole still supplies two blocks up and down. (#19)
