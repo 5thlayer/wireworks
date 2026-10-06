@@ -46,11 +46,11 @@ _Avoid_: infinite source, debug pole
 ### Networks
 
 **Electric Network**:
-Every **District** and **Transmission Line** joined through **Transformer**s. Each District settles its own book first; the network's book then meets the Districts' shortfalls from their surplus, generator output first and accumulators second, shares a shortfall among Districts in proportion to each one's, and charges accumulators only from generator surplus. A world with no Transformer has one District per network.
+Every **District** and **Transmission Line** joined through **Transformer**s. Each District settles its own book first; the network's book then meets the Districts' shortfalls from their surplus, generator output first and accumulators second, shares a shortfall among Districts in proportion to each one's, and only then charges accumulators from generator surplus, each District's own first. A world with no Transformer has one District per network.
 _Avoid_: grid, power net, FE network, AC/DC
 
 **District**:
-Every **Distribution Pole** joined to another by a **Wire**, directly or through other Distribution Poles, plus every generator, accumulator and machine standing in any of their areas. One balance: demand is met from its generators first and its accumulators second, only a generator surplus charges accumulators, and a shortfall is shared out. What it has left over or lacks crosses its Transformers.
+Every **Distribution Pole** joined to another by a **Wire**, directly or through other Distribution Poles, plus every generator, accumulator and machine standing in any of their areas. Its own demand is met from its generators first and its accumulators second, and a shortfall is shared out. What it has left over or lacks crosses its Transformers, and its accumulators charge only once every District on its **Electric Network** is fed.
 _Avoid_: zone, subnet, area (the **Supply Area**), substation
 
 **Transmission Line**:

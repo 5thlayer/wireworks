@@ -24,11 +24,12 @@ and the Medium Pole's toward the district, both configured. Energy crosses it ei
 remote solar field exports up the line.
 
 **Distribution Poles joined by wires are a District, and a District settles first.** Each District
-runs ADR 0003's balance on its own book: its generators, then its accumulators, with only a
-generator surplus charging its accumulators. Then the **Electric Network**, every District and
-**Transmission Line** joined through Transformers, settles the Districts' leftovers in the same
-order: their generator surplus meets the other Districts' shortfalls, then their accumulators
-discharge to cover what remains, then generator surplus charges accumulators anywhere. A shortfall
+meets its own demand from its own generators, then its own accumulators. Then the **Electric
+Network**, every District and **Transmission Line** joined through Transformers, settles the
+Districts' leftovers in the same order: their generator surplus meets the other Districts'
+shortfalls, then their accumulators discharge to cover what remains. Only then does generator
+surplus charge accumulators, a District's own first and then any District's, so no accumulator
+charges while a machine anywhere on the network goes short. A shortfall
 across Districts is shared in proportion to each District's shortfall, so every importing machine
 ends at the same fraction. Within a District it is still water-filled. The model has two levels and
 no more: a District is always a leaf, two lines joined only through a District are one network, and
@@ -65,6 +66,15 @@ Transformer's gives the power crossing it this tick, imported or exported.
 **Always on.** There is no config switch. A world with no Transformer has one District per network,
 which is exactly the network before this ADR. A pack that does not want transmission removes the two
 recipes.
+
+## Amended on review, before release
+
+The first text had each District charge its own accumulators from its surplus before the network
+step, as ADR 0003's balance does on one book. Review found the spec contradicting it, and play
+would have shown a District sitting dark while its neighbour's accumulators filled. Accumulators
+now charge only once every District's demand is met, which is Factorio's own rule for accumulators.
+A District still keeps its own power for its own machines, and its own accumulators still charge
+before another District's.
 
 ## Considered Options
 
