@@ -1,6 +1,6 @@
 # Placeholder art
 
-The Solar Panel, the Accumulator and the Transmission Pole wear stand-in textures until real art is drawn. They are Wireworks' own, MIT, and the models that use them draw the whole footprint from the anchor's block model.
+The Solar Panel, the Accumulator, the Transmission Pole and the Transformer wear stand-in textures until real art is drawn. They are Wireworks' own, MIT, and the models that use them draw the whole footprint from the anchor's block model.
 
 `scripts/build-placeholder-textures.py` draws every file below, and `--check` fails when a committed one is stale. Redraw a texture in that script and re-run it; never edit the PNGs.
 
@@ -15,5 +15,6 @@ All files are under `src/main/resources/assets/wireworks/textures/block/`. A tex
 | `accumulator_casing.png` | 32x32 | The Accumulator's top and bottom. |
 | `accumulator_side.png` | 32x16 | The Accumulator's four sides, a battery-cell pattern. |
 | `transmission_pole.png` | 16x16 | The Transmission Pole's post and crossarm, a braced grey plate. |
+| `transformer.png` | 16x16 | Every face of the Transformer's cube, a grey casing with two gold coil windings. |
 
 The models are `models/block/solar_panel.json` and `models/block/accumulator.json`, with an item model of each recentred for the inventory slot. The Solar Panel's spans x and z -16 to 32 and y 0 to 32 from its pillar. The Accumulator's spans x and z 0 to 32 from a corner anchor and is turned by `facing`.

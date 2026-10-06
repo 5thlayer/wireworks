@@ -60,7 +60,7 @@ public final class PoleColumn {
 
     /** Whether these two positions hold the same pole block, which is also the same tier. */
     private static boolean sameBlock(BlockGetter level, BlockPos pos, Block block) {
-        return level.getBlockState(pos).is(block);
+        return block instanceof PoleBlock pole && pole.stacks() && level.getBlockState(pos).is(block);
     }
 
     /**

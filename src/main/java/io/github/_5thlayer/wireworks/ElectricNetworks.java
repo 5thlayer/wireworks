@@ -20,23 +20,27 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 /**
- * Every Electric Network in a level, and the tick that settles them (ADR 0003).
+ * Every Electric Network in a level, and the tick that settles them (ADR 0003, ADR 0008).
  *
  * <h2>Networks follow the stored wires</h2>
  *
- * <p>A pole reports itself every tick it runs. A pole that did not report -- broken, unloaded, or
- * turned into a column extension -- is dropped at the level tick. Any change to the set of poles,
- * or a wire made or cut ({@link LevelWires}), rebuilds the networks from the wires between the poles
- * standing (ADR 0004). A merge and a split are the same recomputation.
+ * <p>A pole reports itself every tick it runs: a Distribution Pole, a Transmission Pole or a
+ * Transformer ({@link NetworkPole}). A pole that did not report -- broken, unloaded, or turned into a
+ * column extension -- is dropped at the level tick. Any change to the set of poles, or a wire made or
+ * cut ({@link LevelWires}), rebuilds the Districts and Electric Networks from the wires between the
+ * poles standing (ADR 0004, {@link PoleNetworks#topology}). A merge and a split are the same
+ * recomputation.
  *
- * <h2>One settlement per network</h2>
+ * <h2>One settlement per Electric Network</h2>
  *
  * <p>A block inside two wired poles' areas is one consumer, not two: the member poles' lists are
  * unioned by position before anything is probed. Room and offer are each measured with an insert or
  * extract inside a transaction that is then aborted, since the transfer API has no "how much"
- * question, and {@link NetworkBalance} decides the flows. Sources are weighted by what they offer
- * this tick; for a generator whose face caps extraction at its rated output, that is its maximum
- * output.
+ * question, and {@link NetworkBalance#settleNetwork} decides the flows: each District on its own book
+ * first, then the network across its Districts. Sources are weighted by what they offer this tick; for
+ * a generator whose face caps extraction at its rated output, that is its maximum output. The flows of
+ * every District in the network are applied in a single transaction. A network with no Transformer is
+ * one District and settles exactly as it always did.
  */
 public final class ElectricNetworks {
 
@@ -51,9 +55,34 @@ public final class ElectricNetworks {
      */
     private static final long CREATIVE_OFFER = Integer.MAX_VALUE;
 
-    private final Map<BlockPos, SupplyAreaPoleBlockEntity> poles = new LinkedHashMap<>();
+    /** One Electric Network: every pole wired into it, and the supply poles of each of its Districts. */
+    private record Network(List<NetworkPole> members, List<List<SupplyAreaPoleBlockEntity>> districts) {
+    }
+
+    /** One District's machines, as found by its poles this tick. */
+    private static final class Book {
+        final List<SupplyAreaPoleBlockEntity> poles;
+        final int creative;
+        final List<EnergyHandler> generators;
+        final List<BlockPos> accumulatorsAt;
+        final List<EnergyHandler> accumulators;
+        final List<EnergyHandler> consumers;
+        long demanded;
+
+        Book(List<SupplyAreaPoleBlockEntity> poles, int creative, List<EnergyHandler> generators,
+                List<BlockPos> accumulatorsAt, List<EnergyHandler> accumulators, List<EnergyHandler> consumers) {
+            this.poles = poles;
+            this.creative = creative;
+            this.generators = generators;
+            this.accumulatorsAt = accumulatorsAt;
+            this.accumulators = accumulators;
+            this.consumers = consumers;
+        }
+    }
+
+    private final Map<BlockPos, NetworkPole> poles = new LinkedHashMap<>();
     private final Map<BlockPos, Long> lastReport = new LinkedHashMap<>();
-    private List<List<SupplyAreaPoleBlockEntity>> networks = List.of();
+    private List<Network> networks = List.of();
     private Map<BlockPos, Long> accumulatorFlows = Map.of();
     private boolean dirty;
 
@@ -64,7 +93,11 @@ public final class ElectricNetworks {
         return BY_LEVEL.computeIfAbsent(level, l -> new ElectricNetworks());
     }
 
-    void report(SupplyAreaPoleBlockEntity pole) {
+    /**
+     * A pole reports itself: a Distribution Pole, a Transmission Pole or a Transformer. A change to
+     * the set of any of the three rebuilds the topology.
+     */
+    void report(NetworkPole pole) {
         BlockPos pos = pole.getBlockPos();
         if (poles.put(pos, pole) != pole) {
             dirty = true;
@@ -77,19 +110,23 @@ public final class ElectricNetworks {
         dirty = true;
     }
 
-    /** The poles wired into the same network as this one, itself included. */
+    /** The supply poles of every District wired into the same Electric Network as this one, itself included. */
     public List<SupplyAreaPoleBlockEntity> networkOf(SupplyAreaPoleBlockEntity pole) {
-        for (List<SupplyAreaPoleBlockEntity> network : networks) {
-            if (network.contains(pole)) {
-                return network;
+        for (Network network : networks) {
+            for (List<SupplyAreaPoleBlockEntity> district : network.districts()) {
+                if (district.contains(pole)) {
+                    List<SupplyAreaPoleBlockEntity> all = new ArrayList<>();
+                    network.districts().forEach(all::addAll);
+                    return all;
+                }
             }
         }
         return List.of();
     }
 
     public boolean drawsFrom(BlockPos generator) {
-        for (SupplyAreaPoleBlockEntity pole : poles.values()) {
-            if (pole.generators().contains(generator)) {
+        for (NetworkPole pole : poles.values()) {
+            if (pole instanceof SupplyAreaPoleBlockEntity supply && supply.generators().contains(generator)) {
                 return true;
             }
         }
@@ -97,8 +134,8 @@ public final class ElectricNetworks {
     }
 
     public boolean chargesFrom(BlockPos accumulator) {
-        for (SupplyAreaPoleBlockEntity pole : poles.values()) {
-            if (pole.accumulators().contains(accumulator)) {
+        for (NetworkPole pole : poles.values()) {
+            if (pole instanceof SupplyAreaPoleBlockEntity supply && supply.accumulators().contains(accumulator)) {
                 return true;
             }
         }
@@ -138,7 +175,7 @@ public final class ElectricNetworks {
         var stale = lastReport.entrySet().iterator();
         while (stale.hasNext()) {
             var entry = stale.next();
-            SupplyAreaPoleBlockEntity pole = poles.get(entry.getKey());
+            NetworkPole pole = poles.get(entry.getKey());
             if (entry.getValue() < now - 1 || pole.isRemoved()) {
                 poles.remove(entry.getKey());
                 stale.remove();
@@ -150,131 +187,249 @@ public final class ElectricNetworks {
             dirty = false;
         }
         Map<BlockPos, Long> flows = new LinkedHashMap<>();
-        for (List<SupplyAreaPoleBlockEntity> network : networks) {
+        for (Network network : networks) {
             settle(level, network, flows);
         }
         accumulatorFlows = flows;
     }
 
+    /**
+     * Districts and Electric Networks from the stored wires between the poles standing: a District's
+     * supply poles settle together, and the Districts a Transformer joins settle as one network.
+     */
     private void rebuild(Level level) {
-        List<SupplyAreaPoleBlockEntity> all = new ArrayList<>(poles.values());
+        List<NetworkPole> all = new ArrayList<>(poles.values());
         List<PoleNetworks.Pole> shapes = new ArrayList<>(all.size());
-        for (SupplyAreaPoleBlockEntity pole : all) {
+        for (NetworkPole pole : all) {
             shapes.add(pole.shape());
         }
-        int[] ids = PoleNetworks.networks(shapes, LevelWires.of((ServerLevel) level).wires().all());
-        List<List<SupplyAreaPoleBlockEntity>> built = new ArrayList<>();
-        for (int i = 0; i < all.size(); i++) {
-            while (built.size() <= ids[i]) {
-                built.add(new ArrayList<>());
+        PoleNetworks.Topology topology = PoleNetworks.topology(shapes,
+                LevelWires.of((ServerLevel) level).wires().all());
+        List<Network> built = new ArrayList<>();
+        List<Map<Integer, List<SupplyAreaPoleBlockEntity>>> byDistrict = new ArrayList<>();
+        for (PoleNetworks.ElectricNetwork electric : topology.networks()) {
+            Map<Integer, List<SupplyAreaPoleBlockEntity>> districts = new LinkedHashMap<>();
+            for (int district : electric.districts()) {
+                districts.put(district, new ArrayList<>());
             }
-            built.get(ids[i]).add(all.get(i));
+            byDistrict.add(districts);
+            built.add(new Network(new ArrayList<>(), new ArrayList<>(districts.values())));
+        }
+        for (int i = 0; i < all.size(); i++) {
+            int network = topology.networkOf()[i];
+            built.get(network).members().add(all.get(i));
+            if (all.get(i) instanceof SupplyAreaPoleBlockEntity supply) {
+                byDistrict.get(network).get(topology.districtOf()[i]).add(supply);
+            }
         }
         networks = built;
     }
 
-    private static void settle(Level level, List<SupplyAreaPoleBlockEntity> network,
-            Map<BlockPos, Long> accumulatorFlows) {
-        Set<BlockPos> generatorPositions = new LinkedHashSet<>();
-        Set<BlockPos> accumulatorPositions = new LinkedHashSet<>();
-        Set<BlockPos> consumerPositions = new LinkedHashSet<>();
-        int creative = 0;
-        for (SupplyAreaPoleBlockEntity pole : network) {
-            generatorPositions.addAll(pole.generators());
-            accumulatorPositions.addAll(pole.accumulators());
-            consumerPositions.addAll(pole.consumers());
-            if (pole.isCreative()) {
-                creative++;
+    /**
+     * Settles one Electric Network (ADR 0008): every District's books go through
+     * {@link NetworkBalance#settleNetwork}, and the result is applied in one transaction. Receivers
+     * first, sources second, and the whole network's tick aborted if a source gives less than its probe
+     * promised.
+     */
+    private static void settle(Level level, Network network, Map<BlockPos, Long> accumulatorFlows) {
+        // A block standing in the areas of two Districts is one machine of the network, not two.
+        Set<BlockPos> claimed = new LinkedHashSet<>();
+        List<Book> books = new ArrayList<>(network.districts().size());
+        for (List<SupplyAreaPoleBlockEntity> district : network.districts()) {
+            books.add(book(level, district, claimed));
+        }
+        int n = books.size();
+        if (n == 0) {
+            return;
+        }
+
+        NetworkBalance.District[] districts = new NetworkBalance.District[n];
+        long realOffered = 0L;
+        for (int d = 0; d < n; d++) {
+            Book book = books.get(d);
+            // The creative poles lead the generator array as generators with no handler.
+            long[] generatorOffers = new long[book.creative + book.generators.size()];
+            for (int i = 0; i < book.creative; i++) {
+                generatorOffers[i] = CREATIVE_OFFER;
             }
+            for (int i = 0; i < book.generators.size(); i++) {
+                generatorOffers[book.creative + i] = probeExtract(book.generators.get(i));
+                realOffered += generatorOffers[book.creative + i];
+            }
+            long[] accumulatorOffers = new long[book.accumulators.size()];
+            long[] accumulatorRooms = new long[book.accumulators.size()];
+            for (int i = 0; i < book.accumulators.size(); i++) {
+                accumulatorOffers[i] = probeExtract(book.accumulators.get(i));
+                accumulatorRooms[i] = probeInsert(book.accumulators.get(i));
+            }
+            long[] demands = new long[book.consumers.size()];
+            for (int i = 0; i < book.consumers.size(); i++) {
+                demands[i] = probeInsert(book.consumers.get(i));
+                book.demanded += demands[i];
+            }
+            districts[d] = new NetworkBalance.District(generatorOffers, accumulatorOffers,
+                    accumulatorRooms, demands);
         }
 
-        List<EnergyHandler> generators = handlers(level, generatorPositions);
-        List<BlockPos> accumulatorsAt = new ArrayList<>(accumulatorPositions.size());
-        List<EnergyHandler> accumulators = handlers(level, accumulatorPositions, accumulatorsAt);
-        List<EnergyHandler> consumers = handlers(level, consumerPositions);
-
-        // The creative poles lead the generator array as generators with no handler.
-        long[] generatorOffers = new long[creative + generators.size()];
-        for (int i = 0; i < creative; i++) {
-            generatorOffers[i] = CREATIVE_OFFER;
-        }
-        for (int i = 0; i < generators.size(); i++) {
-            generatorOffers[creative + i] = probeExtract(generators.get(i));
-        }
-        long[] accumulatorOffers = new long[accumulators.size()];
-        long[] accumulatorRooms = new long[accumulators.size()];
-        for (int i = 0; i < accumulators.size(); i++) {
-            accumulatorOffers[i] = probeExtract(accumulators.get(i));
-            accumulatorRooms[i] = probeInsert(accumulators.get(i));
-        }
-        long[] demands = new long[consumers.size()];
-        long demanded = 0L;
-        for (int i = 0; i < consumers.size(); i++) {
-            demands[i] = probeInsert(consumers.get(i));
-            demanded += demands[i];
-        }
-
-        NetworkBalance.Settlement plan = NetworkBalance.settle(
-                generatorOffers, accumulatorOffers, accumulatorRooms, demands);
+        NetworkBalance.Settlement[] plan = NetworkBalance.settleNetwork(districts);
 
         // Receivers first, sources second, all in one transaction. What is extracted is exactly
         // what was accepted, so a receiver that takes less than its grant costs its sources the
         // difference rather than destroying it. A source that gives less than its probe promised
         // cannot cover the tick, and the whole tick is aborted rather than creating energy.
-        long delivered = 0L;
-        long produced = 0L;
-        long charged = 0L;
-        long discharged = 0L;
-        long[] accumulatorFlow = new long[accumulators.size()];
+        long[] delivered = new long[n];
+        long[] produced = new long[n];
+        long[] charged = new long[n];
+        long[] discharged = new long[n];
+        long[][] accumulatorFlow = new long[n][];
+        long realProduced = 0L;
+        for (int d = 0; d < n; d++) {
+            accumulatorFlow[d] = new long[books.get(d).accumulators.size()];
+        }
         try (Transaction transaction = Transaction.open(null)) {
-            for (int i = 0; i < consumers.size(); i++) {
-                delivered += insert(consumers.get(i), plan.consumerGrants()[i], transaction);
+            long owed = 0L;
+            for (int d = 0; d < n; d++) {
+                Book book = books.get(d);
+                for (int i = 0; i < book.consumers.size(); i++) {
+                    delivered[d] += insert(book.consumers.get(i), plan[d].consumerGrants()[i], transaction);
+                }
+                for (int i = 0; i < book.accumulators.size(); i++) {
+                    accumulatorFlow[d][i] = insert(book.accumulators.get(i),
+                            plan[d].accumulatorCharges()[i], transaction);
+                    charged[d] += accumulatorFlow[d][i];
+                }
+                owed += delivered[d] + charged[d];
             }
-            for (int i = 0; i < accumulators.size(); i++) {
-                accumulatorFlow[i] = insert(accumulators.get(i), plan.accumulatorCharges()[i], transaction);
-                charged += accumulatorFlow[i];
+            for (int d = 0; d < n && owed > 0L; d++) {
+                Book book = books.get(d);
+                for (int i = 0; i < book.creative && owed > 0L; i++) {
+                    long drawn = Math.min(owed, plan[d].generatorDraws()[i]);
+                    produced[d] += drawn;
+                    owed -= drawn;
+                }
+                for (int i = 0; i < book.generators.size() && owed > 0L; i++) {
+                    long drawn = extract(book.generators.get(i),
+                            Math.min(owed, plan[d].generatorDraws()[book.creative + i]), transaction);
+                    produced[d] += drawn;
+                    realProduced += drawn;
+                    owed -= drawn;
+                }
             }
-            long owed = delivered + charged;
-            for (int i = 0; i < creative && owed > 0L; i++) {
-                long drawn = Math.min(owed, plan.generatorDraws()[i]);
-                produced += drawn;
-                owed -= drawn;
-            }
-            for (int i = 0; i < generators.size() && owed > 0L; i++) {
-                long drawn = extract(generators.get(i),
-                        Math.min(owed, plan.generatorDraws()[creative + i]), transaction);
-                produced += drawn;
-                owed -= drawn;
-            }
-            for (int i = 0; i < accumulators.size() && owed > 0L; i++) {
-                long drawn = extract(accumulators.get(i),
-                        Math.min(owed, plan.accumulatorDischarges()[i]), transaction);
-                accumulatorFlow[i] -= drawn;
-                discharged += drawn;
-                owed -= drawn;
+            for (int d = 0; d < n && owed > 0L; d++) {
+                Book book = books.get(d);
+                for (int i = 0; i < book.accumulators.size() && owed > 0L; i++) {
+                    long drawn = extract(book.accumulators.get(i),
+                            Math.min(owed, plan[d].accumulatorDischarges()[i]), transaction);
+                    accumulatorFlow[d][i] -= drawn;
+                    discharged[d] += drawn;
+                    owed -= drawn;
+                }
             }
             if (owed == 0L) {
                 transaction.commit();
             } else {
-                delivered = produced = charged = discharged = 0L;
-                accumulatorFlow = new long[accumulators.size()];
+                for (int d = 0; d < n; d++) {
+                    delivered[d] = produced[d] = charged[d] = discharged[d] = 0L;
+                    accumulatorFlow[d] = new long[books.get(d).accumulators.size()];
+                }
+                realProduced = 0L;
             }
         }
 
         // Read after the transaction closes, so an aborted tick reads what is really stored.
+        long demanded = 0L;
+        long deliveredTotal = 0L;
+        long[] supplied = new long[n];
+        long[] used = new long[n];
+        for (int d = 0; d < n; d++) {
+            demanded += books.get(d).demanded;
+            deliveredTotal += delivered[d];
+            supplied[d] = produced[d] + discharged[d];
+            used[d] = delivered[d] + charged[d];
+        }
+        long surplus = realOffered - realProduced;
+        long shortfall = demanded - deliveredTotal;
+        NetworkReading[] readings = new NetworkReading[n];
+        for (int d = 0; d < n; d++) {
+            Book book = books.get(d);
+            long stored = 0L;
+            long capacity = 0L;
+            for (EnergyHandler accumulator : book.accumulators) {
+                stored += accumulator.getAmountAsLong();
+                capacity += accumulator.getCapacityAsLong();
+            }
+            for (int i = 0; i < book.accumulators.size(); i++) {
+                accumulatorFlows.put(book.accumulatorsAt.get(i), accumulatorFlow[d][i]);
+            }
+            readings[d] = new NetworkReading(produced[d], delivered[d], book.demanded, charged[d],
+                    discharged[d], stored, capacity, book.accumulators.size(), network.members().size());
+            NetworkExchange exchange = NetworkExchange.ofDistrict(supplied[d], used[d], surplus, shortfall);
+            for (SupplyAreaPoleBlockEntity pole : book.poles) {
+                pole.recordNetworkTick(readings[d], exchange);
+            }
+        }
+        NetworkReading whole = sum(readings, network.members().size());
+        NetworkExchange crossed = NetworkExchange.ofNetwork(supplied, used, surplus, shortfall);
+        for (NetworkPole member : network.members()) {
+            if (!(member instanceof SupplyAreaPoleBlockEntity)) {
+                member.recordNetworkTick(whole, crossed);
+            }
+        }
+    }
+
+    /** The Districts' readings added up, for a pole that belongs to the network and to no District. */
+    private static NetworkReading sum(NetworkReading[] readings, int poles) {
+        long produced = 0L;
+        long delivered = 0L;
+        long demanded = 0L;
+        long charged = 0L;
+        long discharged = 0L;
         long stored = 0L;
         long capacity = 0L;
-        for (EnergyHandler accumulator : accumulators) {
-            stored += accumulator.getAmountAsLong();
-            capacity += accumulator.getCapacityAsLong();
+        int accumulators = 0;
+        for (NetworkReading r : readings) {
+            produced += r.produced();
+            delivered += r.delivered();
+            demanded += r.demanded();
+            charged += r.charged();
+            discharged += r.discharged();
+            stored += r.stored();
+            capacity += r.capacity();
+            accumulators += r.accumulators();
         }
-        for (int i = 0; i < accumulators.size(); i++) {
-            accumulatorFlows.put(accumulatorsAt.get(i), accumulatorFlow[i]);
+        return new NetworkReading(produced, delivered, demanded, charged, discharged, stored, capacity,
+                accumulators, poles);
+    }
+
+    /** What a District's supply poles found, each block counted once across the whole network. */
+    private static Book book(Level level, List<SupplyAreaPoleBlockEntity> poles, Set<BlockPos> claimed) {
+        Set<BlockPos> generatorPositions = new LinkedHashSet<>();
+        Set<BlockPos> accumulatorPositions = new LinkedHashSet<>();
+        Set<BlockPos> consumerPositions = new LinkedHashSet<>();
+        int creative = 0;
+        for (SupplyAreaPoleBlockEntity pole : poles) {
+            claim(pole.generators(), generatorPositions, claimed);
+            claim(pole.accumulators(), accumulatorPositions, claimed);
+            claim(pole.consumers(), consumerPositions, claimed);
+            if (pole.isCreative()) {
+                creative++;
+            }
         }
-        NetworkReading reading = new NetworkReading(produced, delivered, demanded, charged,
-                discharged, stored, capacity, accumulators.size(), network.size());
-        for (SupplyAreaPoleBlockEntity pole : network) {
-            pole.recordNetworkTick(reading);
+        List<BlockPos> accumulatorsAt = new ArrayList<>(accumulatorPositions.size());
+        List<EnergyHandler> accumulators = handlers(level, accumulatorPositions, accumulatorsAt);
+        return new Book(poles, creative, handlers(level, generatorPositions), accumulatorsAt, accumulators,
+                handlers(level, consumerPositions));
+    }
+
+    /**
+     * Takes the positions no other District has, plus any this District already took through another
+     * of its poles.
+     */
+    private static void claim(List<BlockPos> found, Set<BlockPos> into, Set<BlockPos> claimed) {
+        for (BlockPos pos : found) {
+            if (into.contains(pos) || claimed.add(pos)) {
+                into.add(pos);
+            }
         }
     }
 

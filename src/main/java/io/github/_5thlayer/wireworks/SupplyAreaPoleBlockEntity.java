@@ -43,7 +43,7 @@ import java.util.List;
  * affordable, and it is also pointless: machines do not appear and vanish every tick. The area is
  * rescanned on {@link #RESCAN_INTERVAL}, so a newly placed machine waits at most two seconds.
  */
-public class SupplyAreaPoleBlockEntity extends BlockEntity {
+public class SupplyAreaPoleBlockEntity extends BlockEntity implements NetworkPole {
 
 
     /** Ticks between rescans of the supply area. Two seconds. */
@@ -59,6 +59,7 @@ public class SupplyAreaPoleBlockEntity extends BlockEntity {
      * and not synced: Jade asks the server when a player looks.
      */
     private NetworkReading lastReading = NetworkReading.NONE;
+    private NetworkExchange lastExchange = NetworkExchange.NONE;
 
     public SupplyAreaPoleBlockEntity(BlockPos pos, BlockState state) {
         super(WireworksRegistries.SUPPLY_AREA_POLE.get(), pos, state);
@@ -76,6 +77,7 @@ public class SupplyAreaPoleBlockEntity extends BlockEntity {
     }
 
     /** This pole as {@link PoleNetworks} sees it: where it stands and how far it reaches. */
+    @Override
     public PoleNetworks.Pole shape() {
         return LevelWires.pole(getBlockPos(), tier());
     }
@@ -115,9 +117,17 @@ public class SupplyAreaPoleBlockEntity extends BlockEntity {
         return lastReading.demanded();
     }
 
-    /** The pole's network as it stood after the last tick. Jade reads this. */
+    /** The pole's District as it stood after the last tick, imports and exports included. Jade reads this. */
     public NetworkReading networkReading() {
         return lastReading;
+    }
+
+    /**
+     * What the pole's District gave to and took from its Electric Network last tick, and the
+     * network's surplus and shortfall. Jade reads this.
+     */
+    public NetworkExchange networkExchange() {
+        return lastExchange;
     }
 
     List<BlockPos> consumers() {
@@ -132,8 +142,10 @@ public class SupplyAreaPoleBlockEntity extends BlockEntity {
         return accumulators;
     }
 
-    void recordNetworkTick(NetworkReading reading) {
+    @Override
+    public void recordNetworkTick(NetworkReading reading, NetworkExchange exchange) {
         lastReading = reading;
+        lastExchange = exchange;
     }
 
     private void scan(Level level) {

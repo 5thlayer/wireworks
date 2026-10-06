@@ -60,6 +60,14 @@ public abstract class PoleBlock extends Block {
     /** What this pole is to the topology: its tier's Distribution Pole, or the Transmission Pole. */
     public abstract PoleKind kind();
 
+    /**
+     * Whether this pole is a Pole Column: segments of the same block stack into one pole. The
+     * Transformer is one block and does not, so a second one on top is a second Transformer.
+     */
+    public boolean stacks() {
+        return true;
+    }
+
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level,
                                   BlockPos pos, CollisionContext context) {
@@ -93,7 +101,7 @@ public abstract class PoleBlock extends Block {
     protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level,
                                               BlockPos pos, Player player, InteractionHand hand,
                                               BlockHitResult hit) {
-        if (!(stack.getItem() instanceof PoleItem item)) {
+        if (!stacks() || !(stack.getItem() instanceof PoleItem item)) {
             // Includes the empty hand and every other item, which must fall through to their own
             // placement.
             return InteractionResult.TRY_WITH_EMPTY_HAND;
@@ -150,7 +158,7 @@ public abstract class PoleBlock extends Block {
     @Override
     protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
         BlockPos pos = BlockPos.containing(params.getOptionalParameter(LootContextParams.ORIGIN));
-        if (params.getLevel().getBlockState(pos.below()).is(this)) {
+        if (stacks() && params.getLevel().getBlockState(pos.below()).is(this)) {
             return List.of();
         }
         return super.getDrops(state, params);
@@ -172,11 +180,11 @@ public abstract class PoleBlock extends Block {
             return;
         }
         // A base's wires go with it; an extension holds none (ADR 0004).
-        if (!level.getBlockState(pos.below()).is(this)) {
+        if (!stacks() || !level.getBlockState(pos.below()).is(this)) {
             LevelWires.of(level).broken(level, pos);
         }
         BlockPos above = pos.above();
-        if (level.getBlockState(above).is(this)) {
+        if (stacks() && level.getBlockState(above).is(this)) {
             // Dropped without loot: extending a column costs nothing, so a segment must pay nothing
             // back, or a tall pole broken is a pole duplicator. The block the player actually broke
             // pays out through its own loot table, which is the single item the column cost.

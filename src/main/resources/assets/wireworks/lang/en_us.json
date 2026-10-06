@@ -7,6 +7,7 @@
   "block.wireworks.small_pole": "Small Pole",
   "block.wireworks.solar_panel": "Solar Panel",
   "block.wireworks.solar_panel_part": "Solar Panel",
+  "block.wireworks.transformer": "Transformer",
   "block.wireworks.transmission_pole": "Transmission Pole",
   "config.jade.plugin_wireworks.accumulator": "Accumulator status",
   "config.jade.plugin_wireworks.solar_panel": "Solar Panel output",
@@ -17,6 +18,7 @@
   "item.wireworks.medium_pole": "Medium Pole",
   "item.wireworks.small_pole": "Small Pole",
   "item.wireworks.solar_panel": "Solar Panel",
+  "item.wireworks.transformer": "Transformer",
   "item.wireworks.transmission_pole": "Transmission Pole",
   "itemGroup.wireworks.items": "Wireworks",
   "message.wireworks.cross_system": "A Transformer joins a transmission line to a distribution pole.",
@@ -39,6 +41,8 @@
   "tooltip.wireworks.pole.wireless": "Wireless: powers machines in its area",
   "tooltip.wireworks.solar_panel.jade.output": "Making %s FE/t",
   "tooltip.wireworks.solar_panel.jade.roofed": "Sky blocked: making nothing",
+  "tooltip.wireworks.transformer.joins": "Joins a transmission line to a distribution pole; energy crosses both ways",
+  "tooltip.wireworks.transformer.reach": "Wires reach %s blocks toward a Transmission Pole, %s toward a Distribution Pole",
   "tooltip.wireworks.transmission_pole.powers_nothing": "Powers nothing: a Transformer joins it to distribution poles",
   "tooltip.wireworks.transmission_pole.reach": "Carries wires up to %s blocks"
 }

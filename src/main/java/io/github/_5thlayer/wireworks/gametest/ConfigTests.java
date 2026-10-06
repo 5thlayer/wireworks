@@ -4,6 +4,7 @@
 package io.github._5thlayer.wireworks.gametest;
 
 import io.github._5thlayer.wireworks.PoleTier;
+import io.github._5thlayer.wireworks.TransformerSpec;
 import io.github._5thlayer.wireworks.TransmissionSpec;
 import net.minecraft.gametest.framework.GameTestHelper;
 
@@ -20,6 +21,7 @@ final class ConfigTests {
     static void register(WireworksGameTests.Registrar tests) {
         tests.test("server_config_reaches_the_pole_tiers", 1, ConfigTests::reachesTheTiers);
         tests.test("server_config_reaches_the_transmission_pole", 1, ConfigTests::reachesTheTransmissionPole);
+        tests.test("server_config_reaches_the_transformer", 1, ConfigTests::reachesTheTransformer);
     }
 
     private static void reachesTheTiers(GameTestHelper helper) {
@@ -41,6 +43,16 @@ final class ConfigTests {
         if (reach != 40.0) {
             helper.fail("the [transmission] section did not reach the Transmission Pole: it reaches " + reach
                     + ", not the 40.0 that src/gametest/wireworks-server.toml configures");
+            return;
+        }
+        helper.succeed();
+    }
+
+    private static void reachesTheTransformer(GameTestHelper helper) {
+        if (TransformerSpec.lineReach() != 30.0 || TransformerSpec.districtReach() != 11.0) {
+            helper.fail("the [transformer] section did not reach the Transformer: it reaches "
+                    + TransformerSpec.lineReach() + " and " + TransformerSpec.districtReach()
+                    + ", not the 30.0 and 11.0 that src/gametest/wireworks-server.toml configures");
             return;
         }
         helper.succeed();

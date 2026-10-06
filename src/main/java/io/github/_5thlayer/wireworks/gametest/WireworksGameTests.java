@@ -67,6 +67,7 @@ public final class WireworksGameTests {
         ElectricNetworkTests.register(tests);
         PoleWireTests.register(tests);
         TransmissionPoleTests.register(tests);
+        TransformerTests.register(tests);
         PoleColumnCostTests.register(tests);
         WireGestureTests.register(tests);
         PolePlanTests.register(tests);
@@ -88,6 +89,18 @@ public final class WireworksGameTests {
             var id = id(name);
             CodeGameTest.define(id, body);
             event.registerTest(id, new CodeGameTest(id, new TestData<>(environment, PLATFORM, maxTicks, 0, true, Rotation.NONE)));
+        }
+
+        /**
+         * A test that runs alone. Tests of one environment run together, side by side, and a wire's
+         * reach is not bounded by its test's structure: a Transformer reaches 30 blocks, so it would
+         * wire itself to a neighbouring test's poles. An environment of its own is a batch of its own.
+         */
+        void isolated(String name, int maxTicks, Consumer<GameTestHelper> body) {
+            var alone = event.registerEnvironment(id("alone/" + name), new TestEnvironmentDefinition.AllOf(List.of()));
+            var id = id(name);
+            CodeGameTest.define(id, body);
+            event.registerTest(id, new CodeGameTest(id, new TestData<>(alone, PLATFORM, maxTicks, 0, true, Rotation.NONE)));
         }
     }
 }

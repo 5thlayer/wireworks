@@ -8,8 +8,12 @@ Each version has two sections: Players, what a player or pack developer sees, an
 
 - The Transmission Pole: a pole with no tier and no supply area that powers nothing and carries wires 32 blocks by default, stacks as a pole column, and joins only other Transmission Poles. A wire between it and a Distribution Pole is refused, and the refusal says a Transformer joins the two.
 
+- The Transformer: the only block that wires to both a Transmission Pole and a Distribution Pole, and never to another Transformer. Placed between a District and a Transmission Line it joins them into one Electric Network, and energy crosses either way: a District that makes its own power keeps it, and its surplus feeds the other Districts on the line, so a remote solar field exports up the line. Breaking it leaves its District settling on its own. It is one block, not a column, with no supply area and no GUI. Craft it from iron and copper ingots round an iron block.
+
 ### Consumers
 
+- The network tick settles each Electric Network in one transaction through the two-level balance, Districts first, and the Transmission Pole and the Transformer report into it like a Distribution Pole. A world with no Transformer settles as before. A Transformer's block entity and a District's poles keep a `NetworkExchange` (what crossed, and the network's surplus and shortfall) for a Jade line.
+- `wireworks-server.toml` gains `[transformer] lineReach` (default 32, the Transmission Pole's) and `districtReach` (default 9, the Medium Pole's), and the Transformer is a new block, `wireworks:transformer`, outside the `wireworks:poles` Fast Replace group.
 - `wireworks-server.toml` gains `[transmission] wireReach`, the Transmission Pole's Wire Reach, and the pole is a new block, `wireworks:transmission_pole`, outside the `wireworks:poles` Fast Replace group.
 - Wireworks accepts Groundworks `[0.5.4,0.6)`, from the version it nests, where it accepted `[0.5.2,0.6)`.
 

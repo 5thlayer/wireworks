@@ -31,3 +31,8 @@
 # The Transmission Pole is configured off its default of 32, for the same reason as the large pole.
 [transmission]
 	wireReach = 40.0
+
+# The Transformer is configured off its defaults of 32 and 9 too.
+[transformer]
+	lineReach = 30.0
+	districtReach = 11.0

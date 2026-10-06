@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "I": "#c:ingots/iron",
+    "C": "#c:ingots/copper",
+    "B": "#c:storage_blocks/iron"
+  },
+  "pattern": [
+    "ICI",
+    "CBC",
+    "ICI"
+  ],
+  "result": {
+    "id": "wireworks:transformer",
+    "count": 1
+  }
+}

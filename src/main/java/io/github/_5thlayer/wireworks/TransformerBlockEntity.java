@@ -8,22 +8,22 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * A Transmission Pole's block entity: it holds no energy and settles nothing. A block entity is how
- * the level finds the poles standing near a placed one without walking blocks, and how a wire is
- * drawn from a pole; it also reports the pole into the network tick, so a Transmission Pole joining
- * or leaving rebuilds the Electric Networks.
+ * A Transformer's block entity: it holds no energy and scans no area. It reports into the network
+ * tick, so a Transformer joining or leaving rebuilds the Electric Networks, and keeps what its
+ * network last did for the Jade line.
  */
-public class TransmissionPoleBlockEntity extends BlockEntity implements NetworkPole {
+public class TransformerBlockEntity extends BlockEntity implements NetworkPole {
 
+    private NetworkReading lastReading = NetworkReading.NONE;
     private NetworkExchange lastExchange = NetworkExchange.NONE;
 
-    public TransmissionPoleBlockEntity(BlockPos pos, BlockState state) {
-        super(WireworksRegistries.TRANSMISSION_POLE_ENTITY.get(), pos, state);
+    public TransformerBlockEntity(BlockPos pos, BlockState state) {
+        super(WireworksRegistries.TRANSFORMER_ENTITY.get(), pos, state);
     }
 
     @Override
     public PoleNetworks.Pole shape() {
-        return LevelWires.pole(getBlockPos(), PoleKind.TRANSMISSION);
+        return LevelWires.pole(getBlockPos(), TransformerSpec.kind());
     }
 
     void serverTick() {
@@ -37,8 +37,14 @@ public class TransmissionPoleBlockEntity extends BlockEntity implements NetworkP
         return lastExchange;
     }
 
+    /** The network as it stood after the last tick, summed over its Districts. Jade reads this. */
+    public NetworkReading networkReading() {
+        return lastReading;
+    }
+
     @Override
     public void recordNetworkTick(NetworkReading reading, NetworkExchange exchange) {
+        lastReading = reading;
         lastExchange = exchange;
     }
 }

@@ -26,6 +26,8 @@ public final class WireworksConfig {
     private static final Map<PoleTier, Tier> TIERS = new EnumMap<>(PoleTier.class);
     private static final ModConfigSpec SPEC;
     private static final ModConfigSpec.DoubleValue TRANSMISSION_WIRE_REACH;
+    private static final ModConfigSpec.DoubleValue TRANSFORMER_LINE_REACH;
+    private static final ModConfigSpec.DoubleValue TRANSFORMER_DISTRICT_REACH;
     private static final ModConfigSpec.LongValue SOLAR_PEAK_WATTS;
     private static final ModConfigSpec.LongValue ACCUMULATOR_CAPACITY_JOULES;
     private static final ModConfigSpec.LongValue ACCUMULATOR_MAX_WATTS;
@@ -44,6 +46,12 @@ public final class WireworksConfig {
         builder.push("transmission");
         TRANSMISSION_WIRE_REACH = builder.comment("How far a wire reaches from a Transmission Pole, in blocks.")
                 .defineInRange("wireReach", TransmissionSpec.DEFAULT_WIRE_REACH, 1.0, 256.0);
+        builder.pop();
+        builder.push("transformer");
+        TRANSFORMER_LINE_REACH = builder.comment("How far a Transformer's wire reaches toward a Transmission Pole, in blocks.")
+                .defineInRange("lineReach", TransformerSpec.DEFAULT_LINE_REACH, 1.0, 256.0);
+        TRANSFORMER_DISTRICT_REACH = builder.comment("How far a Transformer's wire reaches toward a Distribution Pole, in blocks.")
+                .defineInRange("districtReach", TransformerSpec.DEFAULT_DISTRICT_REACH, 1.0, 64.0);
         builder.pop();
         builder.push("solar_panel");
         SOLAR_PEAK_WATTS = builder.comment("The power at full daylight, in watts. 60000 is 30 FE/t.")
@@ -71,6 +79,7 @@ public final class WireworksConfig {
             if (event.getConfig().getSpec() == SPEC) {
                 TIERS.keySet().forEach(tier -> tier.configure(tier.defaultSupplySize(), tier.defaultWireReach()));
                 TransmissionSpec.configure(TransmissionSpec.DEFAULT_WIRE_REACH);
+                TransformerSpec.configure(TransformerSpec.DEFAULT_LINE_REACH, TransformerSpec.DEFAULT_DISTRICT_REACH);
                 SolarPanelSpec.configure(SolarPanelSpec.DEFAULT_PEAK_WATTS);
                 AccumulatorSpec.configure(AccumulatorSpec.DEFAULT_CAPACITY_JOULES, AccumulatorSpec.DEFAULT_MAX_WATTS);
             }
@@ -83,6 +92,7 @@ public final class WireworksConfig {
         }
         TIERS.forEach((tier, values) -> tier.configure(values.supplySize().get(), values.wireReach().get()));
         TransmissionSpec.configure(TRANSMISSION_WIRE_REACH.get());
+        TransformerSpec.configure(TRANSFORMER_LINE_REACH.get(), TRANSFORMER_DISTRICT_REACH.get());
         SolarPanelSpec.configure(SOLAR_PEAK_WATTS.get());
         AccumulatorSpec.configure(ACCUMULATOR_CAPACITY_JOULES.get(), ACCUMULATOR_MAX_WATTS.get());
     }

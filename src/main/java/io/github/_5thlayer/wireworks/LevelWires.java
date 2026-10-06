@@ -89,7 +89,8 @@ public final class LevelWires extends SavedData {
         // not a new pole: its wires move to the new base and it adds none of its own. Where the
         // placement also joins a column below, the new base is that lower column's.
         BlockPos above = pos.above();
-        if (level.getBlockState(above).is(level.getBlockState(pos).getBlock())) {
+        if (level.getBlockState(pos).getBlock() instanceof PoleBlock column && column.stacks()
+                && level.getBlockState(above).is(column)) {
             BlockPos base = PoleColumn.baseOf(level, pos);
             rekeyed(level, pos(above), pos(base));
             return;

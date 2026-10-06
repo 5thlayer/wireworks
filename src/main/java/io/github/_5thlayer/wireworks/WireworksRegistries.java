@@ -74,6 +74,16 @@ public final class WireworksRegistries {
             TRANSMISSION_POLE_ENTITY = BLOCK_ENTITIES.register("transmission_pole",
                     () -> new BlockEntityType<>(TransmissionPoleBlockEntity::new, TRANSMISSION_POLE.get()));
 
+    /** The Transformer: the joint between a Transmission Line and a District. One block, not a column. */
+    public static final DeferredBlock<TransformerBlock> TRANSFORMER =
+            BLOCKS.registerBlock(TransformerBlock.BLOCK_NAME, TransformerBlock::new);
+    public static final DeferredItem<TransformerItem> TRANSFORMER_ITEM =
+            ITEMS.registerItem(TransformerBlock.BLOCK_NAME,
+                    props -> new TransformerItem(TRANSFORMER.get(), props));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TransformerBlockEntity>>
+            TRANSFORMER_ENTITY = BLOCK_ENTITIES.register("transformer",
+                    () -> new BlockEntityType<>(TransformerBlockEntity::new, TRANSFORMER.get()));
+
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SupplyAreaPoleBlockEntity>>
             SUPPLY_AREA_POLE = BLOCK_ENTITIES.register("supply_area_pole",
                     () -> new BlockEntityType<>(SupplyAreaPoleBlockEntity::new, poleBlocks()));
@@ -129,9 +139,9 @@ public final class WireworksRegistries {
         return POLE_ITEMS.get(tier);
     }
 
-    /** Every pole's item, the tiers in order, then the Transmission Pole, and the creative pole last. */
+    /** Every pole's item, the tiers in order, then the Transmission Pole and the Transformer, and the creative pole last. */
     private static Stream<Item> poleItems() {
-        return Stream.concat(POLE_ITEMS.values().stream(), Stream.of(TRANSMISSION_POLE_ITEM, CREATIVE_POLE_ITEM))
+        return Stream.concat(POLE_ITEMS.values().stream(), Stream.of(TRANSMISSION_POLE_ITEM, TRANSFORMER_ITEM, CREATIVE_POLE_ITEM))
                 .map(DeferredItem::get);
     }
 

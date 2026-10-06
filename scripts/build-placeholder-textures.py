@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2026 5thlayer
 # SPDX-License-Identifier: MIT
 
-"""Draws the Solar Panel's and the Accumulator's stand-in textures.
+"""Draws the stand-in textures of the Solar Panel, the Accumulator, the Transmission Pole and the Transformer.
 
 Both blocks wear this placeholder art until real art is drawn (docs/placeholder-art.md). Each
 texture is sized to the model face it covers, so a face of 48 by 16 units is a 48 by 16 pixel
@@ -126,7 +126,18 @@ def transmission_pole():
     return image
 
 
+def transformer():
+    """A grey casing with two gold coil windings side by side, for the Transformer's body."""
+    image = framed(16, 16)
+    for x0 in (3, 9):
+        put_rect(image, x0, 3, x0 + 4, 13, CASING_CELL)
+        for y in range(4, 13, 2):
+            put_rect(image, x0, y, x0 + 4, y + 1, CASING_TERMINAL)
+    return image
+
+
 TEXTURE_NAMES = {
+    "transformer.png": transformer,
     "transmission_pole.png": transmission_pole,
     "solar_panel_frame.png": lambda: framed(16, 16),
     "solar_panel_edge.png": lambda: framed(48, 16),

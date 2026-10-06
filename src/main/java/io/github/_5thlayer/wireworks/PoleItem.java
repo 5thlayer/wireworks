@@ -49,7 +49,8 @@ public class PoleItem extends BlockItem implements PlansPlacement {
         Level level = context.getLevel();
         BlockPos aimed = Placements.aimedPos(context);
         BlockState aimedState = level.getBlockState(aimed);
-        if (!(aimedState.getBlock() instanceof PoleBlock) || context.isSecondaryUseActive()) {
+        if (!(aimedState.getBlock() instanceof PoleBlock aimedPole && aimedPole.stacks())
+                || context.isSecondaryUseActive()) {
             return Placements.vanillaPlan(this, context);
         }
         if (!aimedState.is(getBlock())) {
