@@ -119,13 +119,10 @@ dependencies {
     compileOnly 'maven.modrinth:jade:26.1.11+neoforge'
     localRuntime 'maven.modrinth:jade:26.1.11+neoforge'
     localRuntime 'curse.maven:emi-unofficial-port-1544558:8630349'
-    // -PwithCraftworks puts Craftworks 0.4.0, its CurseForge file, on the dev runs: its Assembler draws
-    // FE, so a pole has a machine to feed and the Supply Area Square's input outline can be looked at.
-    // Wireworks names none of its code. Opt-in only while it sends the game test server's mock players
-    // a payload they cannot take, since a run has no classpath of its own to keep it to the client.
-    if (providers.gradleProperty('withCraftworks').isPresent()) {
-        localRuntime 'curse.maven:craftworks-1715876:9072732'
-    }
+    // Craftworks 0.4.1, its CurseForge file, on the dev runs and the game test server: its Assembler
+    // draws FE, so a pole has a machine to feed, and is a Groundworks footprint from a mod that doesn't
+    // build against Wireworks, which a pole counts once. Wireworks names none of its code.
+    localRuntime 'curse.maven:craftworks-1715876:9078919'
 
     // DataFixerUpper, and only that: Codec is Mojang's serialisation library, not a Minecraft type,
     // so the wire store's codec round-trips on a plain JVM. The version is the one Minecraft 26.1.2 ships.
