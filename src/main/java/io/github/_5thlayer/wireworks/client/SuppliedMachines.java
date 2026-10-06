@@ -16,7 +16,8 @@ import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Which machines a pole reaches, for the Supply Area Square to outline (ADR 0005), cached.
+ * Which machines a pole reaches, for the Supply Area Square to outline (ADR 0005, ADR 0009),
+ * cached.
  *
  * <p>The answer is {@link SupplyAreaScan}'s -- the same scan the pole runs to build its network, so
  * the outlines cannot claim a machine the network would not feed, or miss one it would.

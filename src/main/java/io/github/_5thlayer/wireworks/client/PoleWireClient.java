@@ -23,8 +23,8 @@ public final class PoleWireClient {
 
     public static void register(IEventBus modBus) {
         modBus.addListener(PoleWireClient::registerRenderers);
-        // The Supply Area Square (ADR 0005): its line pipeline ignores depth, which no stock line type
-        // does, so it has to be registered before the first frame that draws one.
+        // The Supply Area Square (ADR 0005, ADR 0009): its line pipeline ignores depth, which no
+        // stock line type does, so it has to be registered before the first frame that draws one.
         SupplyAreaSquare.register(modBus);
         NeoForge.EVENT_BUS.addListener(PreviewOverlay::onOverlay);
         NeoForge.EVENT_BUS.addListener(ClientWires::onLevelUnload);

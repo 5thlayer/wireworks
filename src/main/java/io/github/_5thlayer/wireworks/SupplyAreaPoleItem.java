@@ -23,9 +23,9 @@ import net.minecraft.world.item.component.TooltipDisplay;
  * shape of the network cannot be read off the world. There is no GUI, so nothing can be inspected.
  * The recipe says nothing about reach.
  *
- * <p>The <b>Supply Area Square</b> shows where the area lands (ADR 0005), but only while a pole is held
- * or looked at, and it says nothing about the pole being wireless or about the area being measured
- * at the base. Those are this tooltip's alone, and the numbers here are what the square is read
+ * <p>The <b>Supply Area Square</b> shows where the area lands (ADR 0005, ADR 0009), but only while
+ * a pole is held or looked at, and it says nothing about the pole being wireless or about the area
+ * being measured at the base. Those are this tooltip's alone, and the numbers here are what the square is read
  * against.
  *
  * <p>So it is stated here, in three lines, always shown rather than hidden behind Shift. This is

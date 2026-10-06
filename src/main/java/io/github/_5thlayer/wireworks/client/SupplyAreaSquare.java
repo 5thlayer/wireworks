@@ -43,7 +43,7 @@ import org.joml.Vector3f;
  * <p>{@link #offsets} is the whole geometry, and it is a function of the tier alone -- nothing here
  * reads the world. The held item's preview and the placed pole's renderer both draw what it
  * returns, so they cannot disagree about where the area is, which is the placement plan's rule
- * applied to the overlay. The x and z extent come from {@link SupplyArea#bounds}: the large pole's
+ * applied to the drawing. The x and z extent come from {@link SupplyArea#bounds}: the large pole's
  * even-sided area takes its extra block on the negative side, and a renderer that centred the square
  * instead would be wrong by half a block on the one tier where it shows.
  *
@@ -66,7 +66,7 @@ import org.joml.Vector3f;
  *
  * <p>The edges ignore depth. The square sits on the plane the base stands on, which on flat ground is
  * exactly the ground's top face, so a depth-tested line would z-fight it; and a slope rising into
- * the square would hide the part of it behind the hill, which is the ground extent the overlay exists
+ * the square would hide the part of it behind the hill, which is the ground extent the square exists
  * to show. No stock line type passes depth unconditionally, so {@link #PIPELINE} is vanilla's own
  * {@code LINES_SNIPPET} with {@link CompareOp#ALWAYS_PASS} and no depth write. It costs nothing
  * extra: the same line segments and the same arithmetic, with the test off.
@@ -155,7 +155,7 @@ public final class SupplyAreaSquare {
             BlockPos base, PoleTier tier) {
         drawSquare(collector, poseStack, offsets(tier));
         for (BlockPos machine : SuppliedMachines.around(level, base, tier)) {
-            draw(collector, poseStack, outlineOf(level, machine)
+            drawOutline(collector, poseStack, outlineOf(level, machine)
                     .move(machine.getX() - base.getX(), machine.getY() - base.getY(),
                             machine.getZ() - base.getZ()));
         }
@@ -171,7 +171,7 @@ public final class SupplyAreaSquare {
             Vec3 camera, BlockPos base, PoleTier tier) {
         drawSquare(collector, poseStack, around(base, tier).move(-camera.x(), -camera.y(), -camera.z()));
         for (BlockPos machine : SuppliedMachines.around(level, base, tier)) {
-            draw(collector, poseStack, outlineOf(level, machine)
+            drawOutline(collector, poseStack, outlineOf(level, machine)
                     .move(machine.getX() - camera.x(), machine.getY() - camera.y(),
                             machine.getZ() - camera.z()));
         }
@@ -190,7 +190,7 @@ public final class SupplyAreaSquare {
     }
 
     /**
-     * The square's four edges, at the flat box's own y.
+     * The square's four edges, at the square's own y.
      *
      * <p>Emitted directly rather than off a {@link VoxelShape}: {@link Shapes#create} gives the empty
      * shape for a box with no height, and an empty shape draws nothing at all.
@@ -206,13 +206,14 @@ public final class SupplyAreaSquare {
     }
 
     /**
-     * A machine's edges come off a {@link VoxelShape}, the way every other outline in the game is
-     * drawn, rather than from twelve hand-written segments that could differ from one. Vanilla's own
+     * A machine's outline comes off its {@link VoxelShape}, the way every other outline in the game
+     * is drawn, rather than from hand-written edges that could differ from the shape; the square's
+     * edges are hand-written only because it has no shape ({@link #drawSquare}). Vanilla's own
      * {@code ShapeRenderer} is not reused because it wants a whole {@link PoseStack} while the
      * collector hands out a single {@link PoseStack.Pose}, and the callback may run after the stack
      * has been popped.
      */
-    private static void draw(SubmitNodeCollector collector, PoseStack poseStack, AABB box) {
+    private static void drawOutline(SubmitNodeCollector collector, PoseStack poseStack, AABB box) {
         collector.submitCustomGeometry(poseStack, RENDER_TYPE, (pose, buffer) ->
                 Shapes.create(box).forAllEdges((x1, y1, z1, x2, y2, z2) ->
                         line(pose, buffer, x1, y1, z1, x2, y2, z2)));

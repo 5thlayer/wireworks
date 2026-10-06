@@ -15,8 +15,8 @@ import net.minecraft.world.level.block.state.BlockState;
  * owner it answers to (ADR 0003).
  *
  * <p>This is the scan the pole runs to build its network, and it is <b>also</b> what the Supply Area
- * Box outlines (ADR 0005). There is one of it rather than two: a client that re-derived "which
- * machines are in here" would drift from the server's answer, and the ways it would drift are
+ * Square outlines (ADR 0005, ADR 0009). There is one of it rather than two: a client that
+ * re-derived "which machines are in here" would drift from the server's answer, and the ways it would drift are
  * not obvious. A slave Steam Engine resolves to its master, which may stand outside the area
  * entirely; a machine's hull block answers its controller's face and is never a consumer in its own
  * right. A naive "does this block have an Energy capability" sweep gets both wrong and lights up

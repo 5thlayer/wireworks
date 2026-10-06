@@ -146,8 +146,8 @@ public final class PoleWireRenderer
     }
 
     /**
-     * The Supply Area Square for a placed pole (ADR 0005), drawn only while it is the pole the
-     * local player is looking at.
+     * The Supply Area Square for a placed pole (ADR 0005, ADR 0009), drawn only while it is the
+     * pole the local player is looking at.
      *
      * <p><b>Only the aimed pole.</b> Drawing every loaded pole's square would carpet a built base in
      * overlapping wireframes, which is the opposite of legible and is not what Factorio does -- it
