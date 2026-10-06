@@ -23,6 +23,8 @@ import io.github._5thlayer.wireworks.PoleTier;
 import io.github._5thlayer.wireworks.ClientWires;
 import io.github._5thlayer.wireworks.PoleBlock;
 import io.github._5thlayer.wireworks.TransmissionSpec;
+import io.github._5thlayer.wireworks.WireLook;
+import io.github._5thlayer.wireworks.WireSystem;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
@@ -81,6 +83,9 @@ public final class PoleWireRenderer
 
     public static final class State extends BlockEntityRenderState {
         final List<EntityRenderState.LeashState> wires = new ArrayList<>();
+        /** Index-aligned with {@link #wires}: the stored system of each, which decides its look. */
+        final List<WireSystem> systems = new ArrayList<>();
+        WireSystem slackSystem = WireSystem.DISTRIBUTION;
         EntityRenderState.@Nullable LeashState slack;
         Tint tint = Tint.HELD;
         /** The tier whose Supply Area Box to draw, or null when this pole is not the one looked at. */
@@ -100,6 +105,8 @@ public final class PoleWireRenderer
             Vec3 cameraPosition, ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress) {
         BlockEntityRenderer.super.extractRenderState(pole, state, partialTicks, cameraPosition, breakProgress);
         state.wires.clear();
+        state.systems.clear();
+        state.slackSystem = WireSystem.DISTRIBUTION;
         state.slack = null;
         state.areaTier = null;
         state.areaLevel = null;
@@ -133,6 +140,7 @@ public final class PoleWireRenderer
             wire.endSkyLight = level.getBrightness(LightLayer.SKY, endTop);
             wire.slack = true;
             state.wires.add(wire);
+            state.systems.add(stored.system());
         }
         extractSlack(level, from, start, partialTicks, state);
     }
@@ -205,6 +213,8 @@ public final class PoleWireRenderer
         }
         Minecraft minecraft = Minecraft.getInstance();
         Tint tint = Tint.HELD;
+        // Held to the hand the wire is the anchor's own; over a pole it takes the system the click would make.
+        WireSystem system = WireSystem.between(anchorBlock.kind(), anchorBlock.kind());
         Vec3 end = null;
         if (minecraft.hitResult instanceof BlockHitResult hit
                 && level.getBlockState(hit.getBlockPos()).getBlock() instanceof PoleBlock targetBlock) {
@@ -214,6 +224,7 @@ public final class PoleWireRenderer
             // Looking at another pole previews the wire itself, ending where it would hang.
             if (!base.equals(from)) {
                 end = attachPoint(level, base);
+                system = WireSystem.between(anchor.kind(), target.kind());
                 if (PoleWiring.refuses(anchor, target)) {
                     tint = Tint.REFUSED;
                 } else if (ClientWires.wires().contains(pos(from), pos(base))) {
@@ -242,6 +253,7 @@ public final class PoleWireRenderer
         slack.endSkyLight = level.getBrightness(LightLayer.SKY, endAt);
         state.slack = slack;
         state.tint = tint;
+        state.slackSystem = system;
     }
 
     @Override
@@ -254,14 +266,25 @@ public final class PoleWireRenderer
             // offsets -- it must not take the camera a second time.
             SupplyAreaBox.drawAtPose(collector, poseStack, areaLevel, areaBase, areaTier);
         }
-        for (EntityRenderState.LeashState wire : state.wires) {
-            collector.submitLeash(poseStack, wire);
+        for (int i = 0; i < state.wires.size(); i++) {
+            EntityRenderState.LeashState wire = state.wires.get(i);
+            WireSystem system = state.systems.get(i);
+            if (system == WireSystem.DISTRIBUTION) {
+                // Vanilla's own leash, exactly as before the systems.
+                collector.submitLeash(poseStack, wire);
+            } else {
+                WireLook look = WireLook.of(system);
+                collector.submitCustomGeometry(poseStack, RenderTypes.leash(),
+                        (pose, buffer) -> WireGeometry.draw(pose.pose(), buffer, wire, look,
+                                look.red(), look.green(), look.blue(), 1.0F));
+            }
         }
         EntityRenderState.LeashState slack = state.slack;
         if (slack != null) {
             Tint tint = state.tint;
+            WireLook look = WireLook.of(state.slackSystem);
             collector.submitCustomGeometry(poseStack, RenderTypes.leash(),
-                    (pose, buffer) -> WireGeometry.draw(pose.pose(), buffer, slack, tint.r, tint.g, tint.b, 1.0F));
+                    (pose, buffer) -> WireGeometry.draw(pose.pose(), buffer, slack, look, tint.r, tint.g, tint.b, 1.0F));
         }
     }
 

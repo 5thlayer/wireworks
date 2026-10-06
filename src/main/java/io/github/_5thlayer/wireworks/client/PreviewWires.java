@@ -14,6 +14,8 @@ import io.github._5thlayer.wireworks.PoleNetworks;
 import io.github._5thlayer.wireworks.PoleTier;
 import io.github._5thlayer.wireworks.PoleWiring;
 import io.github._5thlayer.wireworks.PoleBlock;
+import io.github._5thlayer.wireworks.WireLook;
+import io.github._5thlayer.wireworks.WireSystem;
 import io.github._5thlayer.wireworks.client.WireGeometry;
 import io.github._5thlayer.groundworks.PlacementPlan;
 
@@ -91,9 +93,11 @@ public final class PreviewWires {
             wire.endBlockLight = level.getBrightness(LightLayer.BLOCK, endAt);
             wire.startSkyLight = level.getBrightness(LightLayer.SKY, startAt);
             wire.endSkyLight = level.getBrightness(LightLayer.SKY, endAt);
+            // The system the wire would be made in, from the two poles' kinds, as the click decides it.
+            WireLook look = WireLook.of(WireSystem.between(block.kind(), target.kind()));
             collector.submitCustomGeometry(poseStack, RenderTypes.leash(),
-                    (pose, buffer) -> WireGeometry.draw(pose.pose(), buffer, wire,
-                            0.5F * FADE, 0.4F * FADE, 0.3F * FADE, 1.0F));
+                    (pose, buffer) -> WireGeometry.draw(pose.pose(), buffer, wire, look,
+                            look.red() * FADE, look.green() * FADE, look.blue() * FADE, 1.0F));
         }
     }
 
