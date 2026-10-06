@@ -14,6 +14,7 @@ Each version has two sections: Players, what a player or pack developer sees, an
 
 ### Consumers
 
+- Breaking: `PoleNetworks.Pole` carries a `PoleKind` (a Distribution tier, the Transmission Pole or the Transformer) in place of its `PoleTier`, so `tier()` is gone, and `PoleNetworks.Wire` carries its `WireSystem`; its two-argument constructor still makes a Distribution wire. `ElectricNetworks.networkOf` lists the poles of the pole's District. (#11)
 - The network tick settles each Electric Network in one transaction through the two-level balance, Districts first, and the Transmission Pole and the Transformer report into it like a Distribution Pole. A world with no Transformer settles as before. A Transformer's block entity and a District's poles keep a `NetworkExchange` (what crossed, and the network's surplus and shortfall) for a Jade line; a Transformer's is its share of each District it joins.
 - `wireworks-server.toml` gains `[transformer] lineReach` (default 32, the Transmission Pole's) and `districtReach` (default 9, the Medium Pole's), and the Transformer is a new block, `wireworks:transformer`, outside the `wireworks:poles` Fast Replace group.
 - `wireworks-server.toml` gains `[transmission] wireReach`, the Transmission Pole's Wire Reach, and the pole is a new block, `wireworks:transmission_pole`, outside the `wireworks:poles` Fast Replace group.
