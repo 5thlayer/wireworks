@@ -49,6 +49,6 @@
   "tooltip.wireworks.transformer.jade.imported": "Importing: %s FE/t to its District",
   "tooltip.wireworks.transformer.joins": "Joins a Transmission Line to a Distribution Pole; energy crosses both ways",
   "tooltip.wireworks.transformer.reach": "Wires reach %s blocks toward a Transmission Pole, %s toward a Distribution Pole",
-  "tooltip.wireworks.transmission_pole.powers_nothing": "Powers nothing: a Transformer joins it to distribution poles",
+  "tooltip.wireworks.transmission_pole.powers_nothing": "Powers nothing: a Transformer joins it to Distribution Poles",
   "tooltip.wireworks.transmission_pole.reach": "Carries wires up to %s blocks"
 }
