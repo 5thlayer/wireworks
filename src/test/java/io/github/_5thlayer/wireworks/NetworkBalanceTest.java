@@ -176,6 +176,33 @@ class NetworkBalanceTest {
     }
 
     @Test
+    void aDistrictChargesNothingWhileAnotherDistrictIsShort() {
+        // A makes 1000 with nothing to feed and room for 1000. B asks 1000. B is fed first.
+        NetworkBalance.Settlement[] s = NetworkBalance.settleNetwork(
+                district(new long[]{1000}, new long[]{0}, new long[]{1000}, NONE),
+                district(NONE, NONE, NONE, new long[]{1000}));
+        assertArrayEquals(new long[]{1000}, s[1].consumerGrants());
+        assertArrayEquals(new long[]{0}, s[0].accumulatorCharges());
+        assertArrayEquals(new long[]{1000}, s[0].generatorDraws());
+    }
+
+    @Test
+    void surplusChargesADistrictsOwnRoomBeforeAnotherDistrictsRoom() {
+        // Both Districts make 50 and need nothing. Each has room for 100: each charges its own 50.
+        NetworkBalance.Settlement[] s = NetworkBalance.settleNetwork(
+                district(new long[]{50}, new long[]{0}, new long[]{100}, NONE),
+                district(new long[]{50}, new long[]{0}, new long[]{100}, NONE));
+        assertArrayEquals(new long[]{50}, s[0].accumulatorCharges());
+        assertArrayEquals(new long[]{50}, s[1].accumulatorCharges());
+        // A District with more surplus than room spills the rest into the other's room.
+        s = NetworkBalance.settleNetwork(
+                district(new long[]{150}, new long[]{0}, new long[]{100}, NONE),
+                district(NONE, new long[]{0}, new long[]{100}, NONE));
+        assertArrayEquals(new long[]{100}, s[0].accumulatorCharges());
+        assertArrayEquals(new long[]{50}, s[1].accumulatorCharges());
+    }
+
+    @Test
     void aNetworkOfOneDistrictSettlesAsTheFlatBalanceDoes() {
         long[][][] cases = {
                 {{450}, {150}, {0}, {90}},
