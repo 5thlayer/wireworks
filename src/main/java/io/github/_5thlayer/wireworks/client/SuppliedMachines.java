@@ -40,12 +40,12 @@ public final class SuppliedMachines {
     /** Ticks between rescans. The pole's own {@code RESCAN_INTERVAL}: two seconds. */
     private static final int RESCAN_INTERVAL = 40;
 
-    private static final SupplyScan.Roles<BlockPos> NONE =
+    private static final SupplyScan.Roles<BlockPos> EMPTY =
             new SupplyScan.Roles<>(List.of(), List.of(), List.of());
 
     private static @Nullable Key key;
     private static long scannedAt = Long.MIN_VALUE;
-    private static SupplyScan.Roles<BlockPos> reached = NONE;
+    private static SupplyScan.Roles<BlockPos> reached = EMPTY;
 
     private SuppliedMachines() {
     }
@@ -54,13 +54,13 @@ public final class SuppliedMachines {
     }
 
     /**
-     * Every block a pole of this tier based here reaches, sorted by role.
+     * Every block a pole of this tier based here reaches, grouped by role.
      *
-     * <p>Sorted rather than flattened because the square outlines each role in its own colour
+     * <p>Grouped rather than flattened because the square outlines each role in its own colour
      * (ADR 0009): a generator orange, a machine the pole feeds blue, an accumulator purple, which
      * says at a glance what feeds the area and what draws on it. An owner standing <em>outside</em>
      * the area is included where it stands -- a slave Steam Engine's master is what the network
-     * actually draws, so an outline beyond the square is the truth about the row rather than a leak.
+     * actually draws, so an outline beyond the square is the truth about the row, not a leak.
      */
     public static SupplyScan.Roles<BlockPos> around(Level level, BlockPos base, PoleTier tier) {
         Key now = new Key(base.immutable(), tier, level.dimension());
@@ -79,6 +79,6 @@ public final class SuppliedMachines {
     public static void clear() {
         key = null;
         scannedAt = Long.MIN_VALUE;
-        reached = NONE;
+        reached = EMPTY;
     }
 }

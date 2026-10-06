@@ -20,11 +20,11 @@ blocks up and down from the base of its **Pole Column** (ADR 0002's band), and t
 
 **The drawing is the square's outline, on the plane the base stands on.** That is the top of the
 block under the base: the ground the player stands on and most machines sit on. It is the four
-bottom edges of the old box, raised two blocks, so it keeps everything else ADR 0005 decided: anchored
-at the base, the large pole's even side offset half a block, edges only, drawn through terrain, one
-unchanging yellow, the machine outlines and their cache, a placed pole drawn only while looked at,
-and no square from the hand for a pole extending a column. The term is now the **Supply Area
-Square**.
+bottom edges of the old box, raised two blocks, so it keeps everything else ADR 0005 decided:
+anchored at the base, the large pole's even side offset half a block, edges only, drawn through
+terrain, one unchanging yellow for the square, the machine outlines and their cache, a placed pole
+drawn only while looked at, and no square from the hand for a pole extending a column. The term is
+now the **Supply Area Square**.
 
 **Nothing draws the band.** With the cage gone, the area's reach above and below the ground shows
 only once a machine there is outlined. The item tooltip already states it ("Reaches 2 blocks up and

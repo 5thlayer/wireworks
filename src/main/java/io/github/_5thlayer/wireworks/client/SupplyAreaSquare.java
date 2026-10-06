@@ -97,19 +97,19 @@ public final class SupplyAreaSquare {
      * block already says that -- and it does not react to network load. The square describes an area,
      * not an outcome; whether machines in it are being fed is the Jade line's answer, on the machine.
      */
-    private static final int SQUARE = 0xFFFFE04C;
+    private static final int SQUARE_COLOUR = 0xFFFFE04C;
 
     /**
      * A generator's outline: output, in Thermal's orange. Redder than the wire tool's cut orange
      * ({@code #FF8C00}, ADR 0004), so the two read apart when both are on screen.
      */
-    private static final int OUTPUT = 0xFFEB6B00;
+    private static final int OUTPUT_COLOUR = 0xFFEB6B00;
 
     /** The outline of a machine the pole feeds: input, in Thermal's blue. */
-    private static final int INPUT = 0xFF1EBEE7;
+    private static final int INPUT_COLOUR = 0xFF1EBEE7;
 
     /** An accumulator's outline: both input and output, in Mekanism's purple for the pair. */
-    private static final int BOTH = 0xFFA460D9;
+    private static final int BOTH_COLOUR = 0xFFA460D9;
 
     /** Vanilla's own line width for a world-space outline. */
     private static final float WIDTH = 2.0F;
@@ -190,19 +190,19 @@ public final class SupplyAreaSquare {
     }
 
     /**
-     * Outlines every machine the pole reaches, each in its role's colour, relative to {@code origin}:
-     * the pole's base for a pose at the block, the camera for a pose at the level's.
+     * Outlines every machine the pole reaches, each in its role's colour, relative to
+     * {@code origin}: the pole's base for a pose at the block, the camera for a pose at the level's.
      */
-    private static void drawMachines(SubmitNodeCollector collector, PoseStack poseStack, Level level,
-            BlockPos base, PoleTier tier, Vec3 origin) {
+    private static void drawMachines(SubmitNodeCollector collector, PoseStack poseStack,
+            Level level, BlockPos base, PoleTier tier, Vec3 origin) {
         SupplyScan.Roles<BlockPos> roles = SuppliedMachines.around(level, base, tier);
-        drawOutlines(collector, poseStack, level, roles.generators(), origin, OUTPUT);
-        drawOutlines(collector, poseStack, level, roles.consumers(), origin, INPUT);
-        drawOutlines(collector, poseStack, level, roles.accumulators(), origin, BOTH);
+        drawOutlines(collector, poseStack, level, roles.generators(), origin, OUTPUT_COLOUR);
+        drawOutlines(collector, poseStack, level, roles.consumers(), origin, INPUT_COLOUR);
+        drawOutlines(collector, poseStack, level, roles.accumulators(), origin, BOTH_COLOUR);
     }
 
-    private static void drawOutlines(SubmitNodeCollector collector, PoseStack poseStack, Level level,
-            List<BlockPos> machines, Vec3 origin, int colour) {
+    private static void drawOutlines(SubmitNodeCollector collector, PoseStack poseStack,
+            Level level, List<BlockPos> machines, Vec3 origin, int colour) {
         for (BlockPos machine : machines) {
             drawOutline(collector, poseStack, outlineOf(level, machine)
                     .move(machine.getX() - origin.x(), machine.getY() - origin.y(),
@@ -231,10 +231,10 @@ public final class SupplyAreaSquare {
     private static void drawSquare(SubmitNodeCollector collector, PoseStack poseStack, AABB flat) {
         collector.submitCustomGeometry(poseStack, RENDER_TYPE, (pose, buffer) -> {
             double y = flat.minY;
-            line(pose, buffer, SQUARE, flat.minX, y, flat.minZ, flat.maxX, y, flat.minZ);
-            line(pose, buffer, SQUARE, flat.maxX, y, flat.minZ, flat.maxX, y, flat.maxZ);
-            line(pose, buffer, SQUARE, flat.maxX, y, flat.maxZ, flat.minX, y, flat.maxZ);
-            line(pose, buffer, SQUARE, flat.minX, y, flat.maxZ, flat.minX, y, flat.minZ);
+            line(pose, buffer, SQUARE_COLOUR, flat.minX, y, flat.minZ, flat.maxX, y, flat.minZ);
+            line(pose, buffer, SQUARE_COLOUR, flat.maxX, y, flat.minZ, flat.maxX, y, flat.maxZ);
+            line(pose, buffer, SQUARE_COLOUR, flat.maxX, y, flat.maxZ, flat.minX, y, flat.maxZ);
+            line(pose, buffer, SQUARE_COLOUR, flat.minX, y, flat.maxZ, flat.minX, y, flat.minZ);
         });
     }
 
