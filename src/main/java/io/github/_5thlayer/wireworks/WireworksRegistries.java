@@ -64,6 +64,16 @@ public final class WireworksRegistries {
             ITEMS.registerItem(CreativeSupplyAreaPoleBlock.BLOCK_NAME,
                     props -> new SupplyAreaPoleItem(CREATIVE_POLE.get(), props));
 
+    /** The Transmission Pole: no tier, no area, wires only. */
+    public static final DeferredBlock<TransmissionPoleBlock> TRANSMISSION_POLE =
+            BLOCKS.registerBlock(TransmissionPoleBlock.BLOCK_NAME, TransmissionPoleBlock::new);
+    public static final DeferredItem<TransmissionPoleItem> TRANSMISSION_POLE_ITEM =
+            ITEMS.registerItem(TransmissionPoleBlock.BLOCK_NAME,
+                    props -> new TransmissionPoleItem(TRANSMISSION_POLE.get(), props));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TransmissionPoleBlockEntity>>
+            TRANSMISSION_POLE_ENTITY = BLOCK_ENTITIES.register("transmission_pole",
+                    () -> new BlockEntityType<>(TransmissionPoleBlockEntity::new, TRANSMISSION_POLE.get()));
+
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SupplyAreaPoleBlockEntity>>
             SUPPLY_AREA_POLE = BLOCK_ENTITIES.register("supply_area_pole",
                     () -> new BlockEntityType<>(SupplyAreaPoleBlockEntity::new, poleBlocks()));
@@ -119,9 +129,10 @@ public final class WireworksRegistries {
         return POLE_ITEMS.get(tier);
     }
 
-    /** Every pole's item, the tiers in order and the creative pole last. */
+    /** Every pole's item, the tiers in order, then the Transmission Pole, and the creative pole last. */
     private static Stream<Item> poleItems() {
-        return Stream.concat(POLE_ITEMS.values().stream(), Stream.of(CREATIVE_POLE_ITEM)).map(DeferredItem::get);
+        return Stream.concat(POLE_ITEMS.values().stream(), Stream.of(TRANSMISSION_POLE_ITEM, CREATIVE_POLE_ITEM))
+                .map(DeferredItem::get);
     }
 
     /** Every item the Library adds: the poles, then the Solar Panel and the Accumulator. */

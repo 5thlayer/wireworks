@@ -13,7 +13,7 @@ import io.github._5thlayer.wireworks.PoleKind;
 import io.github._5thlayer.wireworks.PoleNetworks;
 import io.github._5thlayer.wireworks.PoleTier;
 import io.github._5thlayer.wireworks.PoleWiring;
-import io.github._5thlayer.wireworks.SupplyAreaPoleBlock;
+import io.github._5thlayer.wireworks.PoleBlock;
 import io.github._5thlayer.wireworks.client.WireGeometry;
 import io.github._5thlayer.groundworks.PlacementPlan;
 
@@ -58,7 +58,7 @@ public final class PreviewWires {
             return;
         }
         for (PlacementPlan.Placed placed : plan.blocks()) {
-            if (placed.state().getBlock() instanceof SupplyAreaPoleBlock pole) {
+            if (placed.state().getBlock() instanceof PoleBlock pole) {
                 draw(collector, poseStack, level, camera, placed.pos(), pole);
                 return;
             }
@@ -66,13 +66,13 @@ public final class PreviewWires {
     }
 
     private static void draw(SubmitNodeCollector collector, PoseStack poseStack, ClientLevel level,
-            Vec3 camera, BlockPos pos, SupplyAreaPoleBlock block) {
+            Vec3 camera, BlockPos pos, PoleBlock block) {
         // A placement touching a standing column of the same pole extends or joins it, whichever end
         // it lands on, and a column that merely grew is not a new pole.
         boolean joinsAColumn = level.getBlockState(pos.below()).is(block)
                 || level.getBlockState(pos.above()).is(block);
-        PoleNetworks.Pole would = new PoleNetworks.Pole(pos.getX(), pos.getY(), pos.getZ(), PoleKind.distribution(block.tier()));
-        List<PoleNetworks.Pole> targets = PoleWiring.wouldAdd(would, standingNear(level, pos, block.tier()),
+        PoleNetworks.Pole would = new PoleNetworks.Pole(pos.getX(), pos.getY(), pos.getZ(), block.kind());
+        List<PoleNetworks.Pole> targets = PoleWiring.wouldAdd(would, standingNear(level, pos, block.kind()),
                 ClientWires.wires(), joinsAColumn);
         if (targets.isEmpty()) {
             return;
@@ -102,8 +102,8 @@ public final class PreviewWires {
      * reach is the shorter of its two ends', so the held pole's own reach bounds the search, exactly
      * as the server's does.
      */
-    private static List<PoleNetworks.Pole> standingNear(ClientLevel level, BlockPos pos, PoleTier tier) {
-        int reach = (int) Math.ceil(tier.wireReach());
+    private static List<PoleNetworks.Pole> standingNear(ClientLevel level, BlockPos pos, PoleKind kind) {
+        int reach = (int) Math.ceil(kind.longestReach());
         List<PoleNetworks.Pole> found = new ArrayList<>();
         for (int cx = SectionPos.blockToSectionCoord(pos.getX() - reach);
              cx <= SectionPos.blockToSectionCoord(pos.getX() + reach); cx++) {
@@ -115,9 +115,9 @@ public final class PreviewWires {
                 }
                 for (BlockEntity be : chunk.getBlockEntities().values()) {
                     BlockPos at = be.getBlockPos();
-                    if (level.getBlockState(at).getBlock() instanceof SupplyAreaPoleBlock other
+                    if (level.getBlockState(at).getBlock() instanceof PoleBlock other
                             && !at.equals(pos) && PoleColumn.isBase(level, at)) {
-                        found.add(new PoleNetworks.Pole(at.getX(), at.getY(), at.getZ(), PoleKind.distribution(other.tier())));
+                        found.add(new PoleNetworks.Pole(at.getX(), at.getY(), at.getZ(), other.kind()));
                     }
                 }
             }

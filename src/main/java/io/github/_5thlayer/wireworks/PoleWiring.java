@@ -21,7 +21,9 @@ public final class PoleWiring {
 
     /** What a second click with a wire tool did. */
     public enum Click {
-        WIRED, CUT, CANCELLED, REFUSED
+        WIRED, CUT, CANCELLED, REFUSED,
+        /** A Distribution Pole and a Transmission Pole: only a Transformer joins them (ADR 0008). */
+        CROSS_SYSTEM
     }
 
     private PoleWiring() {
@@ -51,6 +53,10 @@ public final class PoleWiring {
     public static Click click(PoleNetworks.Pole anchor, PoleNetworks.Pole target, WireSet wires) {
         if (pos(anchor).equals(pos(target))) {
             return Click.CANCELLED;
+        }
+        if (!mayWire(anchor, target) && !(anchor.kind() instanceof PoleKind.Transformer)
+                && !(target.kind() instanceof PoleKind.Transformer)) {
+            return Click.CROSS_SYSTEM;
         }
         if (refuses(anchor, target)) {
             return Click.REFUSED;

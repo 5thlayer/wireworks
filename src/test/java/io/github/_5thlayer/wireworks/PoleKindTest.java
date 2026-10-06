@@ -40,4 +40,10 @@ class PoleKindTest {
         assertNotEquals(PoleKind.distribution(PoleTier.SMALL), PoleKind.distribution(PoleTier.MEDIUM));
         assertNotEquals(PoleKind.TRANSMISSION, PoleKind.distribution(PoleTier.LARGE));
     }
+
+    @Test
+    void theTransmissionPoleReachesThirtyTwoBlocksByDefaultTowardItsOwnSystem() {
+        assertEquals(32.0, PoleKind.TRANSMISSION.reachToward(PoleKind.TRANSMISSION));
+        assertEquals(32.0, PoleKind.wireReach(PoleKind.TRANSMISSION, PoleKind.TRANSMISSION));
+    }
 }

@@ -5,6 +5,8 @@ package io.github._5thlayer.wireworks;
 
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -34,6 +36,8 @@ public final class PoleWireGesture {
     /** Particles per block of wire. */
     private static final double PARTICLES_PER_BLOCK = 2.0;
 
+    private static final String CROSS_SYSTEM_KEY = "message.wireworks.cross_system";
+
     private PoleWireGesture() {
     }
 
@@ -52,7 +56,7 @@ public final class PoleWireGesture {
         }
         Level level = event.getLevel();
         BlockPos clicked = event.getPos();
-        if (!(level.getBlockState(clicked).getBlock() instanceof SupplyAreaPoleBlock)) {
+        if (!(level.getBlockState(clicked).getBlock() instanceof PoleBlock)) {
             return;
         }
         event.setCanceled(true);
@@ -82,16 +86,25 @@ public final class PoleWireGesture {
                 alongWire(server, pending.pos(), base, ParticleTypes.SMOKE);
             }
             case CANCELLED -> tool.remove(WireworksRegistries.PENDING_WIRE.get());
+            // Told why, as a placed pole is: a Transformer is what joins the two systems.
+            case CROSS_SYSTEM -> {
+                refusedAtPlayer(server, player);
+                if (player instanceof ServerPlayer serverPlayer) {
+                    serverPlayer.sendSystemMessage(Component.translatable(CROSS_SYSTEM_KEY), true);
+                }
+            }
             // The end stays held: a refusal changes nothing, the held end included.
             // Not DISPENSER_FAIL: it plays random/click, the same file as TRIPWIRE_ATTACH. Played at
             // the player, not the pole: vanilla attenuates the crafter's fail over 3 blocks, and a
             // pole beyond wire reach is always further than that.
-            case REFUSED -> {
-                Vec3 at = player.position();
-                server.playSound(null, at.x, at.y, at.z, SoundEvents.CRAFTER_FAIL, SoundSource.PLAYERS, 1.0F, 1.0F);
-            }
+            case REFUSED -> refusedAtPlayer(server, player);
         }
         return InteractionResult.SUCCESS_SERVER;
+    }
+
+    private static void refusedAtPlayer(ServerLevel server, Player player) {
+        Vec3 at = player.position();
+        server.playSound(null, at.x, at.y, at.z, SoundEvents.CRAFTER_FAIL, SoundSource.PLAYERS, 1.0F, 1.0F);
     }
 
     /** Lets go of every held end the moment {@link PendingEnd} says it is no longer held. */
@@ -117,14 +130,14 @@ public final class PoleWireGesture {
         boolean sameDimension = pending.dimension().equals(level.dimension());
         BlockPos anchor = pending.pos();
         boolean standing = sameDimension && level.isLoaded(anchor)
-                && level.getBlockState(anchor).getBlock() instanceof SupplyAreaPoleBlock
+                && level.getBlockState(anchor).getBlock() instanceof PoleBlock
                 && PoleColumn.isBase(level, anchor);
-        PoleTier tier = standing
-                ? ((SupplyAreaPoleBlock) level.getBlockState(anchor).getBlock()).tier()
-                : PoleTier.SMALL;
+        PoleKind kind = standing
+                ? ((PoleBlock) level.getBlockState(anchor).getBlock()).kind()
+                : PoleKind.distribution(PoleTier.SMALL);
         PendingEnd.Holder held = new PendingEnd.Holder(player.getX(), player.getY(), player.getZ(),
                 player.blockInteractionRange(), mainHand, sameDimension);
-        if (!PendingEnd.stillHeld(LevelWires.pole(anchor, tier), standing, held)) {
+        if (!PendingEnd.stillHeld(LevelWires.pole(anchor, kind), standing, held)) {
             tool.remove(WireworksRegistries.PENDING_WIRE.get());
             // The snap: dropping an end is heard at the player, since nothing else shows it. A
             // chain's break, so it is none of the made, cut or refused sounds.

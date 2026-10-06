@@ -4,8 +4,13 @@ Each version has two sections: Players, what a player or pack developer sees, an
 
 ## Unreleased
 
+### Players
+
+- The Transmission Pole: a pole with no tier and no supply area that powers nothing and carries wires 32 blocks by default, stacks as a pole column, and joins only other Transmission Poles. A wire between it and a Distribution Pole is refused, and the refusal says a Transformer joins the two.
+
 ### Consumers
 
+- `wireworks-server.toml` gains `[transmission] wireReach`, the Transmission Pole's Wire Reach, and the pole is a new block, `wireworks:transmission_pole`, outside the `wireworks:poles` Fast Replace group.
 - Wireworks accepts Groundworks `[0.5.4,0.6)`, from the version it nests, where it accepted `[0.5.2,0.6)`.
 
 ## 0.2.2

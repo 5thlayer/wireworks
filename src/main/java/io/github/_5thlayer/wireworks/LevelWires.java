@@ -155,9 +155,9 @@ public final class LevelWires extends SavedData {
                 }
                 for (BlockEntity be : chunk.getBlockEntities().values()) {
                     BlockPos at = be.getBlockPos();
-                    if (be instanceof SupplyAreaPoleBlockEntity pole && !at.equals(pos)
+                    if (!at.equals(pos) && level.getBlockState(at).getBlock() instanceof PoleBlock pole
                             && PoleColumn.isBase(level, at)) {
-                        found.add(pole.shape());
+                        found.add(pole(at, pole.kind()));
                     }
                 }
             }
@@ -209,14 +209,19 @@ public final class LevelWires extends SavedData {
 
     /** The pole of {@code tier} whose column's base is {@code base}. */
     static PoleNetworks.Pole pole(BlockPos base, PoleTier tier) {
-        return new PoleNetworks.Pole(base.getX(), base.getY(), base.getZ(), PoleKind.distribution(tier));
+        return pole(base, PoleKind.distribution(tier));
+    }
+
+    /** The pole of {@code kind} whose column's base is {@code base}. */
+    static PoleNetworks.Pole pole(BlockPos base, PoleKind kind) {
+        return new PoleNetworks.Pole(base.getX(), base.getY(), base.getZ(), kind);
     }
 
     /** The pole whose column holds {@code pos}, named by its base, or null if there is none. */
     private static PoleNetworks.Pole poleAt(ServerLevel level, BlockPos pos) {
-        if (!(level.getBlockState(pos).getBlock() instanceof SupplyAreaPoleBlock pole)) {
+        if (!(level.getBlockState(pos).getBlock() instanceof PoleBlock pole)) {
             return null;
         }
-        return pole(PoleColumn.baseOf(level, pos), pole.tier());
+        return pole(PoleColumn.baseOf(level, pos), pole.kind());
     }
 }

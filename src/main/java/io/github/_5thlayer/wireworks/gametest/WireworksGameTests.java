@@ -66,6 +66,7 @@ public final class WireworksGameTests {
         ConfigTests.register(tests);
         ElectricNetworkTests.register(tests);
         PoleWireTests.register(tests);
+        TransmissionPoleTests.register(tests);
         PoleColumnCostTests.register(tests);
         WireGestureTests.register(tests);
         PolePlanTests.register(tests);

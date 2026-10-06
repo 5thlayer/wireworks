@@ -40,5 +40,6 @@ public final class PoleWireClient {
 
     private static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(WireworksRegistries.SUPPLY_AREA_POLE.get(), context -> new PoleWireRenderer());
+        event.registerBlockEntityRenderer(WireworksRegistries.TRANSMISSION_POLE_ENTITY.get(), context -> new PoleWireRenderer());
     }
 }

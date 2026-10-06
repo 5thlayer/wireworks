@@ -117,7 +117,17 @@ def accumulator_side():
     return image
 
 
+def transmission_pole():
+    """A grey steel lattice: a plate with a dark rim and a diagonal brace, for the post and its crossarm."""
+    image = framed(16, 16)
+    for i in range(2, 14):
+        image[i][i] = FRAME_EDGE
+        image[i][15 - i] = FRAME_EDGE
+    return image
+
+
 TEXTURE_NAMES = {
+    "transmission_pole.png": transmission_pole,
     "solar_panel_frame.png": lambda: framed(16, 16),
     "solar_panel_edge.png": lambda: framed(48, 16),
     "solar_panel_underside.png": lambda: framed(48, 48),

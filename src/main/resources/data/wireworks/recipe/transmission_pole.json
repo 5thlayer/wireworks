@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "C": "#c:ingots/copper",
+    "B": "minecraft:iron_bars",
+    "I": "#c:ingots/iron"
+  },
+  "pattern": [
+    "CBC",
+    " I ",
+    " I "
+  ],
+  "result": {
+    "id": "wireworks:transmission_pole",
+    "count": 1
+  }
+}

@@ -73,7 +73,7 @@ public final class PoleColumn {
      */
     public static BlockPos baseOf(BlockGetter level, BlockPos pos) {
         BlockState state = level.getBlockState(pos);
-        if (!(state.getBlock() instanceof SupplyAreaPoleBlock)) {
+        if (!(state.getBlock() instanceof PoleBlock)) {
             return null;
         }
         Block block = state.getBlock();
@@ -91,7 +91,7 @@ public final class PoleColumn {
     /** Whether this position is the bottom of its column -- the block the supply area is measured at. */
     public static boolean isBase(BlockGetter level, BlockPos pos) {
         BlockState state = level.getBlockState(pos);
-        return state.getBlock() instanceof SupplyAreaPoleBlock
+        return state.getBlock() instanceof PoleBlock
                 && !sameBlock(level, pos.below(), state.getBlock());
     }
 

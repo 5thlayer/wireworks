@@ -64,4 +64,24 @@ class PoleWiringPlacementTest {
                 small(0, 0, 0), List.of(east, south, west), new WireSet());
         assertEquals(List.of(west, south, east), wired);
     }
+
+    private static PoleNetworks.Pole transmission(int x, int y, int z) {
+        return new PoleNetworks.Pole(x, y, z, PoleKind.TRANSMISSION);
+    }
+
+    @Test
+    void aPlacedTransmissionPoleWiresOnlyToTransmissionPolesInReach() {
+        PoleNetworks.Pole far = transmission(30, 0, 0);
+        List<PoleNetworks.Pole> wired = PoleWiring.onPlace(transmission(0, 0, 0),
+                List.of(small(2, 0, 0), far, transmission(40, 0, 0)), new WireSet());
+        assertEquals(List.of(far), wired);
+    }
+
+    @Test
+    void aPlacedDistributionPoleNeverWiresToATransmissionPole() {
+        PoleNetworks.Pole near = small(7, 0, 0);
+        List<PoleNetworks.Pole> wired = PoleWiring.onPlace(small(0, 0, 0),
+                List.of(transmission(1, 0, 0), near), new WireSet());
+        assertEquals(List.of(near), wired);
+    }
 }

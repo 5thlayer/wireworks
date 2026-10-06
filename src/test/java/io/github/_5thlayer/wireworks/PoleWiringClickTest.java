@@ -85,4 +85,46 @@ class PoleWiringClickTest {
             assertEquals(refused, PoleWiring.refuses(a, target));
         }
     }
+
+    private static PoleNetworks.Pole transmission(int x, int y, int z) {
+        return new PoleNetworks.Pole(x, y, z, PoleKind.TRANSMISSION);
+    }
+
+    @Test
+    void clickingTwoTransmissionPolesInReachWiresThemAsTransmission() {
+        WireSet wires = new WireSet();
+        assertEquals(PoleWiring.Click.WIRED, PoleWiring.click(transmission(0, 0, 0), transmission(32, 0, 0), wires));
+        assertEquals(WireSystem.TRANSMISSION, wires.all().iterator().next().system());
+    }
+
+    @Test
+    void clickingTwoTransmissionPolesBeyondReachIsRefusedForReach() {
+        WireSet wires = new WireSet();
+        assertEquals(PoleWiring.Click.REFUSED, PoleWiring.click(transmission(0, 0, 0), transmission(33, 0, 0), wires));
+        assertTrue(wires.all().isEmpty());
+    }
+
+    @Test
+    void clickingATransmissionPoleAndADistributionPoleIsRefusedForTheSystemAndStoresNoWire() {
+        WireSet wires = new WireSet();
+        assertEquals(PoleWiring.Click.CROSS_SYSTEM, PoleWiring.click(transmission(0, 0, 0), small(3, 0, 0), wires));
+        assertEquals(PoleWiring.Click.CROSS_SYSTEM, PoleWiring.click(small(3, 0, 0), transmission(0, 0, 0), wires));
+        assertTrue(wires.all().isEmpty());
+    }
+
+    @Test
+    void aCrossSystemPairIsRefusedEvenWhenAWireAlreadyJoinsItSoNoStrayWireCanBeCut() {
+        PoleNetworks.Pole t = transmission(0, 0, 0);
+        PoleNetworks.Pole d = small(3, 0, 0);
+        WireSet wires = new WireSet();
+        wires.add(pos(t), pos(d));
+        assertEquals(PoleWiring.Click.CROSS_SYSTEM, PoleWiring.click(t, d, wires));
+        assertTrue(wires.contains(pos(t), pos(d)));
+    }
+
+    @Test
+    void refusesCoversTheCrossSystemPair() {
+        assertTrue(PoleWiring.refuses(transmission(0, 0, 0), small(3, 0, 0)));
+        assertTrue(PoleWiring.refuses(small(3, 0, 0), transmission(0, 0, 0)));
+    }
 }

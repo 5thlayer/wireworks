@@ -27,3 +27,7 @@
 [accumulator]
 	capacity_joules = 5000000
 	max_watts = 300000
+
+# The Transmission Pole is configured off its default of 32, for the same reason as the large pole.
+[transmission]
+	wireReach = 40.0

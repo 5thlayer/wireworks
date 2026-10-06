@@ -4,6 +4,7 @@
 package io.github._5thlayer.wireworks.gametest;
 
 import io.github._5thlayer.wireworks.PoleTier;
+import io.github._5thlayer.wireworks.TransmissionSpec;
 import net.minecraft.gametest.framework.GameTestHelper;
 
 /**
@@ -18,6 +19,7 @@ final class ConfigTests {
 
     static void register(WireworksGameTests.Registrar tests) {
         tests.test("server_config_reaches_the_pole_tiers", 1, ConfigTests::reachesTheTiers);
+        tests.test("server_config_reaches_the_transmission_pole", 1, ConfigTests::reachesTheTransmissionPole);
     }
 
     private static void reachesTheTiers(GameTestHelper helper) {
@@ -29,6 +31,16 @@ final class ConfigTests {
         }
         if (PoleTier.maxWireReach() != 21.5) {
             helper.fail("the longest wire is " + PoleTier.maxWireReach() + ", not the large pole's configured 21.5");
+            return;
+        }
+        helper.succeed();
+    }
+
+    private static void reachesTheTransmissionPole(GameTestHelper helper) {
+        double reach = TransmissionSpec.wireReach();
+        if (reach != 40.0) {
+            helper.fail("the [transmission] section did not reach the Transmission Pole: it reaches " + reach
+                    + ", not the 40.0 that src/gametest/wireworks-server.toml configures");
             return;
         }
         helper.succeed();

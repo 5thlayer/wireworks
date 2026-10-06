@@ -9,8 +9,7 @@ package io.github._5thlayer.wireworks;
  *
  * <p>Wire Reach is asked of one end toward the other, since a Transformer's reach depends on the
  * system at the far end ({@link #reachToward}); a wire reaches the shorter of its two ends' answers
- * ({@link #wireReach}). The Transmission Pole and the Transformer exist here as constants only: their
- * reaches arrive with their blocks.
+ * ({@link #wireReach}). The Transformer exists here as a constant only: its reaches arrive with its block.
  *
  * <p>Pure: no Minecraft types.
  */
@@ -67,10 +66,11 @@ public sealed interface PoleKind {
         }
     }
 
+    /** The Transmission Pole: its configured reach, whatever is at the other end. */
     record Transmission() implements PoleKind {
         @Override
         public double reachToward(PoleKind other) {
-            throw new UnsupportedOperationException("the Transmission Pole's reach arrives with its block");
+            return TransmissionSpec.wireReach();
         }
     }
 

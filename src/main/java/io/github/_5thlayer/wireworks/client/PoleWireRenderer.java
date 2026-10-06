@@ -21,7 +21,9 @@ import io.github._5thlayer.wireworks.PoleKind;
 import io.github._5thlayer.wireworks.PoleNetworks;
 import io.github._5thlayer.wireworks.PoleTier;
 import io.github._5thlayer.wireworks.ClientWires;
-import io.github._5thlayer.wireworks.SupplyAreaPoleBlockEntity;
+import io.github._5thlayer.wireworks.PoleBlock;
+import io.github._5thlayer.wireworks.TransmissionSpec;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
@@ -50,7 +52,7 @@ import java.util.List;
  * the wire, green when the click would wire, orange when it would cut and red when it would be refused ({@link PoleWiring#refuses}). Vanilla's leash colour is fixed, so the slack is drawn here.
  */
 public final class PoleWireRenderer
-        implements BlockEntityRenderer<SupplyAreaPoleBlockEntity, PoleWireRenderer.State> {
+        implements BlockEntityRenderer<BlockEntity, PoleWireRenderer.State> {
 
     /** Just under the top face of the top segment, where Factorio hangs its wire off the pole's head. */
     private static final double ATTACH_HEIGHT = 0.9;
@@ -94,7 +96,7 @@ public final class PoleWireRenderer
     }
 
     @Override
-    public void extractRenderState(SupplyAreaPoleBlockEntity pole, State state, float partialTicks,
+    public void extractRenderState(BlockEntity pole, State state, float partialTicks,
             Vec3 cameraPosition, ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress) {
         BlockEntityRenderer.super.extractRenderState(pole, state, partialTicks, cameraPosition, breakProgress);
         state.wires.clear();
@@ -174,7 +176,7 @@ public final class PoleWireRenderer
     private static boolean previewsCut(Level level, PoleNetworks.Wire stored) {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.player == null || !(minecraft.hitResult instanceof BlockHitResult hit)
-                || !(level.getBlockState(hit.getBlockPos()).getBlock() instanceof SupplyAreaPoleBlock)) {
+                || !(level.getBlockState(hit.getBlockPos()).getBlock() instanceof PoleBlock)) {
             return false;
         }
         GlobalPos pending = minecraft.player.getMainHandItem().get(WireworksRegistries.PENDING_WIRE.get());
@@ -198,17 +200,17 @@ public final class PoleWireRenderer
         }
         GlobalPos pending = player.getMainHandItem().get(WireworksRegistries.PENDING_WIRE.get());
         if (pending == null || !pending.dimension().equals(level.dimension()) || !pending.pos().equals(from)
-                || !(level.getBlockState(from).getBlock() instanceof SupplyAreaPoleBlock anchorBlock)) {
+                || !(level.getBlockState(from).getBlock() instanceof PoleBlock anchorBlock)) {
             return;
         }
         Minecraft minecraft = Minecraft.getInstance();
         Tint tint = Tint.HELD;
         Vec3 end = null;
         if (minecraft.hitResult instanceof BlockHitResult hit
-                && level.getBlockState(hit.getBlockPos()).getBlock() instanceof SupplyAreaPoleBlock targetBlock) {
+                && level.getBlockState(hit.getBlockPos()).getBlock() instanceof PoleBlock targetBlock) {
             BlockPos base = PoleColumn.baseOf(level, hit.getBlockPos());
-            PoleNetworks.Pole anchor = new PoleNetworks.Pole(from.getX(), from.getY(), from.getZ(), PoleKind.distribution(anchorBlock.tier()));
-            PoleNetworks.Pole target = new PoleNetworks.Pole(base.getX(), base.getY(), base.getZ(), PoleKind.distribution(targetBlock.tier()));
+            PoleNetworks.Pole anchor = new PoleNetworks.Pole(from.getX(), from.getY(), from.getZ(), anchorBlock.kind());
+            PoleNetworks.Pole target = new PoleNetworks.Pole(base.getX(), base.getY(), base.getZ(), targetBlock.kind());
             // Looking at another pole previews the wire itself, ending where it would hang.
             if (!base.equals(from)) {
                 end = attachPoint(level, base);
@@ -275,13 +277,17 @@ public final class PoleWireRenderer
      */
     @Override
     public int getViewDistance() {
-        return BlockEntityRenderer.super.getViewDistance() + (int) Math.ceil(PoleTier.maxWireReach());
+        return BlockEntityRenderer.super.getViewDistance() + (int) Math.ceil(maxWireReach());
     }
 
     @Override
-    public AABB getRenderBoundingBox(SupplyAreaPoleBlockEntity pole) {
-        double reach = PoleTier.maxWireReach();
+    public AABB getRenderBoundingBox(BlockEntity pole) {
+        double reach = maxWireReach();
         return new AABB(pole.getBlockPos()).inflate(reach, reach, reach);
+    }
+
+    private static double maxWireReach() {
+        return Math.max(PoleTier.maxWireReach(), TransmissionSpec.wireReach());
     }
 
     private static Vec3 attachPoint(Level level, BlockPos base) {
