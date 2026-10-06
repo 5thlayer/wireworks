@@ -68,12 +68,12 @@ public final class PoleWiring {
 
     /**
      * Whether placing a pole next to blocks of its own kind grows a column rather than starts a pole,
-     * as the server decides it: a block placed on top of one is never a base, and a block placed
-     * beneath one only joins it when the pole stacks. A Transformer does not stack, so one placed
-     * beneath another is a base and wires as any new pole does.
+     * as the server decides it: a pole that stacks joins a column from either end, and one that does
+     * not never does. A Transformer does not stack, so one placed above or beneath another is a base
+     * and wires as any new pole does.
      */
     public static boolean joinsAColumn(boolean stacks, boolean sameBelow, boolean sameAbove) {
-        return sameBelow || (stacks && sameAbove);
+        return stacks && (sameBelow || sameAbove);
     }
 
     /**

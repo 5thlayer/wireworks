@@ -80,10 +80,10 @@ class PoleWiringPreviewTest {
 
     @Test
     void aTransformerNextToAnotherBlockOfItsKindStillWiresWhereItIsAColumnsBaseOnly() {
-        // A Transformer is not a column: standing above one makes it no extension, so the placement
-        // wires; standing below one is not a base, so it does not.
+        // A Transformer is not a column: above or beneath another it is still a base, so the
+        // placement wires, as PoleColumn.isBase and LevelWires.placed decide on the server.
         assertEquals(false, PoleWiring.joinsAColumn(false, false, true));
-        assertEquals(true, PoleWiring.joinsAColumn(false, true, false));
+        assertEquals(false, PoleWiring.joinsAColumn(false, true, false));
         // A stacking pole joins a column from either end.
         assertEquals(true, PoleWiring.joinsAColumn(true, false, true));
         assertEquals(true, PoleWiring.joinsAColumn(true, true, false));
