@@ -11,6 +11,7 @@ import com.mojang.blaze3d.platform.CompareOp;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
+import io.github._5thlayer.groundworks.Footprint;
 import io.github._5thlayer.wireworks.PoleTier;
 import io.github._5thlayer.wireworks.SupplyArea;
 import io.github._5thlayer.wireworks.SupplyScan;
@@ -20,9 +21,11 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.bus.api.IEventBus;
@@ -213,13 +216,39 @@ public final class SupplyAreaSquare {
     /**
      * A machine's own outline, as offsets from its block corner.
      *
-     * <p>The block's shape rather than a full cube, so a machine that does not fill its block is
-     * outlined where it actually is. A shape can be empty -- and an empty one would draw nothing at
-     * all, which reads as the machine not being reached -- so that falls back to the whole block.
+     * <p>A Groundworks footprint is outlined whole, as the box around all its blocks (ADR 0009): a
+     * pole counts it once, by its origin, so one outline the size of the machine says the same, where
+     * the origin's block alone would make a large machine look small. A multiblock that names its
+     * owner through Wireworks' own interfaces has no shape Wireworks can read, so it is outlined by
+     * its owner's block, as any other machine is.
+     *
+     * <p>That is the block's shape rather than a full cube, so a machine that does not fill its block
+     * is outlined where it actually is. A shape can be empty -- and an empty one would draw nothing
+     * at all, which reads as the machine not being reached -- so that falls back to the whole block.
      */
     private static AABB outlineOf(Level level, BlockPos pos) {
-        VoxelShape shape = level.getBlockState(pos).getShape(level, pos);
+        BlockState state = level.getBlockState(pos);
+        Footprint footprint = Footprint.of(state);
+        if (footprint != null && footprint.isOrigin(state)) {
+            Direction facing = state.getOptionalValue(Footprint.FACING).orElse(Direction.NORTH);
+            return enclosing(footprint.positions(pos, facing), pos);
+        }
+        VoxelShape shape = state.getShape(level, pos);
         return shape.isEmpty() ? FULL_BLOCK : shape.bounds();
+    }
+
+    /** The box around these blocks, as offsets from {@code origin}'s corner. */
+    private static AABB enclosing(List<BlockPos> blocks, BlockPos origin) {
+        BlockPos.MutableBlockPos min = origin.mutable();
+        BlockPos.MutableBlockPos max = origin.mutable();
+        for (BlockPos block : blocks) {
+            min.set(Math.min(min.getX(), block.getX()), Math.min(min.getY(), block.getY()),
+                    Math.min(min.getZ(), block.getZ()));
+            max.set(Math.max(max.getX(), block.getX()), Math.max(max.getY(), block.getY()),
+                    Math.max(max.getZ(), block.getZ()));
+        }
+        return new AABB(Vec3.atLowerCornerOf(min), Vec3.atLowerCornerOf(max.move(1, 1, 1)))
+                .move(-origin.getX(), -origin.getY(), -origin.getZ());
     }
 
     /**

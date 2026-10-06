@@ -41,6 +41,13 @@ convention tech mods share, read from their source (`docs/research/side-config-c
 outlines stay edges only. The output orange is Thermal's rather than the wire tool's cut orange
 (`#FF8C00`, ADR 0004), redder so the two read apart when both are on screen.
 
+**A machine is outlined whole.** A Groundworks footprint is counted once, by its origin, so it is
+outlined once, as the box around all its blocks, the size of the machine. Outlined by its origin's
+block alone, a large machine looks small and a part reaching into the area points at nothing;
+outlined block by block, it reads as several machines. A multiblock that names its owner through
+`EnergyOwner` or `EnergyOwnerBlock` has no shape Wireworks can read, and is outlined by its owner's
+block. This amends ADR 0005's rule that an owner is outlined where it stands, for footprints only.
+
 ## Considered options
 
 - **The area becomes a surface**, a blanket following each column's ground. The drawing would then be

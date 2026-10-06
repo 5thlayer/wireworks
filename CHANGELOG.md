@@ -8,6 +8,7 @@ Each version has two sections: Players, what a player or pack developer sees, an
 
 - The supply area is drawn as a yellow square on the ground the pole stands on, not a box around it. The machines it reaches are still outlined, and the pole still supplies two blocks up and down. (#19)
 - The machines a pole reaches are outlined in their role's colour, after the side-configuration colours other tech mods use: generators orange, the machines it feeds blue, and accumulators purple. The square stays yellow.
+- A machine built from several blocks, such as the Solar Panel, the Accumulator or Craftworks' Assembler, is outlined as one box around the whole machine, not by its main block alone.
 - A machine built as a Groundworks footprint by another mod, such as Craftworks' Assembler, is counted once by a pole, however many of its blocks the supply area reaches. It used to be counted once per block, overstating its demand, its Jade count and its outlines. (#20)
 
 ### Consumers
