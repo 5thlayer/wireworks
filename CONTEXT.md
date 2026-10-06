@@ -96,5 +96,5 @@ _Avoid_: controller, master (Oritech's terms for its own engines)
 ### Drawing
 
 **Supply Area Square**:
-The yellow outline of a pole's **Supply Area** on the ground its **Pole Column**'s base stands on, with an outline around every machine it reaches. Shown while holding a pole or looking at one. It says how much ground the area spreads over, not how far up and down it reaches, which the machine outlines and the item tooltip answer, and never whether anything is fed, which the Jade line answers.
+The yellow outline of a pole's **Supply Area** on the ground its **Pole Column**'s base stands on, with an outline around every machine it reaches, in its role's colour: orange for a **Generator**, blue for a machine it feeds, purple for an **Accumulator**. Shown while holding a pole or looking at one. It says how much ground the area spreads over, not how far up and down it reaches, which the machine outlines and the item tooltip answer, and never whether anything is fed, which the Jade line answers.
 _Avoid_: Supply Area Box (the cube it replaced), overlay, range indicator

@@ -31,6 +31,16 @@ only once a machine there is outlined. The item tooltip already states it ("Reac
 down"). This closes ADR 0005's open question: the box is not dropped, it is flattened, since the
 square is still the only thing that shows reach over ground with no machines on it yet.
 
+**The machines are outlined in their role's colour.** This reverses ADR 0005's one colour for all
+three roles. At placement the question is what feeds this area and what draws on it, and aiming at
+each machine for its Jade line is too slow to answer it. The colours are the side-configuration
+convention tech mods share, read from their source (`docs/research/side-config-colours.md`):
+**Generator**s orange for output and the machines it feeds blue for input, in Thermal's shades,
+`#EB6B00` and `#1EBEE7`; **Accumulator**s, which are both, purple, Mekanism's input/output colour
+`#A460D9`. The square stays yellow, the area's own colour, so four colours each mean one thing. The
+outlines stay edges only. The output orange is Thermal's rather than the wire tool's cut orange
+(`#FF8C00`, ADR 0004), redder so the two read apart when both are on screen.
+
 ## Considered options
 
 - **The area becomes a surface**, a blanket following each column's ground. The drawing would then be
@@ -45,3 +55,10 @@ square is still the only thing that shows reach over ground with no machines on 
 - **The square at the band's floor, base−2.** The true bottom of the area, but two blocks into the
   ground on flat terrain, where nothing the player builds stands.
 - **Corner ticks for the band.** They start to rebuild the cage this ADR removes.
+- **The accumulator in blue and orange together**, the way Thermal and Ender IO draw a face that is
+  both. It is the stricter convention, but a two-tone outline reads as two machines on one block,
+  and a single colour per role keeps one meaning per colour.
+- **The accumulator in the square's yellow**, three colours rather than four. Yellow would then mean
+  both the area's edge and an accumulator.
+- **Green for the accumulator**, Titanium's "both ways". The wire tool's slack already means "wire"
+  in green.
