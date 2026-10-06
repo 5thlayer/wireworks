@@ -84,4 +84,169 @@ class NetworkBalanceTest {
         assertEquals(in, out);
         assertEquals(155, out);
     }
+
+    // ---- The two-level balance (ADR 0008): Districts settle first, then the Electric Network ----
+
+    private static NetworkBalance.District district(long[] gen, long[] accOffers, long[] rooms,
+                                                    long[] demands) {
+        return new NetworkBalance.District(gen, accOffers, rooms, demands);
+    }
+
+    @Test
+    void aSelfSufficientDistrictStaysFedWhileAnotherIsShort() {
+        NetworkBalance.Settlement[] s = NetworkBalance.settleNetwork(
+                district(new long[]{100}, NONE, NONE, new long[]{60}),
+                district(new long[]{0}, NONE, NONE, new long[]{80}));
+        assertArrayEquals(new long[]{60}, s[0].consumerGrants());
+        assertArrayEquals(new long[]{40}, s[1].consumerGrants());
+        assertArrayEquals(new long[]{100}, s[0].generatorDraws());
+    }
+
+    @Test
+    void accumulatorsExportOnlyOnceEveryDistrictsGeneratorSurplusIsSpent() {
+        // District 1 is short by 100. District 0's generators give 30 and its accumulator 500;
+        // District 2's accumulator has 500 too. The 30 of surplus goes first, accumulators cover 70.
+        NetworkBalance.Settlement[] s = NetworkBalance.settleNetwork(
+                district(new long[]{30}, new long[]{500}, new long[]{0}, NONE),
+                district(NONE, NONE, NONE, new long[]{100}),
+                district(NONE, new long[]{500}, new long[]{0}, NONE));
+        assertArrayEquals(new long[]{100}, s[1].consumerGrants());
+        assertArrayEquals(new long[]{30}, s[0].generatorDraws());
+        long exported = s[0].accumulatorDischarges()[0] + s[2].accumulatorDischarges()[0];
+        assertEquals(70, exported);
+        assertArrayEquals(new long[]{35}, s[0].accumulatorDischarges());
+    }
+
+    @Test
+    void accumulatorsDoNotExportWhileGeneratorSurplusCoversTheShortfall() {
+        NetworkBalance.Settlement[] s = NetworkBalance.settleNetwork(
+                district(new long[]{100}, NONE, NONE, NONE),
+                district(NONE, NONE, NONE, new long[]{100}),
+                district(NONE, new long[]{500}, new long[]{0}, NONE));
+        assertArrayEquals(new long[]{100}, s[1].consumerGrants());
+        assertArrayEquals(new long[]{0}, s[2].accumulatorDischarges());
+    }
+
+    @Test
+    void generatorSurplusChargesAccumulatorsInOtherDistrictsOnceDemandIsMet() {
+        NetworkBalance.Settlement[] s = NetworkBalance.settleNetwork(
+                district(new long[]{100}, NONE, NONE, new long[]{10}),
+                district(NONE, new long[]{0}, new long[]{60}, NONE));
+        assertArrayEquals(new long[]{60}, s[1].accumulatorCharges());
+        assertArrayEquals(new long[]{70}, s[0].generatorDraws());
+    }
+
+    @Test
+    void networkChargingIsSharedInProportionToEachDistrictsRoom() {
+        NetworkBalance.Settlement[] s = NetworkBalance.settleNetwork(
+                district(new long[]{80}, NONE, NONE, NONE),
+                district(NONE, new long[]{0}, new long[]{100, 100}, NONE),
+                district(NONE, new long[]{0}, new long[]{200}, NONE));
+        assertArrayEquals(new long[]{20, 20}, s[1].accumulatorCharges());
+        assertArrayEquals(new long[]{40}, s[2].accumulatorCharges());
+    }
+
+    @Test
+    void accumulatorsNeverChargeAccumulatorsAcrossDistricts() {
+        NetworkBalance.Settlement[] s = NetworkBalance.settleNetwork(
+                district(NONE, new long[]{150}, new long[]{0}, NONE),
+                district(NONE, new long[]{0}, new long[]{150}, NONE));
+        assertArrayEquals(new long[]{0}, s[0].accumulatorDischarges());
+        assertArrayEquals(new long[]{0}, s[1].accumulatorCharges());
+    }
+
+    @Test
+    void aShortfallAcrossDistrictsIsSharedInProportionToEachDistrictsShortfall() {
+        NetworkBalance.Settlement[] s = NetworkBalance.settleNetwork(
+                district(new long[]{100}, NONE, NONE, NONE),
+                district(NONE, NONE, NONE, new long[]{300}),
+                district(NONE, NONE, NONE, new long[]{100}));
+        assertArrayEquals(new long[]{75}, s[1].consumerGrants());
+        assertArrayEquals(new long[]{25}, s[2].consumerGrants());
+    }
+
+    @Test
+    void whatAnImportingDistrictTakesJoinsItsOwnSupplyInOneWaterFill() {
+        // The District makes 10 itself and imports 40. Machines ask 40 and 40: 25 each, not a
+        // local 5/5 topped up afterwards.
+        NetworkBalance.Settlement[] s = NetworkBalance.settleNetwork(
+                district(new long[]{10}, NONE, NONE, new long[]{40, 40}),
+                district(new long[]{40}, NONE, NONE, NONE));
+        assertArrayEquals(new long[]{25, 25}, s[0].consumerGrants());
+    }
+
+    @Test
+    void aNetworkOfOneDistrictSettlesAsTheFlatBalanceDoes() {
+        long[][][] cases = {
+                {{450}, {150}, {0}, {90}},
+                {{50}, {150}, {0}, {90}},
+                {{450}, {0}, {150}, {90}},
+                {NONE, {150, 0}, {0, 150}, NONE},
+                {{300, 100}, NONE, NONE, {200}},
+                {{100, 100, 100}, NONE, NONE, {100}},
+                {{100}, NONE, NONE, {90, 90}},
+                {{70, 30}, {40, 40}, {0, 0}, {90, 45, 20}},
+                {{70, 30}, {40, 40}, {25, 25, 25}, {10, 5}},
+        };
+        for (long[][] c : cases) {
+            NetworkBalance.Settlement flat = NetworkBalance.settle(c[0], c[1], c[2], c[3]);
+            NetworkBalance.Settlement net =
+                    NetworkBalance.settleNetwork(district(c[0], c[1], c[2], c[3]))[0];
+            assertArrayEquals(flat.generatorDraws(), net.generatorDraws());
+            assertArrayEquals(flat.accumulatorDischarges(), net.accumulatorDischarges());
+            assertArrayEquals(flat.accumulatorCharges(), net.accumulatorCharges());
+            assertArrayEquals(flat.consumerGrants(), net.consumerGrants());
+        }
+    }
+
+    @Test
+    void energyIsConservedToTheFeOnEveryNetworkCase() {
+        java.util.Random random = new java.util.Random(12);
+        for (int round = 0; round < 500; round++) {
+            NetworkBalance.District[] districts = new NetworkBalance.District[1 + random.nextInt(4)];
+            for (int i = 0; i < districts.length; i++) {
+                districts[i] = district(randoms(random), randoms(random), randoms(random),
+                        randoms(random));
+            }
+            NetworkBalance.Settlement[] s = NetworkBalance.settleNetwork(districts);
+            long in = 0;
+            long out = 0;
+            for (int i = 0; i < districts.length; i++) {
+                in += Arrays.stream(s[i].generatorDraws()).sum()
+                        + Arrays.stream(s[i].accumulatorDischarges()).sum();
+                out += Arrays.stream(s[i].consumerGrants()).sum()
+                        + Arrays.stream(s[i].accumulatorCharges()).sum();
+                assertWithin(districts[i].generatorOffers(), s[i].generatorDraws());
+                assertWithin(districts[i].accumulatorOffers(), s[i].accumulatorDischarges());
+                assertWithin(districts[i].accumulatorRooms(), s[i].accumulatorCharges());
+                assertWithin(districts[i].consumerDemands(), s[i].consumerGrants());
+            }
+            assertEquals(in, out, "round " + round);
+        }
+    }
+
+    private static long[] randoms(java.util.Random random) {
+        long[] values = new long[random.nextInt(4)];
+        for (int i = 0; i < values.length; i++) {
+            values[i] = random.nextInt(4) == 0 ? 0 : random.nextInt(500);
+        }
+        return values;
+    }
+
+    private static void assertWithin(long[] limits, long[] flows) {
+        assertEquals(limits.length, flows.length);
+        for (int i = 0; i < limits.length; i++) {
+            org.junit.jupiter.api.Assertions.assertTrue(flows[i] >= 0 && flows[i] <= limits[i]);
+        }
+    }
+
+    @Test
+    void oneDistrictsGeneratorSurplusFeedsAnothersShortfall() {
+        NetworkBalance.Settlement[] s = NetworkBalance.settleNetwork(
+                district(new long[]{100}, NONE, NONE, new long[]{20}),
+                district(new long[]{30}, NONE, NONE, new long[]{90}));
+        assertArrayEquals(new long[]{90}, s[1].consumerGrants());
+        assertArrayEquals(new long[]{80}, s[0].generatorDraws());
+        assertArrayEquals(new long[]{30}, s[1].generatorDraws());
+    }
 }

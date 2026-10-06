@@ -29,6 +29,11 @@ public final class NetworkBalance {
                              long[] accumulatorCharges, long[] consumerGrants) {
     }
 
+    /** One District's books: the inputs {@link #settle} takes, for one District. */
+    public record District(long[] generatorOffers, long[] accumulatorOffers,
+                           long[] accumulatorRooms, long[] consumerDemands) {
+    }
+
     private NetworkBalance() {
     }
 
@@ -52,6 +57,90 @@ public final class NetworkBalance {
                 EnergyShare.proportional(fromAccumulators, accumulatorOffers),
                 EnergyShare.proportional(charge, accumulatorRooms),
                 EnergyShare.waterFill(fromGenerators + fromAccumulators, consumerDemands));
+    }
+
+    /**
+     * Settles an Electric Network of Districts in two levels (ADR 0008), with no Minecraft types.
+     *
+     * <ol>
+     *   <li>Each District settles on its own book first ({@link #settle}).</li>
+     *   <li>The network meets the Districts' remaining demand from their leftover generator surplus,
+     *       then from their accumulators' spare discharge.</li>
+     *   <li>Generator surplus still left charges the Districts' remaining accumulator room.</li>
+     * </ol>
+     *
+     * <p>Across Districts, contributions are shared in proportion to what each offers, a shortfall
+     * in proportion to each District's shortfall, and charging in proportion to each District's
+     * remaining room. Inside a District, what it imports joins its own supply and the total is
+     * water-filled across its machines in one pass. A network of one District settles exactly as
+     * {@link #settle} does. Energy is conserved to the FE.
+     *
+     * @param districts each District's offers, rooms and demands
+     * @return every flow per District, index-aligned with {@code districts}
+     */
+    public static Settlement[] settleNetwork(District... districts) {
+        int n = districts.length;
+        Settlement[] local = new Settlement[n];
+        long[] shortfall = new long[n];
+        long[] surplus = new long[n];
+        long[] spare = new long[n];
+        long[] room = new long[n];
+        long[][] generatorLeft = new long[n][];
+        long[][] accumulatorLeft = new long[n][];
+        long[][] roomLeft = new long[n][];
+        for (int i = 0; i < n; i++) {
+            District d = districts[i];
+            Settlement s = settle(d.generatorOffers(), d.accumulatorOffers(), d.accumulatorRooms(),
+                    d.consumerDemands());
+            local[i] = s;
+            generatorLeft[i] = remaining(d.generatorOffers(), s.generatorDraws());
+            accumulatorLeft[i] = remaining(d.accumulatorOffers(), s.accumulatorDischarges());
+            roomLeft[i] = remaining(d.accumulatorRooms(), s.accumulatorCharges());
+            shortfall[i] = sum(d.consumerDemands()) - sum(s.consumerGrants());
+            surplus[i] = sum(generatorLeft[i]);
+            spare[i] = sum(accumulatorLeft[i]);
+            room[i] = sum(roomLeft[i]);
+        }
+
+        long needed = sum(shortfall);
+        long fromGenerators = Math.min(needed, sum(surplus));
+        long fromAccumulators = Math.min(needed - fromGenerators, sum(spare));
+        long charge = Math.min(sum(surplus) - fromGenerators, sum(room));
+
+        long[] imports = EnergyShare.proportional(fromGenerators + fromAccumulators, shortfall);
+        long[] generatorExports = EnergyShare.proportional(fromGenerators + charge, surplus);
+        long[] accumulatorExports = EnergyShare.proportional(fromAccumulators, spare);
+        long[] charges = EnergyShare.proportional(charge, room);
+
+        Settlement[] out = new Settlement[n];
+        for (int i = 0; i < n; i++) {
+            long[] draws = add(local[i].generatorDraws(),
+                    EnergyShare.proportional(generatorExports[i], generatorLeft[i]));
+            long[] discharges = add(local[i].accumulatorDischarges(),
+                    EnergyShare.proportional(accumulatorExports[i], accumulatorLeft[i]));
+            long[] charged = add(local[i].accumulatorCharges(),
+                    EnergyShare.proportional(charges[i], roomLeft[i]));
+            long supply = sum(local[i].consumerGrants()) + imports[i];
+            out[i] = new Settlement(draws, discharges, charged,
+                    EnergyShare.waterFill(supply, districts[i].consumerDemands()));
+        }
+        return out;
+    }
+
+    private static long[] remaining(long[] limits, long[] used) {
+        long[] left = new long[limits.length];
+        for (int i = 0; i < left.length; i++) {
+            left[i] = Math.max(0L, limits[i]) - used[i];
+        }
+        return left;
+    }
+
+    private static long[] add(long[] a, long[] b) {
+        long[] total = new long[a.length];
+        for (int i = 0; i < total.length; i++) {
+            total[i] = a[i] + b[i];
+        }
+        return total;
     }
 
     private static long sum(long[] values) {
