@@ -28,7 +28,7 @@ class PoleDistrictsTest {
     }
 
     private static PoleNetworks.Pole transformer(int x) {
-        return new PoleNetworks.Pole(x, 0, 0, PoleKind.TRANSFORMER);
+        return new PoleNetworks.Pole(x, 0, 0, TransformerSpec.kind());
     }
 
     private static PoleNetworks.Wire wire(int a, int b) {

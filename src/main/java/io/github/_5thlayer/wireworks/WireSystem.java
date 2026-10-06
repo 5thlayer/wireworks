@@ -22,6 +22,6 @@ public enum WireSystem {
 
     /** The system of a wire made between two poles: Transmission only where a Transmission Pole is an end. */
     public static WireSystem between(PoleKind a, PoleKind b) {
-        return a == PoleKind.TRANSMISSION || b == PoleKind.TRANSMISSION ? TRANSMISSION : DISTRIBUTION;
+        return a instanceof PoleKind.Transmission || b instanceof PoleKind.Transmission ? TRANSMISSION : DISTRIBUTION;
     }
 }

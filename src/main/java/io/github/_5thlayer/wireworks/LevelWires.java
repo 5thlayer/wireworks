@@ -144,7 +144,7 @@ public final class LevelWires extends SavedData {
      * placed pole's own reach bounds the search.
      */
     private static List<PoleNetworks.Pole> standingNear(ServerLevel level, BlockPos pos, PoleKind kind) {
-        int reach = (int) Math.ceil(kind.reachToward(kind));
+        int reach = (int) Math.ceil(kind.longestReach());
         List<PoleNetworks.Pole> found = new ArrayList<>();
         for (int cx = SectionPos.blockToSectionCoord(pos.getX() - reach);
              cx <= SectionPos.blockToSectionCoord(pos.getX() + reach); cx++) {

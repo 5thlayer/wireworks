@@ -22,7 +22,7 @@ class PoleKindTest {
                 assertEquals(tier.wireReach(), from.reachToward(PoleKind.distribution(other)));
             }
             assertEquals(tier.wireReach(), from.reachToward(PoleKind.TRANSMISSION));
-            assertEquals(tier.wireReach(), from.reachToward(PoleKind.TRANSFORMER));
+            assertEquals(tier.wireReach(), from.reachToward(PoleKind.transformer(30, 9)));
         }
     }
 
@@ -36,7 +36,7 @@ class PoleKindTest {
 
     @Test
     void thereAreThreeKindsAndEachTierIsItsOwnDistributionKind() {
-        assertNotEquals(PoleKind.TRANSMISSION, PoleKind.TRANSFORMER);
+        assertNotEquals(PoleKind.TRANSMISSION, PoleKind.transformer(30, 9));
         assertNotEquals(PoleKind.distribution(PoleTier.SMALL), PoleKind.distribution(PoleTier.MEDIUM));
         assertNotEquals(PoleKind.TRANSMISSION, PoleKind.distribution(PoleTier.LARGE));
     }

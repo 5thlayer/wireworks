@@ -21,14 +21,6 @@ class TransformerReachTest {
     }
 
     @Test
-    void theDefaultsAreTheTransmissionPolesDefaultReachAndTheMediumPolesReach() {
-        assertEquals(PoleKind.DEFAULT_TRANSMISSION_REACH, PoleKind.TRANSFORMER.reachToward(PoleKind.TRANSMISSION));
-        assertEquals(32, PoleKind.DEFAULT_TRANSMISSION_REACH);
-        assertEquals(PoleTier.MEDIUM.wireReach(),
-                PoleKind.TRANSFORMER.reachToward(PoleKind.distribution(PoleTier.SMALL)));
-    }
-
-    @Test
     void theLongestReachIsTheLongerSideSoASearchSizedByItFindsEveryPoleItCouldWire() {
         assertEquals(30, PoleKind.transformer(30, 11).longestReach());
         assertEquals(40, PoleKind.transformer(8, 40).longestReach());

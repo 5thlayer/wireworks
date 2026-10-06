@@ -41,12 +41,10 @@ public final class PoleWiring {
      * Transmission Pole, since only a Transformer joins the two systems.
      */
     public static boolean mayWire(PoleNetworks.Pole a, PoleNetworks.Pole b) {
-        boolean aTransformer = a.kind() instanceof PoleKind.Transformer;
-        boolean bTransformer = b.kind() instanceof PoleKind.Transformer;
-        if (aTransformer || bTransformer) {
-            return !(aTransformer && bTransformer);
+        if (PoleKind.eitherIsTransformer(a.kind(), b.kind())) {
+            return !(a.kind() instanceof PoleKind.Transformer && b.kind() instanceof PoleKind.Transformer);
         }
-        return (a.kind() == PoleKind.TRANSMISSION) == (b.kind() == PoleKind.TRANSMISSION);
+        return (a.kind() instanceof PoleKind.Transmission) == (b.kind() instanceof PoleKind.Transmission);
     }
 
     /** Applies a wire tool's second click, on {@code target}, to the wire set. */
@@ -54,8 +52,7 @@ public final class PoleWiring {
         if (pos(anchor).equals(pos(target))) {
             return Click.CANCELLED;
         }
-        if (!mayWire(anchor, target) && !(anchor.kind() instanceof PoleKind.Transformer)
-                && !(target.kind() instanceof PoleKind.Transformer)) {
+        if (!mayWire(anchor, target) && !PoleKind.eitherIsTransformer(anchor.kind(), target.kind())) {
             return Click.CROSS_SYSTEM;
         }
         if (refuses(anchor, target)) {
@@ -102,7 +99,7 @@ public final class PoleWiring {
             }
             if (placedTransformer) {
                 // One pole of each system, the nearest in reach; neighbour sharing does not apply.
-                boolean transmission = other.kind() == PoleKind.TRANSMISSION;
+                boolean transmission = other.kind() instanceof PoleKind.Transmission;
                 if (transmission ? wiredTransmission : wiredDistribution) {
                     continue;
                 }

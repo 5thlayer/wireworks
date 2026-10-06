@@ -14,12 +14,12 @@ class WireSystemTest {
     void aWireBetweenDistributionPolesIsDistribution() {
         PoleKind small = PoleKind.distribution(PoleTier.SMALL);
         assertEquals(WireSystem.DISTRIBUTION, WireSystem.between(small, PoleKind.distribution(PoleTier.LARGE)));
-        assertEquals(WireSystem.DISTRIBUTION, WireSystem.between(small, PoleKind.TRANSFORMER));
+        assertEquals(WireSystem.DISTRIBUTION, WireSystem.between(small, TransformerSpec.kind()));
     }
 
     @Test
     void aWireWithATransmissionPoleAtAnEndIsTransmission() {
         assertEquals(WireSystem.TRANSMISSION, WireSystem.between(PoleKind.TRANSMISSION, PoleKind.TRANSMISSION));
-        assertEquals(WireSystem.TRANSMISSION, WireSystem.between(PoleKind.TRANSFORMER, PoleKind.TRANSMISSION));
+        assertEquals(WireSystem.TRANSMISSION, WireSystem.between(TransformerSpec.kind(), PoleKind.TRANSMISSION));
     }
 }
