@@ -29,7 +29,22 @@ public final class PoleWiring {
 
     /** Whether a second click on {@code target} would be refused; the slack wire turns red on it. */
     public static boolean refuses(PoleNetworks.Pole anchor, PoleNetworks.Pole target) {
-        return !pos(anchor).equals(pos(target)) && !PoleNetworks.withinReach(anchor, target);
+        return !pos(anchor).equals(pos(target))
+                && !(mayWire(anchor, target) && PoleNetworks.withinReach(anchor, target));
+    }
+
+    /**
+     * Whether two poles' kinds may be wired at all, whatever their distance: a Transformer wires to a
+     * pole of either system but not to another Transformer, and a Distribution Pole never to a
+     * Transmission Pole, since only a Transformer joins the two systems.
+     */
+    public static boolean mayWire(PoleNetworks.Pole a, PoleNetworks.Pole b) {
+        boolean aTransformer = a.kind() instanceof PoleKind.Transformer;
+        boolean bTransformer = b.kind() instanceof PoleKind.Transformer;
+        if (aTransformer || bTransformer) {
+            return !(aTransformer && bTransformer);
+        }
+        return (a.kind() == PoleKind.TRANSMISSION) == (b.kind() == PoleKind.TRANSMISSION);
     }
 
     /** Applies a wire tool's second click, on {@code target}, to the wire set. */
@@ -69,11 +84,26 @@ public final class PoleWiring {
                 .thenComparingInt(PoleNetworks.Pole::y)
                 .thenComparingInt(PoleNetworks.Pole::z));
         List<PoleNetworks.Pole> wired = new ArrayList<>();
+        boolean placedTransformer = placed.kind() instanceof PoleKind.Transformer;
+        boolean wiredTransmission = false;
+        boolean wiredDistribution = false;
         for (PoleNetworks.Pole other : candidates) {
             if (wired.size() == AUTO_WIRES) {
                 break;
             }
-            if (PoleNetworks.withinReach(placed, other) && !sharesANeighbour(other, wired, wires)) {
+            if (!mayWire(placed, other) || !PoleNetworks.withinReach(placed, other)) {
+                continue;
+            }
+            if (placedTransformer) {
+                // One pole of each system, the nearest in reach; neighbour sharing does not apply.
+                boolean transmission = other.kind() == PoleKind.TRANSMISSION;
+                if (transmission ? wiredTransmission : wiredDistribution) {
+                    continue;
+                }
+                wiredTransmission |= transmission;
+                wiredDistribution |= !transmission;
+                wired.add(other);
+            } else if (!sharesANeighbour(other, wired, wires)) {
                 wired.add(other);
             }
         }

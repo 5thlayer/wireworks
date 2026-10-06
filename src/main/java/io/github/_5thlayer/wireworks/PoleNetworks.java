@@ -3,11 +3,13 @@
 
 package io.github._5thlayer.wireworks;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Which poles are one Electric Network (ADR 0003, ADR 0004).
@@ -38,7 +40,117 @@ public final class PoleNetworks {
         }
     }
 
+    /** The district id of a pole that belongs to no District: a Transformer or a Transmission Pole. */
+    public static final int NO_DISTRICT = -1;
+
+    /**
+     * One Electric Network: its Districts by id, and each Transformer by its index among the poles.
+     * Both lists are in order of first appearance.
+     */
+    public record ElectricNetwork(List<Integer> districts, List<Integer> transformers,
+                                  Map<Integer, List<Integer>> transformersByDistrict) {
+
+        /** The Transformers wired to a District, which join it to the rest of the network. */
+        public List<Integer> transformersJoining(int district) {
+            return transformersByDistrict.getOrDefault(district, List.of());
+        }
+    }
+
+    /**
+     * What the poles and wires make: a District id per pole ({@link #NO_DISTRICT} for a Transformer or
+     * a Transmission Pole), an Electric Network id per pole, and the networks. Arrays are index-aligned
+     * with the input poles, ids dense from zero in order of first appearance.
+     */
+    public record Topology(int[] districtOf, int[] networkOf, List<ElectricNetwork> networks) {
+    }
+
     private PoleNetworks() {
+    }
+
+    /**
+     * Districts and Electric Networks (ADR 0008). A District is the Distribution Poles joined by wires
+     * between Distribution Poles; a Transformer joins none, only the network. A wire with an end that
+     * is not among the poles joins nothing.
+     */
+    public static Topology topology(List<Pole> poles, Collection<Wire> wires) {
+        int n = poles.size();
+        int[] networkOf = networks(poles, wires);
+        int[] parent = new int[n];
+        Map<Pos, Integer> index = new HashMap<>();
+        for (int i = 0; i < n; i++) {
+            parent[i] = i;
+            Pole p = poles.get(i);
+            index.put(new Pos(p.x(), p.y(), p.z()), i);
+        }
+        for (Wire wire : wires) {
+            Integer a = index.get(wire.a());
+            Integer b = index.get(wire.b());
+            if (a != null && b != null && isDistribution(poles.get(a)) && isDistribution(poles.get(b))) {
+                parent[root(parent, a)] = root(parent, b);
+            }
+        }
+        int[] districtOf = new int[n];
+        Map<Integer, Integer> idOfRoot = new HashMap<>();
+        for (int i = 0; i < n; i++) {
+            if (isDistribution(poles.get(i))) {
+                int r = root(parent, i);
+                Integer id = idOfRoot.get(r);
+                if (id == null) {
+                    id = idOfRoot.size();
+                    idOfRoot.put(r, id);
+                }
+                districtOf[i] = id;
+            } else {
+                districtOf[i] = NO_DISTRICT;
+            }
+        }
+        int networkCount = Arrays.stream(networkOf).max().orElse(-1) + 1;
+        List<List<Integer>> districts = new ArrayList<>();
+        List<List<Integer>> transformers = new ArrayList<>();
+        List<Map<Integer, List<Integer>>> joining = new ArrayList<>();
+        for (int i = 0; i < networkCount; i++) {
+            districts.add(new ArrayList<>());
+            transformers.add(new ArrayList<>());
+            joining.add(new TreeMap<>());
+        }
+        for (int i = 0; i < n; i++) {
+            if (districtOf[i] != NO_DISTRICT && !districts.get(networkOf[i]).contains(districtOf[i])) {
+                districts.get(networkOf[i]).add(districtOf[i]);
+            }
+            if (poles.get(i).kind() instanceof PoleKind.Transformer) {
+                transformers.get(networkOf[i]).add(i);
+            }
+        }
+        for (Wire wire : wires) {
+            Integer a = index.get(wire.a());
+            Integer b = index.get(wire.b());
+            if (a == null || b == null) {
+                continue;
+            }
+            joinTransformer(poles, districtOf, networkOf, joining, a, b);
+            joinTransformer(poles, districtOf, networkOf, joining, b, a);
+        }
+        List<ElectricNetwork> networks = new ArrayList<>();
+        for (int i = 0; i < networkCount; i++) {
+            joining.get(i).values().forEach(list -> list.sort(null));
+            networks.add(new ElectricNetwork(districts.get(i), transformers.get(i), joining.get(i)));
+        }
+        return new Topology(districtOf, networkOf, networks);
+    }
+
+    private static void joinTransformer(List<Pole> poles, int[] districtOf, int[] networkOf,
+                                        List<Map<Integer, List<Integer>>> joining, int transformer, int other) {
+        if (poles.get(transformer).kind() instanceof PoleKind.Transformer && districtOf[other] != NO_DISTRICT) {
+            List<Integer> list = joining.get(networkOf[transformer])
+                    .computeIfAbsent(districtOf[other], d -> new ArrayList<>());
+            if (!list.contains(transformer)) {
+                list.add(transformer);
+            }
+        }
+    }
+
+    private static boolean isDistribution(Pole pole) {
+        return pole.kind() instanceof PoleKind.Distribution;
     }
 
     /**
