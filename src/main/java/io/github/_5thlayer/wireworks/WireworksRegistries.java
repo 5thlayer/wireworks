@@ -5,7 +5,7 @@ package io.github._5thlayer.wireworks;
 
 import io.github._5thlayer.groundworks.Footprint;
 import io.github._5thlayer.groundworks.FootprintItem;
-import net.minecraft.core.BlockPos;
+import io.github._5thlayer.groundworks.FootprintPartBlock;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
@@ -31,6 +31,7 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -90,8 +91,8 @@ public final class WireworksRegistries {
 
     public static final DeferredBlock<SolarPanelBlock> SOLAR_PANEL =
             BLOCKS.registerBlock(SolarPanelBlock.BLOCK_NAME, SolarPanelBlock::new);
-    public static final DeferredBlock<EnergyPartBlock> SOLAR_PANEL_PART = BLOCKS.registerBlock(
-            "solar_panel_part", props -> new EnergyPartBlock(props, () -> WireworksRegistries.SOLAR_PANEL_FOOTPRINT));
+    public static final DeferredBlock<FootprintPartBlock> SOLAR_PANEL_PART =
+            part("solar_panel_part", () -> WireworksRegistries.SOLAR_PANEL_FOOTPRINT);
     public static final DeferredItem<FootprintItem> SOLAR_PANEL_ITEM = ITEMS.registerItem(
             SolarPanelBlock.BLOCK_NAME, props -> new FootprintItem(WireworksRegistries.SOLAR_PANEL_FOOTPRINT, props));
     public static final Footprint SOLAR_PANEL_FOOTPRINT = Footprint.declare(
@@ -102,8 +103,8 @@ public final class WireworksRegistries {
 
     public static final DeferredBlock<AccumulatorBlock> ACCUMULATOR =
             BLOCKS.registerBlock(AccumulatorBlock.BLOCK_NAME, AccumulatorBlock::new);
-    public static final DeferredBlock<EnergyPartBlock> ACCUMULATOR_PART = BLOCKS.registerBlock(
-            "accumulator_part", props -> new EnergyPartBlock(props, () -> WireworksRegistries.ACCUMULATOR_FOOTPRINT));
+    public static final DeferredBlock<FootprintPartBlock> ACCUMULATOR_PART =
+            part("accumulator_part", () -> WireworksRegistries.ACCUMULATOR_FOOTPRINT);
     public static final DeferredItem<FootprintItem> ACCUMULATOR_ITEM = ITEMS.registerItem(
             AccumulatorBlock.BLOCK_NAME, props -> new FootprintItem(WireworksRegistries.ACCUMULATOR_FOOTPRINT, props));
     public static final Footprint ACCUMULATOR_FOOTPRINT = Footprint.declare(
@@ -167,25 +168,27 @@ public final class WireworksRegistries {
     }
 
     /**
-     * The energy face on the anchor and on every part of each footprint, answering with the anchor's
-     * buffer, so a pole reaching any block of it finds it.
+     * The energy face on each footprint's anchor, answering with its buffer. Groundworks forwards a
+     * part's lookup to its anchor, so a pole reaching any block of the footprint finds it.
      */
     private static void registerCapabilities(RegisterCapabilitiesEvent event) {
-        energyOnFootprint(event, SOLAR_PANEL, SOLAR_PANEL_PART, SolarPanelBlockEntity.class, SolarPanelBlockEntity::energy);
-        energyOnFootprint(event, ACCUMULATOR, ACCUMULATOR_PART, AccumulatorBlockEntity.class, AccumulatorBlockEntity::energy);
+        energyOnAnchor(event, SOLAR_PANEL, SolarPanelBlockEntity.class, SolarPanelBlockEntity::energy);
+        energyOnAnchor(event, ACCUMULATOR, AccumulatorBlockEntity.class, AccumulatorBlockEntity::energy);
     }
 
-    private static <E extends BlockEntity> void energyOnFootprint(RegisterCapabilitiesEvent event,
-            DeferredBlock<? extends Block> anchor, DeferredBlock<EnergyPartBlock> part, Class<E> anchorType,
-            Function<E, EnergyHandler> face) {
+    /**
+     * A footprint's part block, which drops nothing of its own: its origin drops the item. Groundworks
+     * forwards its lookups to its origin, which is also the energy owner a pole counts it by.
+     */
+    private static DeferredBlock<FootprintPartBlock> part(String name, Supplier<Footprint> footprint) {
+        return BLOCKS.registerBlock(name, props -> new FootprintPartBlock(props.noLootTable(), footprint));
+    }
+
+    private static <E extends BlockEntity> void energyOnAnchor(RegisterCapabilitiesEvent event,
+            DeferredBlock<? extends Block> anchor, Class<E> anchorType, Function<E, EnergyHandler> face) {
         event.registerBlock(Capabilities.Energy.BLOCK,
                 (level, pos, state, entity, side) -> anchorType.isInstance(entity) ? face.apply(anchorType.cast(entity)) : null,
                 anchor.get());
-        event.registerBlock(Capabilities.Energy.BLOCK, (level, pos, state, entity, side) -> {
-            BlockPos at = part.get().energyOwner(pos, state);
-            return anchorType.isInstance(level.getBlockEntity(at))
-                    ? face.apply(anchorType.cast(level.getBlockEntity(at))) : null;
-        }, part.get());
     }
 
     private static void addToCreativeTabs(BuildCreativeModeTabContentsEvent event) {

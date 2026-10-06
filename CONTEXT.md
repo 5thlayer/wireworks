@@ -90,7 +90,7 @@ How much of a **Solar Panel**'s peak output the time of day allows, all of it th
 _Avoid_: sunlight, light level (the game's block light, which a roof or torch changes)
 
 **Energy Owner**:
-The block whose energy a multiblock's part stands for, named through `EnergyOwner` or `EnergyOwnerBlock`. A pole resolves each block to its owner first, so it counts and feeds each machine once. A face a pole reaches journals its buffer, since a pole measures room with an insert it then aborts.
+The block whose energy a multiblock's part stands for, named through `EnergyOwner` or `EnergyOwnerBlock`; a Groundworks footprint's part stands for its origin, whatever mod declared it. A pole resolves each block to its owner first, so it counts and feeds each machine once. A face a pole reaches journals its buffer, since a pole measures room with an insert it then aborts.
 _Avoid_: controller, master (Oritech's terms for its own engines)
 
 ### Drawing

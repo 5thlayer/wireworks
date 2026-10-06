@@ -8,6 +8,12 @@ Each version has two sections: Players, what a player or pack developer sees, an
 
 - The supply area is drawn as a yellow square on the ground the pole stands on, not a box around it. The machines it reaches are still outlined, and the pole still supplies two blocks up and down. (#19)
 - The machines a pole reaches are outlined in their role's colour, after the side-configuration colours other tech mods use: generators orange, the machines it feeds blue, and accumulators purple. The square stays yellow.
+- A machine built as a Groundworks footprint by another mod, such as Craftworks' Assembler, is counted once by a pole, however many of its blocks the supply area reaches. It used to be counted once per block, overstating its demand, its Jade count and its outlines. (#20)
+
+### Consumers
+
+- Breaking: `EnergyPartBlock` is gone, and `WireworksRegistries.SOLAR_PANEL_PART` and `ACCUMULATOR_PART` hold plain Groundworks `FootprintPartBlock`s. It was never named API, and neither the Pack nor Craftworks names it. (#20)
+- A Groundworks footprint's part stands for its standing origin as an energy owner, after `EnergyOwner` and `EnergyOwnerBlock`, so a Consumer's footprint is counted once by a pole without implementing either. (#20)
 
 ## 0.3.0
 

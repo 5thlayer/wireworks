@@ -19,7 +19,7 @@ Each tier's supply area and wire reach, the Solar Panel's peak and the Accumulat
 
 ## For mod developers
 
-Wireworks is also a library, carved out of the [FactoryWorks](https://github.com/5thlayer/factoryworks) pack. A multiblock names its anchor through `EnergyOwner` or `EnergyOwnerBlock`, and `PoleColumnReplace.BUILDER` swaps a pole column for another tier through Groundworks' Fast Replace, keeping its wires.
+Wireworks is also a library, carved out of the [FactoryWorks](https://github.com/5thlayer/factoryworks) pack. A multiblock built as a Groundworks footprint is counted once by its origin with nothing more; any other names its anchor through `EnergyOwner` or `EnergyOwnerBlock`, and `PoleColumnReplace.BUILDER` swaps a pole column for another tier through Groundworks' Fast Replace, keeping its wires.
 
 ## Dependencies
 
