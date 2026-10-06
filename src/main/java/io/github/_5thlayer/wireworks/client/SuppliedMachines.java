@@ -3,7 +3,6 @@
 
 package io.github._5thlayer.wireworks.client;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import io.github._5thlayer.wireworks.PoleTier;
@@ -41,9 +40,12 @@ public final class SuppliedMachines {
     /** Ticks between rescans. The pole's own {@code RESCAN_INTERVAL}: two seconds. */
     private static final int RESCAN_INTERVAL = 40;
 
+    private static final SupplyScan.Roles<BlockPos> NONE =
+            new SupplyScan.Roles<>(List.of(), List.of(), List.of());
+
     private static @Nullable Key key;
     private static long scannedAt = Long.MIN_VALUE;
-    private static List<BlockPos> reached = List.of();
+    private static SupplyScan.Roles<BlockPos> reached = NONE;
 
     private SuppliedMachines() {
     }
@@ -52,25 +54,23 @@ public final class SuppliedMachines {
     }
 
     /**
-     * Every block a pole of this tier based here reaches, in no particular order.
+     * Every block a pole of this tier based here reaches, sorted by role.
      *
-     * <p>All three roles together: a consumer, a generator and an accumulator are all things this
-     * pole is connected to, and telling them apart is the Jade line's job rather than a second
-     * colour's (ADR 0005 keeps the square one colour). An owner standing <em>outside</em> the area is
-     * included where it stands -- a slave Steam Engine's master is what the network actually draws,
-     * so an outline beyond the square is the truth about the row rather than a leak.
+     * <p>Sorted rather than flattened because the square outlines each role in its own colour
+     * (ADR 0009): a generator orange, a machine the pole feeds blue, an accumulator purple, which
+     * says at a glance what feeds the area and what draws on it. An owner standing <em>outside</em>
+     * the area is included where it stands -- a slave Steam Engine's master is what the network
+     * actually draws, so an outline beyond the square is the truth about the row rather than a leak.
      */
-    public static List<BlockPos> around(Level level, BlockPos base, PoleTier tier) {
+    public static SupplyScan.Roles<BlockPos> around(Level level, BlockPos base, PoleTier tier) {
         Key now = new Key(base.immutable(), tier, level.dimension());
         long time = level.getGameTime();
         if (!now.equals(key) || time - scannedAt >= RESCAN_INTERVAL || time < scannedAt) {
             SupplyScan.Roles<BlockPos> roles = SupplyAreaScan.of(level, base, tier);
-            List<BlockPos> found = new ArrayList<>(roles.consumers());
-            found.addAll(roles.generators());
-            found.addAll(roles.accumulators());
             key = now;
             scannedAt = time;
-            reached = List.copyOf(found);
+            reached = new SupplyScan.Roles<>(List.copyOf(roles.consumers()),
+                    List.copyOf(roles.generators()), List.copyOf(roles.accumulators()));
         }
         return reached;
     }
@@ -79,6 +79,6 @@ public final class SuppliedMachines {
     public static void clear() {
         key = null;
         scannedAt = Long.MIN_VALUE;
-        reached = List.of();
+        reached = NONE;
     }
 }

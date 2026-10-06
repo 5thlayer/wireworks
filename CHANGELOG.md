@@ -6,7 +6,8 @@ Each version has two sections: Players, what a player or pack developer sees, an
 
 ### Players
 
-- The supply area is drawn as a yellow square on the ground the pole stands on, not a box around it. The outlines round the machines it reaches are unchanged, and the pole still supplies two blocks up and down. (#19)
+- The supply area is drawn as a yellow square on the ground the pole stands on, not a box around it. The machines it reaches are still outlined, and the pole still supplies two blocks up and down. (#19)
+- The machines a pole reaches are outlined in their role's colour, after the side-configuration colours other tech mods use: generators orange, the machines it feeds blue, and accumulators purple. The square stays yellow.
 
 ## 0.3.0
 
