@@ -18,7 +18,7 @@ class PendingEndTest {
     /** A survival player's block interaction range. */
     private static final double RANGE = 4.5;
 
-    private static final PoleNetworks.Pole ANCHOR = new PoleNetworks.Pole(0, 64, 0, PoleTier.SMALL);
+    private static final PoleNetworks.Pole ANCHOR = new PoleNetworks.Pole(0, 64, 0, PoleKind.distribution(PoleTier.SMALL));
 
     /** A player at {@code (x, y, z)} holding the tool in the main hand, in the anchor's dimension. */
     private static PendingEnd.Holder at(double x, double y, double z) {

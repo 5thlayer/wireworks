@@ -31,7 +31,7 @@ public final class PendingEnd {
         double dx = holder.x() - (anchor.x() + 0.5);
         double dy = holder.y() - (anchor.y() + 0.5);
         double dz = holder.z() - (anchor.z() + 0.5);
-        double reach = anchor.tier().wireReach() + holder.interactionRange();
+        double reach = anchor.kind().reachToward(anchor.kind()) + holder.interactionRange();
         boolean inReach = dx * dx + dy * dy + dz * dz <= reach * reach;
         return anchorStanding && holder.toolInMainHand() && holder.sameDimension() && inReach;
     }

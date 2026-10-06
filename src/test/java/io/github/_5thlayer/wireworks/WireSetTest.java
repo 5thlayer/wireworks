@@ -4,6 +4,7 @@
 package io.github._5thlayer.wireworks;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
 import org.junit.jupiter.api.Test;
 
@@ -31,6 +32,69 @@ class WireSetTest {
         WireSet read = WireSet.CODEC.parse(JsonOps.INSTANCE, written).getOrThrow();
 
         assertEquals(wires.all(), read.all());
+    }
+
+    @Test
+    void aWireMadeWithoutASystemIsDistribution() {
+        WireSet wires = new WireSet();
+        wires.add(at(0, 64, 0), at(7, 64, 0));
+        assertEquals(WireSystem.DISTRIBUTION, wires.all().iterator().next().system());
+    }
+
+    @Test
+    void aWiresSystemSurvivesTheRoundTrip() {
+        WireSet wires = new WireSet();
+        wires.add(at(0, 64, 0), at(30, 64, 0), WireSystem.TRANSMISSION);
+        wires.add(at(40, 64, 0), at(47, 64, 0), WireSystem.DISTRIBUTION);
+
+        JsonElement written = WireSet.CODEC.encodeStart(JsonOps.INSTANCE, wires).getOrThrow();
+        WireSet read = WireSet.CODEC.parse(JsonOps.INSTANCE, written).getOrThrow();
+
+        assertEquals(wires.all(), read.all());
+        assertTrue(read.all().contains(new PoleNetworks.Wire(at(0, 64, 0), at(30, 64, 0), WireSystem.TRANSMISSION)));
+    }
+
+    /** An old world's wires have no system field. */
+    @Test
+    void anOldWorldsWiresLoadAsDistribution() {
+        JsonElement old = JsonParser.parseString("[{\"a\":[0,64,0],\"b\":[7,64,0]}]");
+        WireSet read = WireSet.CODEC.parse(JsonOps.INSTANCE, old).getOrThrow();
+        assertEquals(1, read.all().size());
+        assertEquals(WireSystem.DISTRIBUTION, read.all().iterator().next().system());
+    }
+
+    @Test
+    void aDistributionWireIsWrittenWithoutASystemFieldSoItStaysReadableAsBefore() {
+        WireSet wires = new WireSet();
+        wires.add(at(0, 64, 0), at(7, 64, 0));
+        JsonElement written = WireSet.CODEC.encodeStart(JsonOps.INSTANCE, wires).getOrThrow();
+        assertFalse(written.getAsJsonArray().get(0).getAsJsonObject().has("system"));
+    }
+
+    @Test
+    void aWireIsFoundAndCutFromEitherEndWhateverItsSystem() {
+        WireSet wires = new WireSet();
+        wires.add(at(0, 64, 0), at(30, 64, 0), WireSystem.TRANSMISSION);
+        assertTrue(wires.contains(at(30, 64, 0), at(0, 64, 0)));
+        wires.remove(at(30, 64, 0), at(0, 64, 0));
+        assertTrue(wires.all().isEmpty());
+    }
+
+    @Test
+    void rekeyingKeepsAWiresSystem() {
+        WireSet wires = new WireSet();
+        wires.add(at(0, 64, 0), at(30, 64, 0), WireSystem.TRANSMISSION);
+        wires.rekey(at(0, 64, 0), at(0, 63, 0));
+        assertEquals(WireSystem.TRANSMISSION, wires.all().iterator().next().system());
+    }
+
+    @Test
+    void aChunkSendsEachWiresSystemAndTheClientKeepsIt() {
+        WireSet server = new WireSet();
+        server.add(at(1, 64, 1), at(30, 64, 1), WireSystem.TRANSMISSION);
+        WireSet client = new WireSet();
+        client.replaceTouching(0, 0, server.touching(0, 0));
+        assertEquals(server.all(), client.all());
     }
 
     @Test

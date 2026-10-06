@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class PoleReachTest {
 
     private static PoleNetworks.Pole small(int x, int y, int z) {
-        return new PoleNetworks.Pole(x, y, z, PoleTier.SMALL);
+        return new PoleNetworks.Pole(x, y, z, PoleKind.distribution(PoleTier.SMALL));
     }
 
     @Test
@@ -31,7 +31,7 @@ class PoleReachTest {
     @Test
     void theShorterReachOfTheTwoDecides() {
         // A large pole reaches 18, a small pole 7.5: at 12 apart neither end may be the long one.
-        assertFalse(PoleNetworks.withinReach(new PoleNetworks.Pole(0, 0, 0, PoleTier.LARGE), small(12, 0, 0)));
+        assertFalse(PoleNetworks.withinReach(new PoleNetworks.Pole(0, 0, 0, PoleKind.distribution(PoleTier.LARGE)), small(12, 0, 0)));
     }
 
     @Test

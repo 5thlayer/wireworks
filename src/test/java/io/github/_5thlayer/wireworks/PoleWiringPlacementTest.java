@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class PoleWiringPlacementTest {
 
     private static PoleNetworks.Pole small(int x, int y, int z) {
-        return new PoleNetworks.Pole(x, y, z, PoleTier.SMALL);
+        return new PoleNetworks.Pole(x, y, z, PoleKind.distribution(PoleTier.SMALL));
     }
 
     @Test

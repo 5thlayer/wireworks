@@ -6,6 +6,7 @@ package io.github._5thlayer.wireworks.network;
 import io.github._5thlayer.wireworks.Wireworks;
 import io.github._5thlayer.wireworks.ClientWires;
 import io.github._5thlayer.wireworks.PoleNetworks;
+import io.github._5thlayer.wireworks.WireSystem;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -34,9 +35,14 @@ public record PoleWiresPacket(int chunkX, int chunkZ, List<PoleNetworks.Wire> wi
             ByteBufCodecs.VAR_INT, PoleNetworks.Pos::z,
             PoleNetworks.Pos::new);
 
+    private static final StreamCodec<ByteBuf, WireSystem> SYSTEM = ByteBufCodecs.BOOL.map(
+            transmission -> transmission ? WireSystem.TRANSMISSION : WireSystem.DISTRIBUTION,
+            system -> system == WireSystem.TRANSMISSION);
+
     private static final StreamCodec<ByteBuf, PoleNetworks.Wire> WIRE = StreamCodec.composite(
             POS, PoleNetworks.Wire::a,
             POS, PoleNetworks.Wire::b,
+            SYSTEM, PoleNetworks.Wire::system,
             PoleNetworks.Wire::new);
 
     public static final StreamCodec<ByteBuf, PoleWiresPacket> STREAM_CODEC = StreamCodec.composite(

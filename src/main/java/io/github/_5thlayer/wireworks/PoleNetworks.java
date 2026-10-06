@@ -21,16 +21,21 @@ import java.util.Map;
  */
 public final class PoleNetworks {
 
-    /** A pole's position and tier. */
-    public record Pole(int x, int y, int z, PoleTier tier) {
+    /** A pole's position and kind. */
+    public record Pole(int x, int y, int z, PoleKind kind) {
     }
 
     /** A block position, the base of a pole's column. */
     public record Pos(int x, int y, int z) {
     }
 
-    /** A stored wire between two poles' bases. */
-    public record Wire(Pos a, Pos b) {
+    /** A stored wire between two poles' bases, in one wire system. */
+    public record Wire(Pos a, Pos b, WireSystem system) {
+
+        /** A Distribution wire, which is every wire an old world holds. */
+        public Wire(Pos a, Pos b) {
+            this(a, b, WireSystem.DISTRIBUTION);
+        }
     }
 
     private PoleNetworks() {
@@ -41,7 +46,7 @@ public final class PoleNetworks {
      * measured between block centres in three dimensions.
      */
     public static boolean withinReach(Pole a, Pole b) {
-        double reach = Math.min(a.tier().wireReach(), b.tier().wireReach());
+        double reach = PoleKind.wireReach(a.kind(), b.kind());
         long dx = a.x() - b.x();
         long dy = a.y() - b.y();
         long dz = a.z() - b.z();

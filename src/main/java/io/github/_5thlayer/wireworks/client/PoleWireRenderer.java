@@ -17,6 +17,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.joml.Matrix4f;
 import io.github._5thlayer.wireworks.PoleColumn;
+import io.github._5thlayer.wireworks.PoleKind;
 import io.github._5thlayer.wireworks.PoleNetworks;
 import io.github._5thlayer.wireworks.PoleTier;
 import io.github._5thlayer.wireworks.ClientWires;
@@ -206,8 +207,8 @@ public final class PoleWireRenderer
         if (minecraft.hitResult instanceof BlockHitResult hit
                 && level.getBlockState(hit.getBlockPos()).getBlock() instanceof SupplyAreaPoleBlock targetBlock) {
             BlockPos base = PoleColumn.baseOf(level, hit.getBlockPos());
-            PoleNetworks.Pole anchor = new PoleNetworks.Pole(from.getX(), from.getY(), from.getZ(), anchorBlock.tier());
-            PoleNetworks.Pole target = new PoleNetworks.Pole(base.getX(), base.getY(), base.getZ(), targetBlock.tier());
+            PoleNetworks.Pole anchor = new PoleNetworks.Pole(from.getX(), from.getY(), from.getZ(), PoleKind.distribution(anchorBlock.tier()));
+            PoleNetworks.Pole target = new PoleNetworks.Pole(base.getX(), base.getY(), base.getZ(), PoleKind.distribution(targetBlock.tier()));
             // Looking at another pole previews the wire itself, ending where it would hang.
             if (!base.equals(from)) {
                 end = attachPoint(level, base);

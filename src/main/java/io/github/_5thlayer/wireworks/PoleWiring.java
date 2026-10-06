@@ -44,7 +44,7 @@ public final class PoleWiring {
             wires.remove(pos(anchor), pos(target));
             return Click.CUT;
         }
-        wires.add(pos(anchor), pos(target));
+        wires.add(pos(anchor), pos(target), WireSystem.between(anchor.kind(), target.kind()));
         return Click.WIRED;
     }
 

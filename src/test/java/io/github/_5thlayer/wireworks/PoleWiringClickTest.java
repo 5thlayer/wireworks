@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class PoleWiringClickTest {
 
     private static PoleNetworks.Pole small(int x, int y, int z) {
-        return new PoleNetworks.Pole(x, y, z, PoleTier.SMALL);
+        return new PoleNetworks.Pole(x, y, z, PoleKind.distribution(PoleTier.SMALL));
     }
 
     private static PoleNetworks.Pos pos(PoleNetworks.Pole p) {
@@ -30,6 +30,13 @@ class PoleWiringClickTest {
         WireSet wires = new WireSet();
         assertEquals(PoleWiring.Click.WIRED, PoleWiring.click(a, b, wires));
         assertTrue(wires.contains(pos(a), pos(b)));
+    }
+
+    @Test
+    void aWireMadeBetweenDistributionPolesIsStoredAsDistribution() {
+        WireSet wires = new WireSet();
+        PoleWiring.click(small(0, 0, 0), small(7, 0, 0), wires);
+        assertEquals(WireSystem.DISTRIBUTION, wires.all().iterator().next().system());
     }
 
     @Test

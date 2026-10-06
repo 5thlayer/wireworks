@@ -9,6 +9,7 @@ import java.util.List;
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github._5thlayer.wireworks.ClientWires;
 import io.github._5thlayer.wireworks.PoleColumn;
+import io.github._5thlayer.wireworks.PoleKind;
 import io.github._5thlayer.wireworks.PoleNetworks;
 import io.github._5thlayer.wireworks.PoleTier;
 import io.github._5thlayer.wireworks.PoleWiring;
@@ -70,7 +71,7 @@ public final class PreviewWires {
         // it lands on, and a column that merely grew is not a new pole.
         boolean joinsAColumn = level.getBlockState(pos.below()).is(block)
                 || level.getBlockState(pos.above()).is(block);
-        PoleNetworks.Pole would = new PoleNetworks.Pole(pos.getX(), pos.getY(), pos.getZ(), block.tier());
+        PoleNetworks.Pole would = new PoleNetworks.Pole(pos.getX(), pos.getY(), pos.getZ(), PoleKind.distribution(block.tier()));
         List<PoleNetworks.Pole> targets = PoleWiring.wouldAdd(would, standingNear(level, pos, block.tier()),
                 ClientWires.wires(), joinsAColumn);
         if (targets.isEmpty()) {
@@ -116,7 +117,7 @@ public final class PreviewWires {
                     BlockPos at = be.getBlockPos();
                     if (level.getBlockState(at).getBlock() instanceof SupplyAreaPoleBlock other
                             && !at.equals(pos) && PoleColumn.isBase(level, at)) {
-                        found.add(new PoleNetworks.Pole(at.getX(), at.getY(), at.getZ(), other.tier()));
+                        found.add(new PoleNetworks.Pole(at.getX(), at.getY(), at.getZ(), PoleKind.distribution(other.tier())));
                     }
                 }
             }

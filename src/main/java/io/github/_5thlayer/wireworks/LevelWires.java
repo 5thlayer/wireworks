@@ -97,11 +97,12 @@ public final class LevelWires extends SavedData {
         if (!PoleColumn.isBase(level, pos)) {
             return;
         }
-        List<PoleNetworks.Pole> wired = PoleWiring.onPlace(placed, standingNear(level, pos, placed.tier()), wires);
+        List<PoleNetworks.Pole> wired = PoleWiring.onPlace(placed, standingNear(level, pos, placed.kind()), wires);
         List<BlockPos> touched = new ArrayList<>();
         touched.add(pos);
         for (PoleNetworks.Pole other : wired) {
-            wires.add(pos(pos), new PoleNetworks.Pos(other.x(), other.y(), other.z()));
+            wires.add(pos(pos), new PoleNetworks.Pos(other.x(), other.y(), other.z()),
+                    WireSystem.between(placed.kind(), other.kind()));
             touched.add(new BlockPos(other.x(), other.y(), other.z()));
         }
         changed(level, touched.toArray(BlockPos[]::new));
@@ -141,8 +142,8 @@ public final class LevelWires extends SavedData {
      * entities rather than by walking blocks. A wire's reach is the shorter of its two ends', so the
      * placed pole's own reach bounds the search.
      */
-    private static List<PoleNetworks.Pole> standingNear(ServerLevel level, BlockPos pos, PoleTier tier) {
-        int reach = (int) Math.ceil(tier.wireReach());
+    private static List<PoleNetworks.Pole> standingNear(ServerLevel level, BlockPos pos, PoleKind kind) {
+        int reach = (int) Math.ceil(kind.reachToward(kind));
         List<PoleNetworks.Pole> found = new ArrayList<>();
         for (int cx = SectionPos.blockToSectionCoord(pos.getX() - reach);
              cx <= SectionPos.blockToSectionCoord(pos.getX() + reach); cx++) {
@@ -208,7 +209,7 @@ public final class LevelWires extends SavedData {
 
     /** The pole of {@code tier} whose column's base is {@code base}. */
     static PoleNetworks.Pole pole(BlockPos base, PoleTier tier) {
-        return new PoleNetworks.Pole(base.getX(), base.getY(), base.getZ(), tier);
+        return new PoleNetworks.Pole(base.getX(), base.getY(), base.getZ(), PoleKind.distribution(tier));
     }
 
     /** The pole whose column holds {@code pos}, named by its base, or null if there is none. */
