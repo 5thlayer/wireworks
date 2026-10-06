@@ -21,11 +21,11 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.bus.api.IEventBus;
@@ -230,26 +230,15 @@ public final class SupplyAreaSquare {
         BlockState state = level.getBlockState(pos);
         Footprint footprint = Footprint.of(state);
         if (footprint != null && footprint.isOrigin(state)) {
-            Direction facing = state.getOptionalValue(Footprint.FACING).orElse(Direction.NORTH);
-            return enclosing(footprint.positions(pos, facing), pos);
+            // Never empty: the origin is the first of its own positions.
+            List<BlockPos> blocks = footprint.positions(pos, state.getValue(Footprint.FACING));
+            return AABB.of(BoundingBox.encapsulatingPositions(blocks).orElseThrow())
+                    .move(-pos.getX(), -pos.getY(), -pos.getZ());
         }
         VoxelShape shape = state.getShape(level, pos);
         return shape.isEmpty() ? FULL_BLOCK : shape.bounds();
     }
 
-    /** The box around these blocks, as offsets from {@code origin}'s corner. */
-    private static AABB enclosing(List<BlockPos> blocks, BlockPos origin) {
-        BlockPos.MutableBlockPos min = origin.mutable();
-        BlockPos.MutableBlockPos max = origin.mutable();
-        for (BlockPos block : blocks) {
-            min.set(Math.min(min.getX(), block.getX()), Math.min(min.getY(), block.getY()),
-                    Math.min(min.getZ(), block.getZ()));
-            max.set(Math.max(max.getX(), block.getX()), Math.max(max.getY(), block.getY()),
-                    Math.max(max.getZ(), block.getZ()));
-        }
-        return new AABB(Vec3.atLowerCornerOf(min), Vec3.atLowerCornerOf(max.move(1, 1, 1)))
-                .move(-origin.getX(), -origin.getY(), -origin.getZ());
-    }
 
     /**
      * The square's four edges, at the square's own y.

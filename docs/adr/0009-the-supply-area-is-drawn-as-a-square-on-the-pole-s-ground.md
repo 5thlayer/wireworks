@@ -46,7 +46,7 @@ outlined once, as the box around all its blocks, the size of the machine. Outlin
 block alone, a large machine looks small and a part reaching into the area points at nothing;
 outlined block by block, it reads as several machines. A multiblock that names its owner through
 `EnergyOwner` or `EnergyOwnerBlock` has no shape Wireworks can read, and is outlined by its owner's
-block. This amends ADR 0005's rule that an owner is outlined where it stands, for footprints only.
+block.
 
 ## Considered options
 
