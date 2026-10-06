@@ -111,14 +111,15 @@ public final class ElectricNetworks {
         dirty = true;
     }
 
-    /** The supply poles of every District wired into the same Electric Network as this one, itself included. */
+    /**
+     * The supply poles of this pole's District, itself included: the poles that keep one book (ADR
+     * 0008), not every District the Electric Network reaches through its Transformers.
+     */
     public List<SupplyAreaPoleBlockEntity> networkOf(SupplyAreaPoleBlockEntity pole) {
         for (Network network : networks) {
             for (List<SupplyAreaPoleBlockEntity> district : network.districts()) {
                 if (district.contains(pole)) {
-                    List<SupplyAreaPoleBlockEntity> all = new ArrayList<>();
-                    network.districts().forEach(all::addAll);
-                    return all;
+                    return List.copyOf(district);
                 }
             }
         }
@@ -372,7 +373,7 @@ public final class ElectricNetworks {
                 accumulatorFlows.put(book.accumulatorsAt.get(i), accumulatorFlow[d][i]);
             }
             readings[d] = new NetworkReading(produced[d], delivered[d], book.demanded, charged[d],
-                    discharged[d], stored, capacity, book.accumulators.size(), network.members().size());
+                    discharged[d], stored, capacity, book.accumulators.size(), book.poles.size());
             NetworkExchange exchange = NetworkExchange.ofDistrict(supplied[d], used[d], surplus, shortfall);
             for (SupplyAreaPoleBlockEntity pole : book.poles) {
                 pole.recordNetworkTick(readings[d], exchange);

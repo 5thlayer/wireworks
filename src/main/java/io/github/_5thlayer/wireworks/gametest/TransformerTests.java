@@ -65,6 +65,8 @@ final class TransformerTests {
                 TransformerTests::creativeFeedsAnotherDistrict);
         tests.isolated("a_district_keeps_its_own_power_and_exports_only_what_is_left", 120,
                 TransformerTests::keepsItsOwnPowerFirst);
+        tests.isolated("a_distribution_pole_counts_and_lists_only_its_own_district", 120,
+                TransformerTests::countsItsOwnDistrict);
         tests.isolated("breaking_the_transformer_leaves_its_district_on_its_own_book", 200,
                 TransformerTests::breakingLeavesDistrictsApart);
         tests.isolated("transformer_is_one_block_not_a_column", 20, TransformerTests::notAColumn);
@@ -178,6 +180,28 @@ final class TransformerTests {
                     if (left != 10_000L - a - b) {
                         helper.fail("the accumulator holds " + left + " FE after giving " + (10_000L - left)
                                 + " to machines that took " + (a + b), ACCUMULATOR);
+                    }
+                })
+                .thenSucceed();
+    }
+
+    /** Two Districts of one pole each, joined by a line: a pole's reading and book are its District's. */
+    private static void countsItsOwnDistrict(GameTestHelper helper) {
+        Network.small(helper, A_POLE);
+        Network.consumer(helper, A_CONSUMER);
+        line(helper);
+        helper.startSequence()
+                .thenIdle(SETTLE)
+                .thenExecute(() -> {
+                    SupplyAreaPoleBlockEntity pole = helper.getBlockEntity(A_POLE, SupplyAreaPoleBlockEntity.class);
+                    int counted = pole.networkReading().poles();
+                    if (counted != 1) {
+                        helper.fail("the pole reads " + counted + " poles, not the 1 of its District", A_POLE);
+                    }
+                    int listed = io.github._5thlayer.wireworks.ElectricNetworks.of(helper.getLevel())
+                            .networkOf(pole).size();
+                    if (listed != 1) {
+                        helper.fail("networkOf lists " + listed + " poles, not the 1 of its District", A_POLE);
                     }
                 })
                 .thenSucceed();
