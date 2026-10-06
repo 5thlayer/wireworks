@@ -40,19 +40,19 @@ final class ConfigTests {
 
     private static void reachesTheTransmissionPole(GameTestHelper helper) {
         double reach = TransmissionSpec.wireReach();
-        if (reach != 40.0) {
+        if (reach != 9.0) {
             helper.fail("the [transmission] section did not reach the Transmission Pole: it reaches " + reach
-                    + ", not the 40.0 that src/gametest/wireworks-server.toml configures");
+                    + ", not the 9.0 that src/gametest/wireworks-server.toml configures");
             return;
         }
         helper.succeed();
     }
 
     private static void reachesTheTransformer(GameTestHelper helper) {
-        if (TransformerSpec.lineReach() != 30.0 || TransformerSpec.districtReach() != 11.0) {
+        if (TransformerSpec.lineReach() != 9.0 || TransformerSpec.districtReach() != 8.0) {
             helper.fail("the [transformer] section did not reach the Transformer: it reaches "
                     + TransformerSpec.lineReach() + " and " + TransformerSpec.districtReach()
-                    + ", not the 30.0 and 11.0 that src/gametest/wireworks-server.toml configures");
+                    + ", not the 9.0 and 8.0 that src/gametest/wireworks-server.toml configures");
             return;
         }
         helper.succeed();

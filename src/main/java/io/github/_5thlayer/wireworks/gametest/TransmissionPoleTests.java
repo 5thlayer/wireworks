@@ -38,7 +38,7 @@ import java.util.List;
 final class TransmissionPoleTests {
 
     private static final BlockPos A = new BlockPos(1, 1, 3);
-    private static final BlockPos B = new BlockPos(21, 1, 3);
+    private static final BlockPos B = new BlockPos(9, 1, 3);
     /** A small pole standing beside A: in reach of it, and of the wrong system. */
     private static final BlockPos SMALL = new BlockPos(4, 1, 3);
     private static final BlockPos BASE = new BlockPos(10, 1, 3);
@@ -97,7 +97,7 @@ final class TransmissionPoleTests {
     }
 
     private static void wiresAndCuts(GameTestHelper helper) {
-        // Placed with a transmission pole 20 blocks away in reach (the test config's 40): auto-wired.
+        // Placed with a transmission pole 8 blocks away in reach (the test config's 9): auto-wired.
         helper.setBlock(A, WireworksRegistries.TRANSMISSION_POLE.get());
         helper.setBlock(B, WireworksRegistries.TRANSMISSION_POLE.get());
         PoleNetworks.Wire wire = only(helper, A, B);

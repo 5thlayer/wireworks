@@ -93,8 +93,9 @@ public final class WireworksGameTests {
 
         /**
          * A test that runs alone. Tests of one environment run together, side by side, and a wire's
-         * reach is not bounded by its test's structure: a Transformer reaches 30 blocks, so it would
-         * wire itself to a neighbouring test's poles. An environment of its own is a batch of its own.
+         * reach is not bounded by its test's structure. The test config keeps every reach shorter than
+         * the gap between tests, so a Transformer cannot wire itself to a neighbouring test's poles; a
+         * test that places one also gets an environment of its own, which is a batch of its own.
          */
         void isolated(String name, int maxTicks, Consumer<GameTestHelper> body) {
             var alone = event.registerEnvironment(id("alone/" + name), new TestEnvironmentDefinition.AllOf(List.of()));

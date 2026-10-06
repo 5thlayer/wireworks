@@ -28,11 +28,14 @@
 	capacity_joules = 5000000
 	max_watts = 300000
 
-# The Transmission Pole is configured off its default of 32, for the same reason as the large pole.
+# The Transmission Pole is configured off its default of 32, for the same reason as the large pole,
+# and short on purpose. Finished tests stay standing and tick, and tests stand 28 blocks apart, so a
+# reach longer than the gap (11 blocks between one test's easternmost pole and the next test's
+# westernmost) would auto-wire a test's poles into a neighbour's. Each test's own wires are at most 8 (the creative pole to its Transformer is 7).
 [transmission]
-	wireReach = 40.0
+	wireReach = 9.0
 
-# The Transformer is configured off its defaults of 32 and 9 too.
+# The Transformer is configured off its defaults of 32 and 9 too, and short for the same reason.
 [transformer]
-	lineReach = 30.0
-	districtReach = 11.0
+	lineReach = 9.0
+	districtReach = 8.0
