@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import io.github._5thlayer.wireworks.PoleColumn;
 import io.github._5thlayer.wireworks.WireLook;
+import io.github._5thlayer.wireworks.WireStrip;
 
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.core.BlockPos;
@@ -25,9 +26,6 @@ import org.joml.Matrix4f;
  * the preview hangs exactly where the wire it promises will hang.
  */
 public final class WireGeometry {
-
-    /** Vanilla's leash segment count and width, so every wire here reads as the same wire. */
-    static final int STEPS = 24;
 
     /** Just under the top face of the top segment, where Factorio hangs its wire off the pole's head. */
     public static final double ATTACH_HEIGHT = 0.9;
@@ -52,39 +50,18 @@ public final class WireGeometry {
      */
     public static void draw(Matrix4f poseIn, VertexConsumer buffer, EntityRenderState.LeashState leash,
             WireLook look, float r, float g, float b, float alpha) {
-        float width = look.width();
         Matrix4f pose = new Matrix4f(poseIn).translate((float) leash.offset.x, (float) leash.offset.y,
                 (float) leash.offset.z);
         float dx = (float) (leash.end.x - leash.start.x);
         float dy = (float) (leash.end.y - leash.start.y);
         float dz = (float) (leash.end.z - leash.start.z);
-        float horizontal = (float) Math.sqrt(dx * dx + dz * dz);
-        float offsetFactor = horizontal == 0.0F ? 0.0F : width / 2.0F / horizontal;
-        float dxOff = dz * offsetFactor;
-        float dzOff = dx * offsetFactor;
-        for (int k = 0; k <= STEPS; k++) {
-            vertices(buffer, pose, dx, dy, dz, horizontal, look, width, width, dxOff, dzOff, k, false, leash, r, g, b, alpha);
+        for (WireStrip.Vertex v : WireStrip.vertices(dx, dy, dz, look)) {
+            float progress = v.step() / (float) WireStrip.STEPS;
+            int block = (int) (leash.startBlockLight + (leash.endBlockLight - leash.startBlockLight) * progress);
+            int sky = (int) (leash.startSkyLight + (leash.endSkyLight - leash.startSkyLight) * progress);
+            buffer.addVertex(pose, v.x(), v.y(), v.z())
+                    .setColor(r * v.shade(), g * v.shade(), b * v.shade(), alpha)
+                    .setLight(LightCoordsUtil.pack(block, sky));
         }
-        for (int k = STEPS; k >= 0; k--) {
-            vertices(buffer, pose, dx, dy, dz, horizontal, look, width, 0.0F, dxOff, dzOff, k, true, leash, r, g, b, alpha);
-        }
-    }
-
-    private static void vertices(VertexConsumer buffer, Matrix4f pose, float dx, float dy, float dz,
-            float horizontal, WireLook look, float width, float fudge, float dxOff, float dzOff, int k, boolean backwards, EntityRenderState.LeashState leash,
-            float r, float g, float b, float alpha) {
-        float progress = k / (float) STEPS;
-        int block = (int) (leash.startBlockLight + (leash.endBlockLight - leash.startBlockLight) * progress);
-        int sky = (int) (leash.startSkyLight + (leash.endSkyLight - leash.startSkyLight) * progress);
-        int light = LightCoordsUtil.pack(block, sky);
-        float shade = k % 2 == (backwards ? 1 : 0) ? 0.7F : 1.0F;
-        float x = dx * progress;
-        // The sag: vanilla's own curve for Distribution, so a previewed wire hangs where the stored one will.
-        float y = look.height(dy, horizontal, progress);
-        float z = dz * progress;
-        buffer.addVertex(pose, x - dxOff, y + fudge, z + dzOff)
-                .setColor(r * shade, g * shade, b * shade, alpha).setLight(light);
-        buffer.addVertex(pose, x + dxOff, y + width - fudge, z - dzOff)
-                .setColor(r * shade, g * shade, b * shade, alpha).setLight(light);
     }
 }
