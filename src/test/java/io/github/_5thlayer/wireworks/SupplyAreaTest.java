@@ -82,11 +82,11 @@ class SupplyAreaTest {
     }
 
     /**
-     * The Supply Area Box (ADR 0005) is drawn from {@link SupplyArea#bounds}, so the bounds
+     * The Supply Area Square (ADR 0005, ADR 0009) is drawn from {@link SupplyArea#bounds}, so the bounds
      * have to be the same region {@link SupplyArea#covers} admits -- lose an offset and the overlay
      * understates the pole's reach, enclose one it does not cover and the overlay overstates it.
      *
-     * <p>The rest of the box's numbers are {@link PoleTier}'s and are asserted there; ADR 0005
+     * <p>The rest of the square's numbers are {@link PoleTier}'s and are asserted there; ADR 0005
      * records that the overlay warrants no check of its own beyond this one.
      */
     @Test

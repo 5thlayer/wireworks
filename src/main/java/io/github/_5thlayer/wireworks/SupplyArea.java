@@ -22,11 +22,11 @@ public final class SupplyArea {
     /**
      * The area's extent as offsets from the pole's base, inclusive on both ends.
      *
-     * <p>This is what the <b>Supply Area Box</b> is drawn from (ADR 0005). The overlay shows
-     * the area's whole volume rather than a surface, so the extent is the only thing a renderer
-     * needs -- and it is asked for here rather than recomputed client-side, because the large pole's
+     * <p>This is what the <b>Supply Area Square</b> is drawn from (ADR 0005, ADR 0009). The overlay
+     * draws the area's footprint on the plane the base stands on, so the x and z extent is the only
+     * thing a renderer needs -- and it is asked for here rather than recomputed client-side, because the large pole's
      * even-sided offset is exactly the arithmetic that looks right while being half a block wrong.
-     * One source for the box and the scan is what keeps them describing the same region.
+     * One source for the square and the scan is what keeps them describing the same region.
      */
     public record Bounds(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
     }

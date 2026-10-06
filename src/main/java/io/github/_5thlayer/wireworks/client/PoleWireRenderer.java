@@ -88,9 +88,9 @@ public final class PoleWireRenderer
         WireSystem slackSystem = WireSystem.DISTRIBUTION;
         EntityRenderState.@Nullable LeashState slack;
         Tint tint = Tint.HELD;
-        /** The tier whose Supply Area Box to draw, or null when this pole is not the one looked at. */
+        /** The tier whose Supply Area Square to draw, or null when this pole is not the one looked at. */
         @Nullable PoleTier areaTier;
-        /** The base and its level, for the scan behind the box's machine outlines. */
+        /** The base and its level, for the scan behind the square's machine outlines. */
         @Nullable Level areaLevel;
         @Nullable BlockPos areaBase;
     }
@@ -146,22 +146,22 @@ public final class PoleWireRenderer
     }
 
     /**
-     * The Supply Area Box for a placed pole (ADR 0005), drawn only while it is the pole the
+     * The Supply Area Square for a placed pole (ADR 0005), drawn only while it is the pole the
      * local player is looking at.
      *
-     * <p><b>Only the aimed pole.</b> Drawing every loaded pole's box would carpet a built base in
+     * <p><b>Only the aimed pole.</b> Drawing every loaded pole's square would carpet a built base in
      * overlapping wireframes, which is the opposite of legible and is not what Factorio does -- it
      * shows the area of the pole under the cursor. A pole wired to this one draws nothing either:
      * "do my two poles cover the gap" is answered by aiming at each in turn.
      *
-     * <p>Looking at any segment of the column counts, and the box is the base's, the same way the
+     * <p>Looking at any segment of the column counts, and the square is the base's, the same way the
      * capability and the Jade line read from the base whatever segment is held against.
      */
     private static void extractSupplyArea(Level level, BlockPos base, State state) {
         Minecraft minecraft = Minecraft.getInstance();
         // The type is checked as well as the class: a miss is also a BlockHitResult, whose position
         // is the rounded end of the ray. A pole's collision shape is thin, so a ray can pass beside
-        // one and expire in air inside that same block position -- and the box would then draw while
+        // one and expire in air inside that same block position -- and the square would then draw while
         // the player is looking at nothing.
         if (!(minecraft.hitResult instanceof BlockHitResult hit)
                 || hit.getType() != HitResult.Type.BLOCK
@@ -262,9 +262,9 @@ public final class PoleWireRenderer
         Level areaLevel = state.areaLevel;
         BlockPos areaBase = state.areaBase;
         if (areaTier != null && areaLevel != null && areaBase != null) {
-            // This renderer's pose is already at the base's own block, so the box is the bare
+            // This renderer's pose is already at the base's own block, so the square is the bare
             // offsets -- it must not take the camera a second time.
-            SupplyAreaBox.drawAtPose(collector, poseStack, areaLevel, areaBase, areaTier);
+            SupplyAreaSquare.drawAtPose(collector, poseStack, areaLevel, areaBase, areaTier);
         }
         for (int i = 0; i < state.wires.size(); i++) {
             EntityRenderState.LeashState wire = state.wires.get(i);

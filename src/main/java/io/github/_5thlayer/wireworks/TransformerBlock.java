@@ -19,7 +19,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 /**
  * The Transformer (ADR 0008): the only block that wires to both Transmission Poles and Distribution
  * Poles, and the joint through which energy crosses between Districts. One block, not a Pole Column:
- * it has no Supply Area, no Supply Area Box and no GUI, and does not stack.
+ * it has no Supply Area, no Supply Area Square and no GUI, and does not stack.
  *
  * <p>It shares the pole block's wiring, breaking and loot ({@link PoleBlock}), and reports into the
  * network tick like every pole does ({@link TransformerBlockEntity}).

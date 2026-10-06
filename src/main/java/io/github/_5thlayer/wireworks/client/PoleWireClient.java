@@ -23,15 +23,15 @@ public final class PoleWireClient {
 
     public static void register(IEventBus modBus) {
         modBus.addListener(PoleWireClient::registerRenderers);
-        // The Supply Area Box (ADR 0005): its line pipeline ignores depth, which no stock line type
+        // The Supply Area Square (ADR 0005): its line pipeline ignores depth, which no stock line type
         // does, so it has to be registered before the first frame that draws one.
-        SupplyAreaBox.register(modBus);
+        SupplyAreaSquare.register(modBus);
         NeoForge.EVENT_BUS.addListener(PreviewOverlay::onOverlay);
         NeoForge.EVENT_BUS.addListener(ClientWires::onLevelUnload);
         NeoForge.EVENT_BUS.addListener(PoleWireClient::onLevelUnload);
     }
 
-    /** The box's machine scan is cached, and a cached answer must not outlive its world. */
+    /** The square's machine scan is cached, and a cached answer must not outlive its world. */
     private static void onLevelUnload(LevelEvent.Unload event) {
         if (event.getLevel().isClientSide()) {
             SuppliedMachines.clear();

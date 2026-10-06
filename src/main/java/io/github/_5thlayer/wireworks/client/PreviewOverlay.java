@@ -23,7 +23,7 @@ final class PreviewOverlay {
     }
 
     /**
-     * An extension draws no box, since the column it joins already draws one; only the same pole
+     * An extension draws no square, since the column it joins already draws one; only the same pole
      * below makes one, so a small pole beside a medium column stands apart from it.
      */
     private static void drawSupplyArea(SubmitCustomGeometryEvent event, ClientLevel level, PlacementPlan plan) {
@@ -37,7 +37,7 @@ final class PreviewOverlay {
             if (level.getBlockState(placed.pos().below()).is(placed.state().getBlock())) {
                 return;
             }
-            SupplyAreaBox.drawAt(event.getSubmitNodeCollector(), event.getPoseStack(), level,
+            SupplyAreaSquare.drawAt(event.getSubmitNodeCollector(), event.getPoseStack(), level,
                     event.getLevelRenderState().cameraRenderState.pos, placed.pos(), pole.tier());
             return;
         }

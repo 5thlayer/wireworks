@@ -149,7 +149,7 @@ public class SupplyAreaPoleBlockEntity extends BlockEntity implements NetworkPol
     }
 
     private void scan(Level level) {
-        // The scan is SupplyAreaScan's, shared with the Supply Area Box's outlines (ADR 0005) so the
+        // The scan is SupplyAreaScan's, shared with the Supply Area Square's outlines (ADR 0005) so the
         // overlay cannot disagree with the network about what this pole reaches.
         SupplyScan.Roles<BlockPos> roles = SupplyAreaScan.of(level, getBlockPos(), tier());
         consumers = roles.consumers();

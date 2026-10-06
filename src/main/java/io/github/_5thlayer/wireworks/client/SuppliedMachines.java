@@ -16,7 +16,7 @@ import net.minecraft.world.level.Level;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Which machines a pole reaches, for the Supply Area Box to outline (ADR 0005), cached.
+ * Which machines a pole reaches, for the Supply Area Square to outline (ADR 0005), cached.
  *
  * <p>The answer is {@link SupplyAreaScan}'s -- the same scan the pole runs to build its network, so
  * the outlines cannot claim a machine the network would not feed, or miss one it would.
@@ -29,8 +29,8 @@ import org.jspecify.annotations.Nullable;
  * {@link #RESCAN_INTERVAL} -- the pole's own interval, for the pole's own reason: machines do not
  * appear and vanish every tick, and a newly placed one waits at most two seconds to be outlined.
  *
- * <p>The cache holds one entry, because only one box is ever drawn in a frame. A held pole that
- * would extend a column draws no box from the hand (the column's own renderer draws it), a pole
+ * <p>The cache holds one entry, because only one square is ever drawn in a frame. A held pole that
+ * would extend a column draws no square from the hand (the column's own renderer draws it), a pole
  * aimed at a wrong-tier pole is refused, and a placed pole draws only while looked at -- so the two
  * call sites cannot both want a different base at once. If that ever stops being true this becomes
  * a thrashing single-entry cache rather than a wrong one.
@@ -55,9 +55,9 @@ public final class SuppliedMachines {
      *
      * <p>All three roles together: a consumer, a generator and an accumulator are all things this
      * pole is connected to, and telling them apart is the Jade line's job rather than a second
-     * colour's (ADR 0005 keeps the box one colour). An owner standing <em>outside</em> the area is
+     * colour's (ADR 0005 keeps the square one colour). An owner standing <em>outside</em> the area is
      * included where it stands -- a slave Steam Engine's master is what the network actually draws,
-     * so an outline beyond the box is the truth about the row rather than a leak.
+     * so an outline beyond the square is the truth about the row rather than a leak.
      */
     public static List<BlockPos> around(Level level, BlockPos base, PoleTier tier) {
         Key now = new Key(base.immutable(), tier, level.dimension());
