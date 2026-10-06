@@ -21,7 +21,7 @@
   "item.wireworks.transformer": "Transformer",
   "item.wireworks.transmission_pole": "Transmission Pole",
   "itemGroup.wireworks.items": "Wireworks",
-  "message.wireworks.cross_system": "A Transformer joins a transmission line to a distribution pole.",
+  "message.wireworks.cross_system": "A Transformer joins a Transmission Line to a Distribution Pole.",
   "message.wireworks.other_tier": "A %s cannot extend a %s column.",
   "message.wireworks.replace_refused": "The pole column cannot be replaced here.",
   "tooltip.wireworks.accumulator.jade.charging": "Charging",
@@ -47,7 +47,7 @@
   "tooltip.wireworks.transformer.jade.exported": "Exporting: %s FE/t from its District",
   "tooltip.wireworks.transformer.jade.idle": "Nothing crossing",
   "tooltip.wireworks.transformer.jade.imported": "Importing: %s FE/t to its District",
-  "tooltip.wireworks.transformer.joins": "Joins a transmission line to a distribution pole; energy crosses both ways",
+  "tooltip.wireworks.transformer.joins": "Joins a Transmission Line to a Distribution Pole; energy crosses both ways",
   "tooltip.wireworks.transformer.reach": "Wires reach %s blocks toward a Transmission Pole, %s toward a Distribution Pole",
   "tooltip.wireworks.transmission_pole.powers_nothing": "Powers nothing: a Transformer joins it to distribution poles",
   "tooltip.wireworks.transmission_pole.reach": "Carries wires up to %s blocks"

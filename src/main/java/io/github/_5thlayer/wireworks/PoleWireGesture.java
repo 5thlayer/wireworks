@@ -86,7 +86,7 @@ public final class PoleWireGesture {
                 alongWire(server, pending.pos(), base, ParticleTypes.SMOKE);
             }
             case CANCELLED -> tool.remove(WireworksRegistries.PENDING_WIRE.get());
-            // Told why, as a placed pole is: a Transformer is what joins the two systems.
+            // The refusal names the Transformer, the one block that joins a Distribution Pole to a Transmission Pole.
             case CROSS_SYSTEM -> {
                 refusedAtPlayer(server, player);
                 if (player instanceof ServerPlayer serverPlayer) {

@@ -35,7 +35,7 @@ import java.util.List;
  * What every pole block shares (ADR 0002, ADR 0008): the column. A pole stands as tall as the player
  * builds it, up to {@link PoleColumn#MAX_SEGMENTS}, and {@link PoleColumn} has the why. This class
  * owns the two world-facing consequences, extending a column and breaking one, and says what kind of
- * pole it is ({@link #kind}); a Supply Area Pole and a Transmission Pole differ in nothing else a
+ * pole it is ({@link #kind}); a Distribution Pole and a Transmission Pole differ in nothing else a
  * column cares about.
  *
  * <p>A column is segments of one block, so "the same kind below" is "the same block below": each tier
