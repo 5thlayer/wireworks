@@ -67,6 +67,16 @@ public final class PoleWiring {
     }
 
     /**
+     * Whether placing a pole next to blocks of its own kind grows a column rather than starts a pole,
+     * as the server decides it: a block placed on top of one is never a base, and a block placed
+     * beneath one only joins it when the pole stacks. A Transformer does not stack, so one placed
+     * beneath another is a base and wires as any new pole does.
+     */
+    public static boolean joinsAColumn(boolean stacks, boolean sameBelow, boolean sameAbove) {
+        return sameBelow || (stacks && sameAbove);
+    }
+
+    /**
      * The wires the Placement Preview draws for a held pole (ADR 0004): the same {@link #onPlace} the
      * server runs, asked of a hypothetical pole at the aimed spot, and nothing where the placement
      * only grows a column, since a column that grew adds no wire.

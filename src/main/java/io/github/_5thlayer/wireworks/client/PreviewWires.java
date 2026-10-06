@@ -71,8 +71,8 @@ public final class PreviewWires {
             Vec3 camera, BlockPos pos, PoleBlock block) {
         // A placement touching a standing column of the same pole extends or joins it, whichever end
         // it lands on, and a column that merely grew is not a new pole.
-        boolean joinsAColumn = level.getBlockState(pos.below()).is(block)
-                || level.getBlockState(pos.above()).is(block);
+        boolean joinsAColumn = PoleWiring.joinsAColumn(block.stacks(),
+                level.getBlockState(pos.below()).is(block), level.getBlockState(pos.above()).is(block));
         PoleNetworks.Pole would = new PoleNetworks.Pole(pos.getX(), pos.getY(), pos.getZ(), block.kind());
         List<PoleNetworks.Pole> targets = PoleWiring.wouldAdd(would, standingNear(level, pos, block.kind()),
                 ClientWires.wires(), joinsAColumn);
