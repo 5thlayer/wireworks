@@ -32,7 +32,10 @@ public class TransformerBlockEntity extends BlockEntity implements NetworkPole {
         }
     }
 
-    /** What crossed between the network's Districts last tick, and its surplus and shortfall. Jade reads this. */
+    /**
+     * What crossed this Transformer last tick: its share of each District it joins, imported to the
+     * District or exported from it. Jade reads this.
+     */
     public NetworkExchange networkExchange() {
         return lastExchange;
     }

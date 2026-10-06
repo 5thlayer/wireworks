@@ -6,6 +6,11 @@ package io.github._5thlayer.wireworks.compat;
 import io.github._5thlayer.wireworks.AccumulatorBlock;
 import io.github._5thlayer.wireworks.AccumulatorBlockEntity;
 import io.github._5thlayer.wireworks.AccumulatorStatus;
+import io.github._5thlayer.wireworks.NetworkExchange;
+import io.github._5thlayer.wireworks.TransformerBlock;
+import io.github._5thlayer.wireworks.TransformerBlockEntity;
+import io.github._5thlayer.wireworks.TransmissionPoleBlock;
+import io.github._5thlayer.wireworks.TransmissionPoleBlockEntity;
 import io.github._5thlayer.wireworks.Wireworks;
 import io.github._5thlayer.wireworks.NetworkReading;
 import io.github._5thlayer.wireworks.PoleColumn;
@@ -68,6 +73,10 @@ public class PoleJadePlugin implements IWailaPlugin {
     private static final String CAPACITY = "NetCapacity";
     private static final String ACCUMULATORS = "NetAccumulators";
     private static final String POLES = "NetPoles";
+    private static final String LINE_EXPORTED = "LineExported";
+    private static final String LINE_IMPORTED = "LineImported";
+    private static final String LINE_SURPLUS = "LineSurplus";
+    private static final String LINE_SHORTFALL = "LineShortfall";
     private static final String SOLAR_OUTPUT = "SolarPanelOutput";
     private static final String SOLAR_SKY_HIDDEN = "SolarPanelSkyHidden";
     private static final String ACCUMULATOR_STATUS = "AccumulatorStatus";
@@ -153,6 +162,92 @@ public class PoleJadePlugin implements IWailaPlugin {
         }
     };
 
+    private static void putExchange(CompoundTag tag, NetworkExchange exchange) {
+        tag.putLong(LINE_EXPORTED, exchange.exported());
+        tag.putLong(LINE_IMPORTED, exchange.imported());
+        tag.putLong(LINE_SURPLUS, exchange.surplus());
+        tag.putLong(LINE_SHORTFALL, exchange.shortfall());
+    }
+
+    /** Transmission Poles and Transformers answer under the same id, so the "Pole network" toggle covers them. */
+    private static final IServerDataProvider<BlockAccessor> LINE_DATA = new IServerDataProvider<>() {
+        @Override
+        public void appendServerData(CompoundTag tag, BlockAccessor accessor) {
+            BlockPos base = PoleColumn.baseOf(accessor.getLevel(), accessor.getPosition());
+            if (base == null) {
+                return;
+            }
+            var entity = accessor.getLevel().getBlockEntity(base);
+            if (entity instanceof TransmissionPoleBlockEntity pole) {
+                putExchange(tag, pole.networkExchange());
+            } else if (entity instanceof TransformerBlockEntity transformer) {
+                putExchange(tag, transformer.networkExchange());
+            }
+        }
+
+        @Override
+        public Identifier getUid() {
+            return UID;
+        }
+    };
+
+    /** The network's surplus or shortfall, which a Transmission Pole and a Transformer both name. */
+    private static void networkLines(ITooltip tooltip, CompoundTag data) {
+        long surplus = data.getLongOr(LINE_SURPLUS, 0L);
+        long shortfall = data.getLongOr(LINE_SHORTFALL, 0L);
+        if (surplus > 0L) {
+            tooltip.add(Component.translatable("tooltip.wireworks.line.jade.surplus", surplus)
+                    .withStyle(ChatFormatting.GREEN));
+        }
+        if (shortfall > 0L) {
+            tooltip.add(Component.translatable("tooltip.wireworks.line.jade.shortfall", shortfall)
+                    .withStyle(ChatFormatting.RED));
+        }
+        if (surplus == 0L && shortfall == 0L) {
+            tooltip.add(Component.translatable("tooltip.wireworks.line.jade.balanced"));
+        }
+    }
+
+    private static final IBlockComponentProvider TRANSMISSION_TOOLTIP = new IBlockComponentProvider() {
+        @Override
+        public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
+            CompoundTag data = accessor.getServerData();
+            if (data.contains(LINE_SURPLUS)) {
+                networkLines(tooltip, data);
+            }
+        }
+
+        @Override
+        public Identifier getUid() {
+            return UID;
+        }
+    };
+
+    private static final IBlockComponentProvider TRANSFORMER_TOOLTIP = new IBlockComponentProvider() {
+        @Override
+        public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
+            CompoundTag data = accessor.getServerData();
+            if (!data.contains(LINE_SURPLUS)) {
+                return;
+            }
+            long exported = data.getLongOr(LINE_EXPORTED, 0L);
+            long imported = data.getLongOr(LINE_IMPORTED, 0L);
+            if (imported > 0L) {
+                tooltip.add(Component.translatable("tooltip.wireworks.transformer.jade.imported", imported));
+            } else if (exported > 0L) {
+                tooltip.add(Component.translatable("tooltip.wireworks.transformer.jade.exported", exported));
+            } else {
+                tooltip.add(Component.translatable("tooltip.wireworks.transformer.jade.idle"));
+            }
+            networkLines(tooltip, data);
+        }
+
+        @Override
+        public Identifier getUid() {
+            return UID;
+        }
+    };
+
     private static final IServerDataProvider<BlockAccessor> SOLAR_DATA = new IServerDataProvider<>() {
         @Override
         public void appendServerData(CompoundTag tag, BlockAccessor accessor) {
@@ -223,6 +318,8 @@ public class PoleJadePlugin implements IWailaPlugin {
     @Override
     public void register(IWailaCommonRegistration registration) {
         registration.registerBlockDataProvider(DATA, SupplyAreaPoleBlockEntity.class);
+        registration.registerBlockDataProvider(LINE_DATA, TransmissionPoleBlockEntity.class);
+        registration.registerBlockDataProvider(LINE_DATA, TransformerBlockEntity.class);
         registration.registerBlockDataProvider(SOLAR_DATA, SolarPanelBlockEntity.class);
         registration.registerBlockDataProvider(ACCUMULATOR_DATA, AccumulatorBlockEntity.class);
     }
@@ -230,6 +327,8 @@ public class PoleJadePlugin implements IWailaPlugin {
     @Override
     public void registerClient(IWailaClientRegistration registration) {
         registration.registerBlockComponent(TOOLTIP, SupplyAreaPoleBlock.class);
+        registration.registerBlockComponent(TRANSMISSION_TOOLTIP, TransmissionPoleBlock.class);
+        registration.registerBlockComponent(TRANSFORMER_TOOLTIP, TransformerBlock.class);
         registration.registerBlockComponent(SOLAR_TOOLTIP, SolarPanelBlock.class);
         registration.registerBlockComponent(ACCUMULATOR_TOOLTIP, AccumulatorBlock.class);
     }

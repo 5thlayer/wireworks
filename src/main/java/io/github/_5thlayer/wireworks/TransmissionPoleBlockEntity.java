@@ -32,7 +32,7 @@ public class TransmissionPoleBlockEntity extends BlockEntity implements NetworkP
         }
     }
 
-    /** What crossed between the network's Districts last tick, and its surplus and shortfall. Jade reads this. */
+    /** The Electric Network's surplus and shortfall last tick, and what crossed its Transformers. Jade reads this. */
     public NetworkExchange networkExchange() {
         return lastExchange;
     }

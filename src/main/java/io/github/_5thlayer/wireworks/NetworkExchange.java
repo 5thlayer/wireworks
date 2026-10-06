@@ -36,4 +36,22 @@ public record NetworkExchange(long exported, long imported, long surplus, long s
         }
         return new NetworkExchange(out, in, surplus, shortfall);
     }
+
+    /**
+     * One of {@code transformers} Transformers joining a District: they share its exchange evenly,
+     * and the network's surplus and shortfall are the same for each.
+     */
+    public NetworkExchange sharedAmong(int transformers) {
+        int n = Math.max(1, transformers);
+        return new NetworkExchange(exported / n, imported / n, surplus, shortfall);
+    }
+
+    /**
+     * What crosses a Transformer that joins two Districts: its shares added, the two directions
+     * netted into one. Surplus and shortfall are the network's, so this exchange's are kept.
+     */
+    public NetworkExchange plus(NetworkExchange other) {
+        long net = (exported - imported) + (other.exported - other.imported);
+        return new NetworkExchange(Math.max(0L, net), Math.max(0L, -net), surplus, shortfall);
+    }
 }

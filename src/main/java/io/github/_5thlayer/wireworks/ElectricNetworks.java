@@ -56,7 +56,8 @@ public final class ElectricNetworks {
     private static final long CREATIVE_OFFER = Integer.MAX_VALUE;
 
     /** One Electric Network: every pole wired into it, and the supply poles of each of its Districts. */
-    private record Network(List<NetworkPole> members, List<List<SupplyAreaPoleBlockEntity>> districts) {
+    private record Network(List<NetworkPole> members, List<List<SupplyAreaPoleBlockEntity>> districts,
+                           List<List<NetworkPole>> transformers) {
     }
 
     /** One District's machines, as found by its poles this tick. */
@@ -213,7 +214,16 @@ public final class ElectricNetworks {
                 districts.put(district, new ArrayList<>());
             }
             byDistrict.add(districts);
-            built.add(new Network(new ArrayList<>(), new ArrayList<>(districts.values())));
+            // Index-aligned with the districts: the Transformers wired to each.
+            List<List<NetworkPole>> joining = new ArrayList<>();
+            for (int district : electric.districts()) {
+                List<NetworkPole> transformers = new ArrayList<>();
+                for (int pole : electric.transformersJoining(district)) {
+                    transformers.add(all.get(pole));
+                }
+                joining.add(transformers);
+            }
+            built.add(new Network(new ArrayList<>(), new ArrayList<>(districts.values()), joining));
         }
         for (int i = 0; i < all.size(); i++) {
             int network = topology.networkOf()[i];
@@ -370,9 +380,20 @@ public final class ElectricNetworks {
         }
         NetworkReading whole = sum(readings, network.members().size());
         NetworkExchange crossed = NetworkExchange.ofNetwork(supplied, used, surplus, shortfall);
+        // A Transformer carries its share of each District it joins: the District's exchange, split
+        // evenly among the Transformers wired to it.
+        Map<NetworkPole, NetworkExchange> carried = new LinkedHashMap<>();
+        for (int d = 0; d < n; d++) {
+            List<NetworkPole> joining = network.transformers().get(d);
+            NetworkExchange share = NetworkExchange.ofDistrict(supplied[d], used[d], surplus, shortfall)
+                    .sharedAmong(joining.size());
+            for (NetworkPole transformer : joining) {
+                carried.merge(transformer, share, NetworkExchange::plus);
+            }
+        }
         for (NetworkPole member : network.members()) {
             if (!(member instanceof SupplyAreaPoleBlockEntity)) {
-                member.recordNetworkTick(whole, crossed);
+                member.recordNetworkTick(whole, carried.getOrDefault(member, crossed));
             }
         }
     }
