@@ -4,6 +4,10 @@ Each version has two sections: Players, what a player or pack developer sees, an
 
 ## Unreleased
 
+### Players
+
+- Breaking: Wireworks no longer bundles Groundworks and requires it as a separate mod, `[0.5.4,0.6)`. Install Groundworks beside Wireworks; Modrinth and CurseForge list it as a required dependency. (#607)
+
 ## 0.4.0
 
 ### Players
