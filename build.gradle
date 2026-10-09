@@ -35,9 +35,8 @@ repositories {
 
 def gameTestReport = layout.buildDirectory.file('reports/gametest.xml').get().asFile
 
-// The Groundworks versions the Library nests and, through neoforge.mods.toml, accepts at load. The
-// lower bound is the Groundworks it nests, the prefer below, and rises with it; Beltworks' range moves
-// the same way, so a pack holding both loads one Groundworks.
+// The Groundworks versions the Library builds against and, through neoforge.mods.toml, requires at
+// load. The lower bound is the preferred version below and rises with it (ADR 0010).
 def groundworksRange = '[0.5.4,0.6)'
 
 neoForge {
@@ -107,8 +106,8 @@ configurations {
 }
 
 dependencies {
-    // Bundled, so the Library runs with nothing else installed.
-    jarJar(implementation('io.github.5thlayer:groundworks')) {
+    // Required at load and not bundled (ADR 0010). CI reads the version `prefer` names.
+    implementation('io.github.5thlayer:groundworks') {
         version {
             strictly groundworksRange
             prefer '0.5.4'
