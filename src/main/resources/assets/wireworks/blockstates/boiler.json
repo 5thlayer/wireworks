@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "wireworks:block/boiler"
+    },
+    "facing=east": {
+      "model": "wireworks:block/boiler",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "wireworks:block/boiler",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "wireworks:block/boiler",
+      "y": 270
+    }
+  }
+}

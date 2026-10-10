@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "wireworks:block/steam_engine_part"
+    }
+  }
+}

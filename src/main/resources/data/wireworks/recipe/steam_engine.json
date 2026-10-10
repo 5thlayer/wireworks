@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "I": "#c:ingots/iron",
+    "C": "#c:ingots/copper",
+    "P": "minecraft:piston",
+    "B": "#c:storage_blocks/iron"
+  },
+  "pattern": [
+    "IPI",
+    "CBC",
+    "III"
+  ],
+  "result": {
+    "id": "wireworks:steam_engine",
+    "count": 1
+  }
+}

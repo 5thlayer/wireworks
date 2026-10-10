@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "I": "#c:ingots/iron",
+    "B": "minecraft:bucket",
+    "F": "minecraft:furnace"
+  },
+  "pattern": [
+    "IBI",
+    "IFI",
+    "III"
+  ],
+  "result": {
+    "id": "wireworks:boiler",
+    "count": 1
+  }
+}
