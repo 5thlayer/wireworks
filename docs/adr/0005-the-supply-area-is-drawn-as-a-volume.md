@@ -7,7 +7,7 @@ status: accepted
 > **Imported from FactoryWorks ADR-0070**, unchanged apart from renumbering. Wireworks began as
 > FactoryWorks' `core/energy/`. Issue numbers (`#n`) and ADRs cited as ADR-00NN refer to
 > 5thlayer/factoryworks. [ADR-0006](0006-wireworks-is-its-own-mod.md) records where Wireworks
-> departs from this decision; the glossary in `CONTEXT.md` has the current terms.
+> departs from this decision; the glossary in `GLOSSARY.md` has the current terms.
 
 A pole's supply area is invisible by construction -- that invisibility is the mechanic -- and #147
 answered it with text: an item tooltip stating the footprint and a Jade line stating what is being

@@ -8,7 +8,7 @@ supersedes: [267]
 > **Imported from FactoryWorks ADR-0062**, unchanged apart from renumbering. Wireworks began as
 > FactoryWorks' `core/energy/`. Issue numbers (`#n`) and ADRs cited as ADR-00NN refer to
 > 5thlayer/factoryworks. [ADR-0006](0006-wireworks-is-its-own-mod.md) records where Wireworks
-> departs from this decision; the glossary in `CONTEXT.md` has the current terms.
+> departs from this decision; the glossary in `GLOSSARY.md` has the current terms.
 
 ADR-0060 left power with two carriers: the core's supply-area poles inside an area, and Oritech's
 Energy Transmission Pole between areas. It named the Steam Engine as a thing that "makes 450" but

@@ -8,7 +8,7 @@ supersedes: [46, 104]
 > **Imported from FactoryWorks ADR-0036**, unchanged apart from renumbering. Wireworks began as
 > FactoryWorks' `core/energy/`. Issue numbers (`#n`) and ADRs cited as ADR-00NN refer to
 > 5thlayer/factoryworks. [ADR-0006](0006-wireworks-is-its-own-mod.md) records where Wireworks
-> departs from this decision; the glossary in `CONTEXT.md` has the current terms.
+> departs from this decision; the glossary in `GLOSSARY.md` has the current terms.
 
 ADR-0035 removes Mekanism, and with it the Universal Cables that `#46` made the answer to
 distribution *inside* an area. That row cannot be left empty: ADR-0017 teaches the grid as a
