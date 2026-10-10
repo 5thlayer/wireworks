@@ -6,10 +6,14 @@ package io.github._5thlayer.wireworks;
 import io.github._5thlayer.groundworks.Footprint;
 import io.github._5thlayer.groundworks.FootprintItem;
 import io.github._5thlayer.groundworks.FootprintPartBlock;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
@@ -17,6 +21,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
@@ -35,7 +40,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/** The poles', Solar Panel's and Accumulator's blocks, items and block entity types, the creative tab and the held wire end. */
+/** The poles', Solar Panel's, Accumulator's, Boiler's and Steam Engine's blocks, items and block entity types, the creative tab and the held wire end. */
 public final class WireworksRegistries {
 
     private static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(Wireworks.MOD_ID);
@@ -44,6 +49,7 @@ public final class WireworksRegistries {
             DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, Wireworks.MOD_ID);
     private static final DeferredRegister<DataComponentType<?>> DATA_COMPONENTS =
             DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, Wireworks.MOD_ID);
+    private static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(Registries.MENU, Wireworks.MOD_ID);
     private static final DeferredRegister<CreativeModeTab> CREATIVE_TABS =
             DeferredRegister.create(Registries.CREATIVE_MODE_TAB, Wireworks.MOD_ID);
 
@@ -113,6 +119,31 @@ public final class WireworksRegistries {
             ACCUMULATOR_ENTITY = BLOCK_ENTITIES.register("accumulator",
                     () -> new BlockEntityType<>(AccumulatorBlockEntity::new, ACCUMULATOR.get()));
 
+    public static final DeferredBlock<BoilerBlock> BOILER = BLOCKS.registerBlock(BoilerBlock.BLOCK_NAME, BoilerBlock::new);
+    public static final DeferredBlock<FootprintPartBlock> BOILER_PART =
+            part("boiler_part", () -> WireworksRegistries.BOILER_FOOTPRINT);
+    public static final DeferredItem<BoilerItem> BOILER_ITEM =
+            ITEMS.registerItem(BoilerBlock.BLOCK_NAME, BoilerItem::new);
+    public static final Footprint BOILER_FOOTPRINT = Footprint.declare(
+            SteamFootprints.BOILER, BOILER, BOILER_PART, BOILER_ITEM);
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BoilerBlockEntity>>
+            BOILER_ENTITY = BLOCK_ENTITIES.register("boiler",
+                    () -> new BlockEntityType<>(BoilerBlockEntity::new, BOILER.get()));
+    public static final Supplier<MenuType<BoilerMenu>> BOILER_MENU =
+            MENUS.register("boiler", () -> new MenuType<>(BoilerMenu::new, FeatureFlags.DEFAULT_FLAGS));
+
+    public static final DeferredBlock<SteamEngineBlock> STEAM_ENGINE =
+            BLOCKS.registerBlock(SteamEngineBlock.BLOCK_NAME, SteamEngineBlock::new);
+    public static final DeferredBlock<FootprintPartBlock> STEAM_ENGINE_PART =
+            part("steam_engine_part", () -> WireworksRegistries.STEAM_ENGINE_FOOTPRINT);
+    public static final DeferredItem<SteamEngineItem> STEAM_ENGINE_ITEM =
+            ITEMS.registerItem(SteamEngineBlock.BLOCK_NAME, SteamEngineItem::new);
+    public static final Footprint STEAM_ENGINE_FOOTPRINT = Footprint.declare(
+            SteamFootprints.STEAM_ENGINE, STEAM_ENGINE, STEAM_ENGINE_PART, STEAM_ENGINE_ITEM);
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SteamEngineBlockEntity>>
+            STEAM_ENGINE_ENTITY = BLOCK_ENTITIES.register("steam_engine",
+                    () -> new BlockEntityType<>(SteamEngineBlockEntity::new, STEAM_ENGINE.get()));
+
     /** The first end of a wire a tool is holding, on the stack so it survives a relog and the client can draw it. */
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<GlobalPos>>
             PENDING_WIRE = DATA_COMPONENTS.register("pending_wire",
@@ -121,7 +152,7 @@ public final class WireworksRegistries {
                             .networkSynchronized(GlobalPos.STREAM_CODEC)
                             .build());
 
-    /** The Library's creative tab, {@code wireworks:items}: every pole, the Solar Panel and the Accumulator. */
+    /** The Library's creative tab, {@code wireworks:items}: every pole, the Solar Panel, the Accumulator, the Boiler and the Steam Engine. */
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> CREATIVE_TAB =
             CREATIVE_TABS.register("items", () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup.wireworks.items"))
@@ -146,9 +177,9 @@ public final class WireworksRegistries {
                 .map(DeferredItem::get);
     }
 
-    /** Every item the Library adds: the poles, then the Solar Panel and the Accumulator. */
+    /** Every item the Library adds: the poles, then the Solar Panel, the Accumulator, the Boiler and the Steam Engine. */
     private static Stream<Item> items() {
-        return Stream.concat(poleItems(), Stream.of(SOLAR_PANEL_ITEM, ACCUMULATOR_ITEM).map(DeferredItem::get));
+        return Stream.concat(poleItems(), Stream.of(SOLAR_PANEL_ITEM, ACCUMULATOR_ITEM, BOILER_ITEM, STEAM_ENGINE_ITEM).map(DeferredItem::get));
     }
 
     private static Set<Block> poleBlocks() {
@@ -161,10 +192,13 @@ public final class WireworksRegistries {
         BLOCKS.register(modBus);
         ITEMS.register(modBus);
         BLOCK_ENTITIES.register(modBus);
+        MENUS.register(modBus);
         DATA_COMPONENTS.register(modBus);
         CREATIVE_TABS.register(modBus);
         modBus.addListener(WireworksRegistries::addToCreativeTabs);
         modBus.addListener(WireworksRegistries::registerCapabilities);
+        // Ahead of Groundworks' forwarding, which answers a part with its anchor's face and so cannot tell which port was reached.
+        modBus.addListener(EventPriority.HIGHEST, RegisterCapabilitiesEvent.class, WireworksRegistries::registerBoilerPorts);
     }
 
     /**
@@ -174,6 +208,31 @@ public final class WireworksRegistries {
     private static void registerCapabilities(RegisterCapabilitiesEvent event) {
         energyOnAnchor(event, SOLAR_PANEL, SolarPanelBlockEntity.class, SolarPanelBlockEntity::energy);
         energyOnAnchor(event, ACCUMULATOR, AccumulatorBlockEntity.class, AccumulatorBlockEntity::energy);
+        energyOnAnchor(event, STEAM_ENGINE, SteamEngineBlockEntity.class, SteamEngineBlockEntity::energy);
+        event.registerBlockEntity(Capabilities.Fluid.BLOCK, STEAM_ENGINE_ENTITY.get(),
+                (engine, side) -> engine.steamFace());
+        event.registerBlockEntity(Capabilities.Item.BLOCK, BOILER_ENTITY.get(), (boiler, side) -> boiler.itemFace());
+    }
+
+    /**
+     * The Boiler's fluid faces. A port block reaches its tank only on the faces its port opens onto,
+     * and the anchor opens onto none, so a pipe against the back corners or the front's middle finds
+     * nothing. The null side answers every port block, for a tool that names no face.
+     */
+    private static void registerBoilerPorts(RegisterCapabilitiesEvent event) {
+        event.registerBlock(Capabilities.Fluid.BLOCK, (level, pos, state, entity, side) -> {
+            Footprint footprint = BOILER_FOOTPRINT;
+            BlockPos at = footprint.standingOrigin(level, pos, state);
+            if (at == null || !(level.getBlockEntity(at) instanceof BoilerBlockEntity boiler)) {
+                return null;
+            }
+            int number = SteamFootprints.partOf(state);
+            BoilerPort port = SteamFootprints.boilerPort(number);
+            if (port == null || side != null && !SteamFootprints.boilerPortOpens(number, state.getValue(Footprint.FACING), side)) {
+                return null;
+            }
+            return port == BoilerPort.WATER ? boiler.waterFace() : boiler.steamFace();
+        }, BOILER_PART.get());
     }
 
     /**

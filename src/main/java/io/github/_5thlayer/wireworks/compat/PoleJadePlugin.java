@@ -15,6 +15,9 @@ import io.github._5thlayer.wireworks.Wireworks;
 import io.github._5thlayer.wireworks.NetworkReading;
 import io.github._5thlayer.wireworks.PoleColumn;
 import io.github._5thlayer.wireworks.SolarPanelBlock;
+import io.github._5thlayer.wireworks.SteamEngineBlock;
+import io.github._5thlayer.wireworks.SteamEngineBlockEntity;
+import io.github._5thlayer.wireworks.SteamEngineStatus;
 import io.github._5thlayer.wireworks.SolarPanelBlockEntity;
 import io.github._5thlayer.wireworks.SupplyAreaPoleBlock;
 import io.github._5thlayer.wireworks.SupplyAreaPoleBlockEntity;
@@ -34,8 +37,8 @@ import snownee.jade.api.WailaPlugin;
 import snownee.jade.api.config.IPluginConfig;
 
 /**
- * What a pole is doing right now, on the HUD, and the same for the Solar Panel and the Accumulator
- * the Library ships.
+ * What a pole is doing right now, on the HUD, and the same for the Solar Panel, the Accumulator and
+ * the Steam Engine the Library ships.
  *
  * <p>The item tooltip states what a pole <em>is</em> -- its footprint, that it is wireless, that the
  * area is measured at the base. This is the other half: the two numbers that can only be read from
@@ -80,11 +83,14 @@ public class PoleJadePlugin implements IWailaPlugin {
     private static final String SOLAR_OUTPUT = "SolarPanelOutput";
     private static final String SOLAR_SKY_HIDDEN = "SolarPanelSkyHidden";
     private static final String ACCUMULATOR_STATUS = "AccumulatorStatus";
+    private static final String STEAM_ENGINE_STATUS = "SteamEngineStatus";
 
     private static final Identifier SOLAR_UID =
             Identifier.fromNamespaceAndPath(Wireworks.MOD_ID, "solar_panel");
     private static final Identifier ACCUMULATOR_UID =
             Identifier.fromNamespaceAndPath(Wireworks.MOD_ID, "accumulator");
+    private static final Identifier STEAM_ENGINE_UID =
+            Identifier.fromNamespaceAndPath(Wireworks.MOD_ID, "steam_engine");
 
     /**
      * The numbers live on the server, so they have to be asked for.
@@ -315,6 +321,35 @@ public class PoleJadePlugin implements IWailaPlugin {
         }
     };
 
+    private static final IServerDataProvider<BlockAccessor> STEAM_ENGINE_DATA = new IServerDataProvider<>() {
+        @Override
+        public void appendServerData(CompoundTag tag, BlockAccessor accessor) {
+            if (accessor.getBlockEntity() instanceof SteamEngineBlockEntity engine) {
+                tag.putInt(STEAM_ENGINE_STATUS, engine.status().map(Enum::ordinal).orElse(-1));
+            }
+        }
+
+        @Override
+        public Identifier getUid() {
+            return STEAM_ENGINE_UID;
+        }
+    };
+
+    /** The charge is Jade's own energy row and the steam its fluid row; this names only what they cannot. */
+    private static final IBlockComponentProvider STEAM_ENGINE_TOOLTIP = new IBlockComponentProvider() {
+        @Override
+        public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
+            SteamEngineStatus.fromOrdinal(accessor.getServerData().getIntOr(STEAM_ENGINE_STATUS, -1))
+                    .ifPresent(status -> tooltip.add(Component.translatable(status.langKey())
+                            .withStyle(ChatFormatting.RED)));
+        }
+
+        @Override
+        public Identifier getUid() {
+            return STEAM_ENGINE_UID;
+        }
+    };
+
     @Override
     public void register(IWailaCommonRegistration registration) {
         registration.registerBlockDataProvider(DATA, SupplyAreaPoleBlockEntity.class);
@@ -322,6 +357,7 @@ public class PoleJadePlugin implements IWailaPlugin {
         registration.registerBlockDataProvider(LINE_DATA, TransformerBlockEntity.class);
         registration.registerBlockDataProvider(SOLAR_DATA, SolarPanelBlockEntity.class);
         registration.registerBlockDataProvider(ACCUMULATOR_DATA, AccumulatorBlockEntity.class);
+        registration.registerBlockDataProvider(STEAM_ENGINE_DATA, SteamEngineBlockEntity.class);
     }
 
     @Override
@@ -331,5 +367,6 @@ public class PoleJadePlugin implements IWailaPlugin {
         registration.registerBlockComponent(TRANSFORMER_TOOLTIP, TransformerBlock.class);
         registration.registerBlockComponent(SOLAR_TOOLTIP, SolarPanelBlock.class);
         registration.registerBlockComponent(ACCUMULATOR_TOOLTIP, AccumulatorBlock.class);
+        registration.registerBlockComponent(STEAM_ENGINE_TOOLTIP, SteamEngineBlock.class);
     }
 }

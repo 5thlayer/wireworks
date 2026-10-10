@@ -4,6 +4,7 @@
 package io.github._5thlayer.wireworks;
 
 import io.github._5thlayer.wireworks.client.PoleWireClient;
+import io.github._5thlayer.wireworks.client.SteamClient;
 import io.github._5thlayer.wireworks.gametest.WireworksGameTests;
 import io.github._5thlayer.wireworks.network.PoleWiresPacket;
 import net.neoforged.api.distmarker.Dist;
@@ -25,6 +26,7 @@ public final class Wireworks {
 
     public Wireworks(IEventBus modBus, ModContainer container) {
         WireworksRegistries.register(modBus);
+        SteamFluids.register(modBus);
         WireworksConfig.register(container, modBus);
         modBus.addListener(Wireworks::registerPayloads);
         PoleColumnReplace.register(modBus);
@@ -36,6 +38,7 @@ public final class Wireworks {
         NeoForge.EVENT_BUS.addListener(PoleWireGesture::onPlayerTick);
         if (FMLEnvironment.getDist() == Dist.CLIENT) {
             PoleWireClient.register(modBus);
+            SteamClient.register(modBus);
         }
         WireworksGameTests.register(modBus);
     }
