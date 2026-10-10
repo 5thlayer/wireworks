@@ -39,3 +39,8 @@
 [transformer]
 	lineReach = 9.0
 	districtReach = 8.0
+
+# The Boiler's fuel conversion is configured off its default of 2500 too, so a config that never
+# reached it fails ConfigTests. Coal's 1600 burn ticks are then 8 MJ, and BoilerTests state no joules.
+[boiler]
+	joules_per_burn_tick = 5000

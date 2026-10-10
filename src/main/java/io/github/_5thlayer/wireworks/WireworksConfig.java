@@ -13,10 +13,11 @@ import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 /**
- * {@code wireworks-server.toml}: each pole tier's supply area and wire reach, the Solar Panel's peak
- * and the Accumulator's capacity and flow, the last three in Factorio's watts and joules at
- * {@link ForgeEnergy#JOULES_PER_FE} J per FE. A server config, so the client draws the same areas and
- * reaches the server powers and wires by.
+ * {@code wireworks-server.toml}: each pole tier's supply area and wire reach, the Solar Panel's peak,
+ * the Accumulator's capacity and flow, and what a fuel's burn tick is worth to the Boiler. The Solar
+ * Panel's and Accumulator's are in Factorio's watts and joules at {@link ForgeEnergy#JOULES_PER_FE} J
+ * per FE. A server config, so the client draws the same areas and reaches the server powers and
+ * wires by.
  */
 public final class WireworksConfig {
 
@@ -31,6 +32,7 @@ public final class WireworksConfig {
     private static final ModConfigSpec.LongValue SOLAR_PEAK_WATTS;
     private static final ModConfigSpec.LongValue ACCUMULATOR_CAPACITY_JOULES;
     private static final ModConfigSpec.LongValue ACCUMULATOR_MAX_WATTS;
+    private static final ModConfigSpec.LongValue BOILER_JOULES_PER_BURN_TICK;
 
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
@@ -65,6 +67,10 @@ public final class WireworksConfig {
                 .defineInRange("max_watts", AccumulatorSpec.DEFAULT_MAX_WATTS,
                         ForgeEnergy.TICKS_PER_SECOND * ForgeEnergy.JOULES_PER_FE, 1_000_000_000_000L);
         builder.pop();
+        builder.push("boiler");
+        BOILER_JOULES_PER_BURN_TICK = builder.comment("What one tick of a fuel's vanilla burn time is worth to the Boiler, in joules. 2500 makes coal's 1600 ticks Factorio's 4 MJ.")
+                .defineInRange("joules_per_burn_tick", BoilerFuel.DEFAULT_JOULES_PER_BURN_TICK, 1L, 1_000_000L);
+        builder.pop();
         SPEC = builder.build();
     }
 
@@ -82,6 +88,7 @@ public final class WireworksConfig {
                 TransformerSpec.configure(TransformerSpec.DEFAULT_LINE_REACH, TransformerSpec.DEFAULT_DISTRICT_REACH);
                 SolarPanelSpec.configure(SolarPanelSpec.DEFAULT_PEAK_WATTS);
                 AccumulatorSpec.configure(AccumulatorSpec.DEFAULT_CAPACITY_JOULES, AccumulatorSpec.DEFAULT_MAX_WATTS);
+                BoilerFuel.configure(BoilerFuel.DEFAULT_JOULES_PER_BURN_TICK);
             }
         });
     }
@@ -95,5 +102,6 @@ public final class WireworksConfig {
         TransformerSpec.configure(TRANSFORMER_LINE_REACH.get(), TRANSFORMER_DISTRICT_REACH.get());
         SolarPanelSpec.configure(SOLAR_PEAK_WATTS.get());
         AccumulatorSpec.configure(ACCUMULATOR_CAPACITY_JOULES.get(), ACCUMULATOR_MAX_WATTS.get());
+        BoilerFuel.configure(BOILER_JOULES_PER_BURN_TICK.get());
     }
 }

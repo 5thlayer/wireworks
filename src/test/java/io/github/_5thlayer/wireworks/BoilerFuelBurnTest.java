@@ -10,7 +10,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 /**
  * Each fuel lasts in the Boiler as long as the same MJ does in Factorio's 1.8 MW boiler: vanilla's
- * burn time at {@link BoilerFuel#JOULES_PER_BURN_TICK}, run through {@link BoilerCycle} at the draw
+ * burn time at {@link BoilerFuel#DEFAULT_JOULES_PER_BURN_TICK}, run through {@link BoilerCycle} at the draw
  * the block entity uses.
  */
 class BoilerFuelBurnTest {
@@ -44,5 +44,17 @@ class BoilerFuelBurnTest {
     void whatDoesNotBurnIsWorthNothing() {
         assertEquals(0L, BoilerFuel.joules(0));
         assertEquals(0L, BoilerFuel.joules(-1));
+    }
+
+    @org.junit.jupiter.api.Test
+    void theConversionIsConfigurableAndRefusesNonsense() {
+        try {
+            BoilerFuel.configure(5_000L);
+            assertEquals(8_000_000L, BoilerFuel.joules(1600));
+            org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> BoilerFuel.configure(0L));
+            assertEquals(5_000L, BoilerFuel.joulesPerBurnTick());
+        } finally {
+            BoilerFuel.configure(BoilerFuel.DEFAULT_JOULES_PER_BURN_TICK);
+        }
     }
 }

@@ -3,6 +3,7 @@
 
 package io.github._5thlayer.wireworks.gametest;
 
+import io.github._5thlayer.wireworks.BoilerFuel;
 import io.github._5thlayer.wireworks.PoleTier;
 import io.github._5thlayer.wireworks.TransformerSpec;
 import io.github._5thlayer.wireworks.TransmissionSpec;
@@ -22,6 +23,7 @@ final class ConfigTests {
         tests.test("server_config_reaches_the_pole_tiers", 1, ConfigTests::reachesTheTiers);
         tests.test("server_config_reaches_the_transmission_pole", 1, ConfigTests::reachesTheTransmissionPole);
         tests.test("server_config_reaches_the_transformer", 1, ConfigTests::reachesTheTransformer);
+        tests.test("server_config_reaches_the_boiler_fuel", 1, ConfigTests::reachesTheBoilerFuel);
     }
 
     private static void reachesTheTiers(GameTestHelper helper) {
@@ -53,6 +55,15 @@ final class ConfigTests {
             helper.fail("the [transformer] section did not reach the Transformer: it reaches "
                     + TransformerSpec.lineReach() + " and " + TransformerSpec.districtReach()
                     + ", not the 9.0 and 8.0 that src/gametest/wireworks-server.toml configures");
+            return;
+        }
+        helper.succeed();
+    }
+
+    private static void reachesTheBoilerFuel(GameTestHelper helper) {
+        if (BoilerFuel.joulesPerBurnTick() != 5000L || BoilerFuel.joules(1600) != 8_000_000L) {
+            helper.fail("the [boiler] section did not reach the Boiler: a burn tick is worth "
+                    + BoilerFuel.joulesPerBurnTick() + " J, not the 5000 that src/gametest/wireworks-server.toml configures");
             return;
         }
         helper.succeed();
