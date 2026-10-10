@@ -85,6 +85,18 @@ _Avoid_: battery, storage
 The **Generator** Wireworks ships: its output follows **Daylight**, and it makes nothing while a roof hides the sky above it.
 _Avoid_: solar generator
 
+**Boiler**:
+The machine that burns fuel to turn water into **Steam**, at Factorio's 60 mB/s. A 3x2 **Groundworks** footprint: water goes in at the two ends of its front row, steam leaves its back middle, and fuel goes in through any block. It burns no fuel while its steam has nowhere to go.
+_Avoid_: furnace, kettle
+
+**Steam Engine**:
+The **Generator** that burns **Steam**, 30 mB/s of it for up to 450 FE/t. A 2x1x2 footprint with its own steam tank, filled by a pipe or by a **Boiler** standing against it.
+_Avoid_: turbine (the nuclear chapter's machine)
+
+**Steam**:
+The fluid the **Boiler** makes and the **Steam Engine** burns, Factorio's 165 degree steam. It has no bucket. It crosses between blocks through NeoForge's fluid capability, so Wireworks needs no pipe mod.
+_Avoid_: vapour
+
 **Daylight**:
 How much of a **Solar Panel**'s peak output the time of day allows, all of it through the day, none at night, ramping between them at dusk and dawn.
 _Avoid_: sunlight, light level (the game's block light, which a roof or torch changes)
