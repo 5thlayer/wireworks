@@ -24,7 +24,7 @@ public class BoilerBlock extends EnergyAnchorBlock {
     public static final String BLOCK_NAME = "boiler";
 
     public BoilerBlock(Properties properties) {
-        super(properties.strength(3.5F));
+        super(properties.strength(3.5F).requiresCorrectToolForDrops());
     }
 
     @Override

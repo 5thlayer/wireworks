@@ -18,7 +18,7 @@ public class SteamEngineBlock extends EnergyAnchorBlock {
     public static final String BLOCK_NAME = "steam_engine";
 
     public SteamEngineBlock(Properties properties) {
-        super(properties);
+        super(properties.requiresCorrectToolForDrops());
     }
 
     @Override

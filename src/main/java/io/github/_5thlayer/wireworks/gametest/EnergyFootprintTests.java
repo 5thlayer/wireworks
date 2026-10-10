@@ -17,6 +17,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -43,9 +44,15 @@ final class EnergyFootprintTests {
         for (Kind kind : List.of(solar(), accumulator(), steamEngine(), boiler())) {
             tests.test(kind.name + "_is_placed_whole_from_its_item", 20, helper -> placedWhole(helper, kind));
             tests.test(kind.name + "_breaks_as_one_when_a_part_is_broken", 20,
-                    helper -> brokenWhole(helper, kind, kind.lastPart(helper)));
+                    helper -> brokenWhole(helper, kind, kind.lastPart(helper), true));
             tests.test(kind.name + "_breaks_as_one_when_its_anchor_is_broken", 20,
-                    helper -> brokenWhole(helper, kind, helper.absolutePos(ANCHOR)));
+                    helper -> brokenWhole(helper, kind, helper.absolutePos(ANCHOR), true));
+            if (kind.needsPickaxe) {
+                tests.test(kind.name + "_drops_nothing_when_broken_without_a_pickaxe", 20,
+                        helper -> brokenWhole(helper, kind, helper.absolutePos(ANCHOR), false));
+                tests.test(kind.name + "_drops_nothing_when_a_part_is_broken_without_a_pickaxe", 20,
+                        helper -> brokenWhole(helper, kind, kind.lastPart(helper), false));
+            }
             if (kind.energy) {
                 tests.test(kind.name + "_answers_the_energy_capability_on_every_block_with_the_anchors_buffer", 20,
                         helper -> sharesItsBuffer(helper, kind));
@@ -53,7 +60,7 @@ final class EnergyFootprintTests {
         }
     }
 
-    private record Kind(String name, Footprint footprint, Item item, int blocks, boolean energy) {
+    private record Kind(String name, Footprint footprint, Item item, int blocks, boolean energy, boolean needsPickaxe) {
 
         BlockPos lastPart(GameTestHelper helper) {
             return footprint.positions(helper.absolutePos(ANCHOR), PLACED_FACING).getLast();
@@ -62,23 +69,23 @@ final class EnergyFootprintTests {
 
     private static Kind solar() {
         return new Kind("solar_panel", WireworksRegistries.SOLAR_PANEL_FOOTPRINT,
-                WireworksRegistries.SOLAR_PANEL_ITEM.get(), 10, true);
+                WireworksRegistries.SOLAR_PANEL_ITEM.get(), 10, true, false);
     }
 
     private static Kind accumulator() {
         return new Kind("accumulator", WireworksRegistries.ACCUMULATOR_FOOTPRINT,
-                WireworksRegistries.ACCUMULATOR_ITEM.get(), 4, true);
+                WireworksRegistries.ACCUMULATOR_ITEM.get(), 4, true, false);
     }
 
     private static Kind steamEngine() {
         return new Kind("steam_engine", WireworksRegistries.STEAM_ENGINE_FOOTPRINT,
-                WireworksRegistries.STEAM_ENGINE_ITEM.get(), 4, true);
+                WireworksRegistries.STEAM_ENGINE_ITEM.get(), 4, true, true);
     }
 
     /** Holds no energy: its footprint is placed and broken as the others are. */
     private static Kind boiler() {
         return new Kind("boiler", WireworksRegistries.BOILER_FOOTPRINT,
-                WireworksRegistries.BOILER_ITEM.get(), 6, false);
+                WireworksRegistries.BOILER_ITEM.get(), 6, false, true);
     }
 
     private static void placedWhole(GameTestHelper helper, Kind kind) {
@@ -96,10 +103,11 @@ final class EnergyFootprintTests {
         helper.succeed();
     }
 
-    private static void brokenWhole(GameTestHelper helper, Kind kind, BlockPos broken) {
+    private static void brokenWhole(GameTestHelper helper, Kind kind, BlockPos broken, boolean withPickaxe) {
         ListeningPlayer player = holding(helper, kind, 1);
         click(helper, player);
         expectStanding(helper, kind);
+        player.setItemInHand(InteractionHand.MAIN_HAND, withPickaxe ? new ItemStack(Items.IRON_PICKAXE) : ItemStack.EMPTY);
         player.gameMode.destroyBlock(broken);
         for (BlockPos pos : kind.footprint.positions(helper.absolutePos(ANCHOR), PLACED_FACING)) {
             if (!helper.getLevel().getBlockState(pos).isAir()) {
@@ -108,8 +116,10 @@ final class EnergyFootprintTests {
         }
         List<ItemStack> drops = helper.getEntities(EntityType.ITEM).stream().map(ItemEntity::getItem).toList();
         int dropped = drops.stream().filter(stack -> stack.is(kind.item)).mapToInt(ItemStack::getCount).sum();
-        if (dropped != 1 || drops.size() != 1) {
-            helper.fail("the break dropped " + dropped + " of its item among " + drops.size() + " stacks, not one item");
+        int expected = !kind.needsPickaxe || withPickaxe ? 1 : 0;
+        if (dropped != expected || drops.size() != expected) {
+            helper.fail("the break dropped " + dropped + " of its item among " + drops.size() + " stacks, not "
+                    + expected + (withPickaxe ? " with a pickaxe" : " with a bare hand"));
         }
         helper.succeed();
     }
