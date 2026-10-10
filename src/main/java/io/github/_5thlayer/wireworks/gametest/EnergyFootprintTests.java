@@ -24,9 +24,9 @@ import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.transfer.energy.EnergyHandler;
 
 /**
- * The Solar Panel and the Accumulator as footprints: each placed whole from its one item, broken as
- * one with one item back whichever block is hit, and answering the energy capability on every block
- * with the anchor's buffer.
+ * The Solar Panel, the Accumulator, the Steam Engine and the Boiler as footprints: each placed whole from its one item, broken as
+ * one with one item back whichever block is hit, and, where they hold energy, answering the energy
+ * capability on every block with the anchor's buffer.
  *
  * <p>The player stands west of the anchor looking east and clicks the floor under it, so the
  * footprint faces west.
@@ -40,18 +40,20 @@ final class EnergyFootprintTests {
     }
 
     static void register(WireworksGameTests.Registrar tests) {
-        for (Kind kind : List.of(solar(), accumulator())) {
+        for (Kind kind : List.of(solar(), accumulator(), steamEngine(), boiler())) {
             tests.test(kind.name + "_is_placed_whole_from_its_item", 20, helper -> placedWhole(helper, kind));
             tests.test(kind.name + "_breaks_as_one_when_a_part_is_broken", 20,
                     helper -> brokenWhole(helper, kind, kind.lastPart(helper)));
             tests.test(kind.name + "_breaks_as_one_when_its_anchor_is_broken", 20,
                     helper -> brokenWhole(helper, kind, helper.absolutePos(ANCHOR)));
-            tests.test(kind.name + "_answers_the_energy_capability_on_every_block_with_the_anchors_buffer", 20,
-                    helper -> sharesItsBuffer(helper, kind));
+            if (kind.energy) {
+                tests.test(kind.name + "_answers_the_energy_capability_on_every_block_with_the_anchors_buffer", 20,
+                        helper -> sharesItsBuffer(helper, kind));
+            }
         }
     }
 
-    private record Kind(String name, Footprint footprint, Item item, int blocks) {
+    private record Kind(String name, Footprint footprint, Item item, int blocks, boolean energy) {
 
         BlockPos lastPart(GameTestHelper helper) {
             return footprint.positions(helper.absolutePos(ANCHOR), PLACED_FACING).getLast();
@@ -60,12 +62,23 @@ final class EnergyFootprintTests {
 
     private static Kind solar() {
         return new Kind("solar_panel", WireworksRegistries.SOLAR_PANEL_FOOTPRINT,
-                WireworksRegistries.SOLAR_PANEL_ITEM.get(), 10);
+                WireworksRegistries.SOLAR_PANEL_ITEM.get(), 10, true);
     }
 
     private static Kind accumulator() {
         return new Kind("accumulator", WireworksRegistries.ACCUMULATOR_FOOTPRINT,
-                WireworksRegistries.ACCUMULATOR_ITEM.get(), 4);
+                WireworksRegistries.ACCUMULATOR_ITEM.get(), 4, true);
+    }
+
+    private static Kind steamEngine() {
+        return new Kind("steam_engine", WireworksRegistries.STEAM_ENGINE_FOOTPRINT,
+                WireworksRegistries.STEAM_ENGINE_ITEM.get(), 4, true);
+    }
+
+    /** Holds no energy: its footprint is placed and broken as the others are. */
+    private static Kind boiler() {
+        return new Kind("boiler", WireworksRegistries.BOILER_FOOTPRINT,
+                WireworksRegistries.BOILER_ITEM.get(), 6, false);
     }
 
     private static void placedWhole(GameTestHelper helper, Kind kind) {

@@ -75,6 +75,8 @@ public final class WireworksGameTests {
         SolarPanelTests.register(tests);
         AccumulatorTests.register(tests);
         EnergyFootprintTests.register(tests);
+        BoilerTests.register(tests);
+        SteamEngineTests.register(tests);
         EnergyBlockDataTests.register(tests);
     }
 

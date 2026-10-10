@@ -15,8 +15,8 @@ import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.RecipeType;
 
 /**
- * What the Solar Panel and the Accumulator ship as data: the tags that give them their roles on a
- * network, and recipes that craft the item from the ingredients the tags name.
+ * What the Solar Panel, the Accumulator, the Boiler and the Steam Engine ship as data: the tags that
+ * give them their roles on a network, and recipes that craft the item from the ingredients the tags name.
  */
 final class EnergyBlockDataTests {
 
@@ -33,6 +33,26 @@ final class EnergyBlockDataTests {
                 Items.IRON_BLOCK, Items.REDSTONE_BLOCK, Items.IRON_BLOCK,
                 Items.REDSTONE_BLOCK, Items.COPPER_INGOT, Items.REDSTONE_BLOCK,
                 Items.IRON_BLOCK, Items.REDSTONE_BLOCK, Items.IRON_BLOCK), WireworksRegistries.ACCUMULATOR_ITEM.get()));
+        tests.test("boiler_is_crafted_from_its_recipe", 1, helper -> crafted(helper, 3, List.of(
+                Items.IRON_INGOT, Items.BUCKET, Items.IRON_INGOT,
+                Items.IRON_INGOT, Items.FURNACE, Items.IRON_INGOT,
+                Items.IRON_INGOT, Items.IRON_INGOT, Items.IRON_INGOT), WireworksRegistries.BOILER_ITEM.get()));
+        tests.test("steam_engine_is_crafted_from_its_recipe", 1, helper -> crafted(helper, 3, List.of(
+                Items.IRON_INGOT, Items.PISTON, Items.IRON_INGOT,
+                Items.COPPER_INGOT, Items.IRON_BLOCK, Items.COPPER_INGOT,
+                Items.IRON_INGOT, Items.IRON_INGOT, Items.IRON_INGOT), WireworksRegistries.STEAM_ENGINE_ITEM.get()));
+        tests.test("steam_engine_is_a_generator_and_the_boiler_is_not", 1, EnergyBlockDataTests::steamTagged);
+    }
+
+    private static void steamTagged(GameTestHelper helper) {
+        if (!WireworksRegistries.STEAM_ENGINE.get().defaultBlockState().is(WireworksTags.GENERATORS)) {
+            helper.fail("the steam engine is not in wireworks:generators");
+        }
+        if (WireworksRegistries.BOILER.get().defaultBlockState().is(WireworksTags.GENERATORS)
+                || WireworksRegistries.BOILER.get().defaultBlockState().is(WireworksTags.ACCUMULATORS)) {
+            helper.fail("the boiler makes no FE and must be in neither tag");
+        }
+        helper.succeed();
     }
 
     private static void tagged(GameTestHelper helper) {

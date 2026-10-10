@@ -12,7 +12,7 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-/** The Library's creative tab holds every pole, the tiers in order, the Transmission Pole, the Transformer and the creative pole last, then the Solar Panel and the Accumulator. */
+/** The Library's creative tab holds every pole, the tiers in order, the Transmission Pole, the Transformer and the creative pole last, then the Solar Panel, the Accumulator, the Boiler and the Steam Engine. */
 final class CreativeTabTests {
 
     private CreativeTabTests() {
@@ -32,7 +32,8 @@ final class CreativeTabTests {
                 WireworksRegistries.poleItem(PoleTier.MEDIUM).get(), WireworksRegistries.poleItem(PoleTier.LARGE).get(),
                 WireworksRegistries.TRANSMISSION_POLE_ITEM.get(), WireworksRegistries.TRANSFORMER_ITEM.get(),
                 WireworksRegistries.CREATIVE_POLE_ITEM.get(), WireworksRegistries.SOLAR_PANEL_ITEM.get(),
-                WireworksRegistries.ACCUMULATOR_ITEM.get());
+                WireworksRegistries.ACCUMULATOR_ITEM.get(), WireworksRegistries.BOILER_ITEM.get(),
+                WireworksRegistries.STEAM_ENGINE_ITEM.get());
         if (!shown.equals(expected)) {
             helper.fail("the creative tab shows " + shown + ", not " + expected);
             return;
