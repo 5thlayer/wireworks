@@ -57,6 +57,11 @@ final class SteamFootprints {
         return world(facing, 1, 0);
     }
 
+    /** The face of a Steam Engine's row end that its local {@code +x} looks out of; its row runs along this axis. */
+    static Direction engineRowSide(Direction facing) {
+        return world(facing, 1, 0);
+    }
+
     static int partOf(BlockState state) {
         return state.getValue(io.github._5thlayer.groundworks.FootprintPartBlock.PART);
     }

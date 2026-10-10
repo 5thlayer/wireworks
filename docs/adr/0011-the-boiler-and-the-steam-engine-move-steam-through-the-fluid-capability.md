@@ -19,8 +19,20 @@ segments gave for free are rebuilt by hand:
 - The Boiler offers its steam to whatever stands against its steam port each tick, so a Boiler beside
   an Engine needs no pipe.
 - The Boiler's water faces draw from and fill one tank, so water passes through the front row.
+- The Engine's steam passes through. Its row runs along its local x, and a face at either end
+  remembers which end it took steam in at (saved with the block). Each tick, after burning, the
+  Engine offers what its tank holds to whatever stands against the other end, an Engine or a pipe.
+  Engines in a row share the steam in the order it reaches them, each burning its rate before it
+  passes the rest on, so a starved row feeds its first Engine fully. Steam put in at a side, from
+  above, or with no side named only fills that Engine and is never passed on, so no pair of Engines
+  hands steam back and forth. Core got this from Pipeworks' segment; here it needs only the fluid
+  capability.
 
-Engines no longer share a segment when their ports touch; each is fed by a pipe or a Boiler of its own.
+The Boiler's water faces accept extraction as well as insertion, so a pipe can draw water back out of
+a Boiler; that is accepted.
+
+**Harvest is by pickaxe.** The Boiler and the Engine are mineable with a pickaxe and drop nothing
+without one, whichever block of the footprint is broken.
 
 **Parts answer from a listener ahead of Groundworks'.** Groundworks forwards a part's lookup to its
 origin with the side unchanged, so the origin cannot tell which port was reached. The Boiler's part
@@ -30,8 +42,10 @@ block registers its fluid faces at the highest priority, and the anchor opens on
 0.2 kJ, 200-unit boxes, 0.5 steam per tick for 900 kW. `BoilerSpec` and `SteamEngineSpec` derive the
 per-tick rates from them and refuse a rate that does not land on a whole millibucket.
 
-**Fuel is vanilla's burn time at 2,500 J per tick**, which makes coal's 1,600 ticks Factorio's 4 MJ.
-ADR-0127 has burners read vanilla burn time.
+**Fuel is vanilla's burn time at 2,500 J per tick by default**, which makes coal's 1,600 ticks
+Factorio's 4 MJ. ADR-0127 has burners read vanilla burn time. The conversion is
+`boiler.joules_per_burn_tick` in the server config, since no table of fuel values ships with the
+Library.
 
 ## Consequences
 

@@ -90,7 +90,7 @@ The machine that burns fuel to turn water into **Steam**, at Factorio's 60 mB/s.
 _Avoid_: furnace, kettle
 
 **Steam Engine**:
-The **Generator** that burns **Steam**, 30 mB/s of it for up to 450 FE/t. A 2x1x2 footprint with its own steam tank, filled by a pipe or by a **Boiler** standing against it.
+The **Generator** that burns **Steam**, 30 mB/s of it for up to 450 FE/t. A 2x1x2 footprint with its own steam tank, filled by a pipe or by a **Boiler** standing against it. Steam that comes in at one end of its row passes on out of the other, so Engines placed end to end share it.
 _Avoid_: turbine (the nuclear chapter's machine)
 
 **Steam**:

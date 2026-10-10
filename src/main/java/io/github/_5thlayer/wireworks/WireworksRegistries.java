@@ -210,7 +210,7 @@ public final class WireworksRegistries {
         energyOnAnchor(event, ACCUMULATOR, AccumulatorBlockEntity.class, AccumulatorBlockEntity::energy);
         energyOnAnchor(event, STEAM_ENGINE, SteamEngineBlockEntity.class, SteamEngineBlockEntity::energy);
         event.registerBlockEntity(Capabilities.Fluid.BLOCK, STEAM_ENGINE_ENTITY.get(),
-                (engine, side) -> engine.steamFace());
+                SteamEngineBlockEntity::steamFace);
         event.registerBlockEntity(Capabilities.Item.BLOCK, BOILER_ENTITY.get(), (boiler, side) -> boiler.itemFace());
     }
 

@@ -3,17 +3,23 @@
 
 package io.github._5thlayer.wireworks;
 
+import io.github._5thlayer.groundworks.Footprint;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.ResourceHandlerUtil;
 import net.neoforged.neoforge.transfer.energy.EnergyHandler;
 import net.neoforged.neoforge.transfer.fluid.FluidResource;
 import net.neoforged.neoforge.transfer.TransferPreconditions;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
+
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -21,8 +27,9 @@ import java.util.Optional;
  * The Steam Engine's anchor: a steam tank and an FE buffer.
  *
  * <p>It burns {@link SteamEngineSpec}'s rate from its own tank, which a pipe or a Boiler's steam port
- * fills through the fluid face on every block of the footprint. A pole reaches the buffer through the
- * energy face, extract-only, as a {@link WireworksTags#GENERATORS generator}.
+ * fills through the fluid face on every block of the footprint. Steam that comes in at one end of its
+ * row leaves by the other, so engines in a row share it (ADR-0011). A pole reaches the buffer through
+ * the energy face, extract-only, as a {@link WireworksTags#GENERATORS generator}.
  */
 public class SteamEngineBlockEntity extends BlockEntity {
 
@@ -34,6 +41,11 @@ public class SteamEngineBlockEntity extends BlockEntity {
     private final LongSnapshotJournal journal = new LongSnapshotJournal(() -> stored, v -> stored = v, this::setChanged);
     private final SingleFluidTank tank = new SingleFluidTank(SteamFluids.STEAM_SOURCE.get(), SPEC.portCapacity(), this::setChanged);
     private final ResourceHandler<FluidResource> steamFace = new FluidFace(tank, true, false);
+    private final ResourceHandler<FluidResource> enteredAtRowSide = new FluidFace(tank, true, false,
+            () -> passOn = rowSide().getOpposite());
+    private final ResourceHandler<FluidResource> enteredAtRowBack = new FluidFace(tank, true, false,
+            () -> passOn = rowSide());
+    private @Nullable Direction passOn;
     private final EnergyHandler energy = new Face();
 
     public SteamEngineBlockEntity(BlockPos pos, BlockState state) {
@@ -44,8 +56,20 @@ public class SteamEngineBlockEntity extends BlockEntity {
         return SPEC;
     }
 
-    ResourceHandler<FluidResource> steamFace() {
-        return steamFace;
+    /**
+     * The fluid face on {@code side}. At either end of the row it remembers which, so the steam it
+     * takes goes on out of the other; on every other side, and for no side, it only fills the tank.
+     */
+    ResourceHandler<FluidResource> steamFace(@Nullable Direction side) {
+        Direction rowSide = rowSide();
+        if (side == rowSide) {
+            return enteredAtRowSide;
+        }
+        return side == rowSide.getOpposite() ? enteredAtRowBack : steamFace;
+    }
+
+    private Direction rowSide() {
+        return SteamFootprints.engineRowSide(getBlockState().getValue(Footprint.FACING));
     }
 
     /** The FE face on every block of the engine. Journalled so a pole's aborted probe takes nothing. */
@@ -69,6 +93,22 @@ public class SteamEngineBlockEntity extends BlockEntity {
         if (changed) {
             setChanged();
         }
+        passSteamOn();
+    }
+
+    /** Offers what the tank holds to whatever stands against the row end the steam did not come in at. */
+    private void passSteamOn() {
+        if (passOn == null || tank.amount() <= 0) {
+            return;
+        }
+        Direction facing = getBlockState().getValue(Footprint.FACING);
+        for (BlockPos block : WireworksRegistries.STEAM_ENGINE_FOOTPRINT.positions(worldPosition, facing)) {
+            ResourceHandler<FluidResource> next =
+                    level.getCapability(Capabilities.Fluid.BLOCK, block.relative(passOn), passOn.getOpposite());
+            if (next != null) {
+                ResourceHandlerUtil.move(tank, next, resource -> true, tank.amount(), null);
+            }
+        }
     }
 
     /** What the Jade line says: no steam, or steam with no pole drawing it. */
@@ -82,6 +122,7 @@ public class SteamEngineBlockEntity extends BlockEntity {
         stored = Math.max(0L, input.getLongOr("Energy", 0L));
         carry = new SteamEngineSpec.Carry(input.getDoubleOr("CarrySteam", 0.0), input.getDoubleOr("CarryEnergy", 0.0));
         tank.fill(input.getIntOr("Steam", 0));
+        passOn = Direction.byName(input.getStringOr("PassOn", ""));
     }
 
     @Override
@@ -91,6 +132,9 @@ public class SteamEngineBlockEntity extends BlockEntity {
         output.putDouble("CarrySteam", carry.steam());
         output.putDouble("CarryEnergy", carry.energy());
         output.putInt("Steam", tank.amount());
+        if (passOn != null) {
+            output.putString("PassOn", passOn.getName());
+        }
     }
 
     private final class Face implements EnergyHandler {

@@ -8,14 +8,14 @@ Each version has two sections: Players, what a player or pack developer sees, an
 
 - The Boiler: a 3x2 machine that burns a fuel item for its vanilla burn time and turns water into steam at Factorio's 60 mB/s, 3 mB a tick. Water goes in at either end of its front row, 600 mB in all; steam leaves its back middle, 200 mB. A Boiler with no room for steam makes none and burns no fuel. Right-click it for its fuel slot and gauges. Pipes can put fuel in but never take it out.
 - The Steam Engine: a 2x1x2 generator that burns 30 mB/s of steam for 450 FE/t, up to Factorio's 900 kW, from a 200 mB steam tank. A pole draws it once, whichever of its blocks the supply area reaches. Jade names "No steam" and "No pole".
-- Steam, a fluid with no bucket. A Boiler standing against an Engine's steam port feeds it with no pipe between.
+- Steam, a fluid with no bucket. A Boiler standing against an Engine's steam port feeds it with no pipe between, and Engines placed end to end share the steam: what comes in at one end passes on out of the other.
 - `boiler.joules_per_burn_tick` in `wireworks-server.toml` sets what a tick of a fuel's vanilla burn time is worth to the Boiler: 2500 J by default, which makes coal Factorio's 4 MJ.
 - The Boiler and the Steam Engine are mined with a pickaxe, and drop nothing from a bare hand.
 - Both craft from vanilla materials: the Boiler from a furnace, a bucket and seven iron ingots; the Engine from a piston, an iron block, two copper ingots and five iron ingots.
 
 ### Consumers
 
-- `wireworks:steam_engine` is in `wireworks:generators`. Its fluid face is on every block of its footprint, insert-only, and the Boiler's water and steam faces are on the port blocks, through NeoForge's `Capabilities.Fluid.BLOCK`. Wireworks names no pipe mod.
+- `wireworks:steam_engine` is in `wireworks:generators`. Its fluid face is on every block of its footprint, insert-only, and steam taken in at either end of its row is offered on out of the other, and the Boiler's water and steam faces are on the port blocks, through NeoForge's `Capabilities.Fluid.BLOCK`. Wireworks names no pipe mod.
 - The Boiler and the Steam Engine ported from FactoryWorks Core, without Oritech or Pipeworks. The Core's `SteamEngineBlock` and `BoilerBlock` ids move from `factoryworks:` to `wireworks:`; a world made with them loses them. (#22)
 
 ## 0.5.0

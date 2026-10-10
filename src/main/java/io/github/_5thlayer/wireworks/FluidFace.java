@@ -17,16 +17,28 @@ final class FluidFace extends GuardedResourceHandler<FluidResource> {
 
     private final boolean canInsert;
     private final boolean canExtract;
+    private final Runnable onInserted;
 
     FluidFace(ResourceHandler<FluidResource> tank, boolean canInsert, boolean canExtract) {
+        this(tank, canInsert, canExtract, () -> {
+        });
+    }
+
+    /** @param onInserted run when an insert took some, whether or not its transaction goes on to commit */
+    FluidFace(ResourceHandler<FluidResource> tank, boolean canInsert, boolean canExtract, Runnable onInserted) {
         super(tank);
         this.canInsert = canInsert;
         this.canExtract = canExtract;
+        this.onInserted = onInserted;
     }
 
     @Override
     public int insert(int index, FluidResource resource, int amount, TransactionContext transaction) {
-        return canInsert ? super.insert(index, resource, amount, transaction) : 0;
+        int taken = canInsert ? super.insert(index, resource, amount, transaction) : 0;
+        if (taken > 0) {
+            onInserted.run();
+        }
+        return taken;
     }
 
     @Override
