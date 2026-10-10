@@ -45,11 +45,4 @@ class BoilerFuelBurnTest {
         assertEquals(0L, BoilerFuel.joules(0));
         assertEquals(0L, BoilerFuel.joules(-1));
     }
-
-    @org.junit.jupiter.api.Test
-    void nothingMayBeTakenBackOut() {
-        assertEquals(BoilerSlots.FUEL, BoilerSlots.insertionSlot(true));
-        assertEquals(BoilerSlots.NONE, BoilerSlots.insertionSlot(false));
-        assertEquals(false, BoilerSlots.canExtract(BoilerSlots.FUEL));
-    }
 }

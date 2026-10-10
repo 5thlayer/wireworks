@@ -57,9 +57,9 @@ public class BoilerBlockEntity extends BlockEntity implements Container, MenuPro
 
     private final NonNullList<ItemStack> items = NonNullList.withSize(BoilerSlots.SIZE, ItemStack.EMPTY);
     private final FuelBuffer fuel = new FuelBuffer();
-    private final SteamTank water = new SteamTank(Fluids.WATER, BoilerSpec.WATER_PORTS * BoilerSpec.PORT_VOLUME, this::setChanged);
-    private final SteamTank steam =
-            new SteamTank(SteamFluids.STEAM_SOURCE.get(), BoilerSpec.PORT_VOLUME, this::setChanged);
+    private final SingleFluidTank water = new SingleFluidTank(Fluids.WATER, BoilerSpec.WATER_PORTS * BoilerSpec.PORT_VOLUME, this::setChanged);
+    private final SingleFluidTank steam =
+            new SingleFluidTank(SteamFluids.STEAM_SOURCE.get(), BoilerSpec.PORT_VOLUME, this::setChanged);
     private final ResourceHandler<FluidResource> waterFace = new FluidFace(water, true, true);
     private final ResourceHandler<FluidResource> steamFace = new FluidFace(steam, false, true);
     private final ResourceHandler<ItemResource> itemFace = new BoilerItemHandler(this);
@@ -107,12 +107,17 @@ public class BoilerBlockEntity extends BlockEntity implements Container, MenuPro
         return data;
     }
 
-    ResourceHandler<FluidResource> waterFace() {
-        return waterFace;
-    }
-
-    ResourceHandler<FluidResource> steamFace() {
-        return steamFace;
+    /**
+     * The fluid face of the footprint block numbered {@code part}, or null where its port does not
+     * open onto {@code side}: the anchor and the back corners open onto nothing. The null side
+     * answers every port block, for a tool that names no face.
+     */
+    @Nullable ResourceHandler<FluidResource> fluidFace(int part, Direction facing, @Nullable Direction side) {
+        BoilerPort port = SteamFootprints.boilerPort(part);
+        if (port == null || side != null && !SteamFootprints.boilerPortOpens(part, facing, side)) {
+            return null;
+        }
+        return port == BoilerPort.WATER ? waterFace : steamFace;
     }
 
     ResourceHandler<ItemResource> itemFace() {
@@ -217,7 +222,7 @@ public class BoilerBlockEntity extends BlockEntity implements Container, MenuPro
 
     @Override
     public boolean canPlaceItem(int slot, ItemStack stack) {
-        return slot == BoilerSlots.insertionSlot(isFuel(stack));
+        return slot == BoilerSlots.FUEL && isFuel(stack);
     }
 
     @Override

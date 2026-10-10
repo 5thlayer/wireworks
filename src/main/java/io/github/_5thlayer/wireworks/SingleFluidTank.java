@@ -8,13 +8,13 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.transfer.fluid.FluidResource;
 import net.neoforged.neoforge.transfer.fluid.FluidStacksResourceHandler;
 
-/** One tank of one fluid: the Boiler's water and steam and the Steam Engine's steam. */
-final class SteamTank extends FluidStacksResourceHandler {
+/** A tank of one fluid, whose contents the owning block entity also sets directly. */
+final class SingleFluidTank extends FluidStacksResourceHandler {
 
     private final FluidResource fluid;
     private final Runnable onChange;
 
-    SteamTank(Fluid fluid, int capacity, Runnable onChange) {
+    SingleFluidTank(Fluid fluid, int capacity, Runnable onChange) {
         super(1, capacity);
         this.fluid = FluidResource.of(fluid);
         this.onChange = onChange;

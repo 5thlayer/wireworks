@@ -12,7 +12,7 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-/** The Library's creative tab holds every pole, the tiers in order, the Transmission Pole, the Transformer and the creative pole last, then the Solar Panel, the Accumulator, the Boiler and the Steam Engine. */
+/** The Library's creative tab holds every item the Library adds, the poles first. */
 final class CreativeTabTests {
 
     private CreativeTabTests() {

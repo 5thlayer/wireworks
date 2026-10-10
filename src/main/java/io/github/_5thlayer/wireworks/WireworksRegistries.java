@@ -40,7 +40,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/** The poles', Solar Panel's, Accumulator's, Boiler's and Steam Engine's blocks, items and block entity types, the creative tab and the held wire end. */
+/** The Library's blocks, items and block entity types, its creative tab and the held wire end. */
 public final class WireworksRegistries {
 
     private static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(Wireworks.MOD_ID);
@@ -152,7 +152,7 @@ public final class WireworksRegistries {
                             .networkSynchronized(GlobalPos.STREAM_CODEC)
                             .build());
 
-    /** The Library's creative tab, {@code wireworks:items}: every pole, the Solar Panel, the Accumulator, the Boiler and the Steam Engine. */
+    /** The Library's creative tab, {@code wireworks:items}. */
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> CREATIVE_TAB =
             CREATIVE_TABS.register("items", () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup.wireworks.items"))
@@ -177,7 +177,7 @@ public final class WireworksRegistries {
                 .map(DeferredItem::get);
     }
 
-    /** Every item the Library adds: the poles, then the Solar Panel, the Accumulator, the Boiler and the Steam Engine. */
+    /** Every item the Library adds, the poles first. */
     private static Stream<Item> items() {
         return Stream.concat(poleItems(), Stream.of(SOLAR_PANEL_ITEM, ACCUMULATOR_ITEM, BOILER_ITEM, STEAM_ENGINE_ITEM).map(DeferredItem::get));
     }
@@ -214,24 +214,14 @@ public final class WireworksRegistries {
         event.registerBlockEntity(Capabilities.Item.BLOCK, BOILER_ENTITY.get(), (boiler, side) -> boiler.itemFace());
     }
 
-    /**
-     * The Boiler's fluid faces. A port block reaches its tank only on the faces its port opens onto,
-     * and the anchor opens onto none, so a pipe against the back corners or the front's middle finds
-     * nothing. The null side answers every port block, for a tool that names no face.
-     */
+    /** The Boiler's part blocks answer for their own port (ADR-0011). */
     private static void registerBoilerPorts(RegisterCapabilitiesEvent event) {
         event.registerBlock(Capabilities.Fluid.BLOCK, (level, pos, state, entity, side) -> {
-            Footprint footprint = BOILER_FOOTPRINT;
-            BlockPos at = footprint.standingOrigin(level, pos, state);
+            BlockPos at = BOILER_FOOTPRINT.standingOrigin(level, pos, state);
             if (at == null || !(level.getBlockEntity(at) instanceof BoilerBlockEntity boiler)) {
                 return null;
             }
-            int number = SteamFootprints.partOf(state);
-            BoilerPort port = SteamFootprints.boilerPort(number);
-            if (port == null || side != null && !SteamFootprints.boilerPortOpens(number, state.getValue(Footprint.FACING), side)) {
-                return null;
-            }
-            return port == BoilerPort.WATER ? boiler.waterFace() : boiler.steamFace();
+            return boiler.fluidFace(SteamFootprints.partOf(state), state.getValue(Footprint.FACING), side);
         }, BOILER_PART.get());
     }
 

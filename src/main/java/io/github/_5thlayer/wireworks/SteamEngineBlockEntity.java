@@ -32,7 +32,7 @@ public class SteamEngineBlockEntity extends BlockEntity {
     private SteamEngineSpec.Carry carry = SteamEngineSpec.Carry.NONE;
     private boolean burning;
     private final LongSnapshotJournal journal = new LongSnapshotJournal(() -> stored, v -> stored = v, this::setChanged);
-    private final SteamTank tank = new SteamTank(SteamFluids.STEAM_SOURCE.get(), SPEC.portCapacity(), this::setChanged);
+    private final SingleFluidTank tank = new SingleFluidTank(SteamFluids.STEAM_SOURCE.get(), SPEC.portCapacity(), this::setChanged);
     private final ResourceHandler<FluidResource> steamFace = new FluidFace(tank, true, false);
     private final EnergyHandler energy = new Face();
 

@@ -13,6 +13,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.transfer.ResourceHandler;
@@ -58,6 +60,7 @@ final class BoilerTests {
         tests.test("boiler_boils", 100, BoilerTests::boils);
         tests.test("boiler_stalls_when_the_steam_backs_up_and_burns_nothing", 200, BoilerTests::stalls);
         tests.test("boiler_ports_open_onto_the_faces_adr_says", 20, BoilerTests::portsOpenWhereTheyShould);
+        tests.test("boiler_ports_follow_the_facing", 20, BoilerTests::portsFollowTheFacing);
         tests.test("boiler_water_port_takes_water_only", 20, BoilerTests::waterPortTakesWaterOnly);
         tests.test("boiler_steam_port_gives_steam_and_takes_none", 20, BoilerTests::steamPortGivesSteamOnly);
         tests.test("boiler_item_face_takes_fuel_only", 20, BoilerTests::itemFaceTakesFuelOnly);
@@ -207,6 +210,26 @@ final class BoilerTests {
         }
         if (steamPort.getAmountAsInt(0) != 0) {
             helper.fail("water put in the row reached the steam port", ANCHOR);
+        }
+        helper.succeed();
+    }
+
+    /** The ports turn with the Boiler: water out of each end of the front row, steam out of the back. */
+    private static void portsFollowTheFacing(GameTestHelper helper) {
+        Direction[] sides = {null, Direction.UP, Direction.DOWN, Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
+        BlockPos anchor = new BlockPos(10, 1, 6);
+        for (Direction facing : Direction.Plane.HORIZONTAL) {
+            List<BlockPos> blocks = Network.footprint(helper, WireworksRegistries.BOILER_FOOTPRINT, anchor, facing);
+            expectOpenOn(helper, facing + " west end", blocks.get(WEST_END), sides, facing.getCounterClockWise());
+            expectOpenOn(helper, facing + " east end", blocks.get(EAST_END), sides, facing.getClockWise());
+            expectOpenOn(helper, facing + " steam port", blocks.get(STEAM_PART), sides, facing.getOpposite());
+            expectOpenOn(helper, facing + " back west", blocks.get(BACK_WEST), sides, null);
+            expectOpenOn(helper, facing + " back east", blocks.get(BACK_EAST), sides, null);
+            expectOpenOn(helper, facing + " anchor", blocks.get(0), sides, null);
+            for (BlockPos block : blocks) {
+                helper.getLevel().setBlock(block, Blocks.AIR.defaultBlockState(),
+                        Block.UPDATE_ALL);
+            }
         }
         helper.succeed();
     }
