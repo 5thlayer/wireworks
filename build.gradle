@@ -62,9 +62,8 @@ tasks.named('runGameTestServer') {
     }
 }
 
-// Mods the dev client loads alongside the Library, to try it with them by hand. 26.1 has no
-// per-run classpath, so they go into the client's mods folder, which holds only what is listed here;
-// the game test server loads Groundworks and nothing else (ADR-0127).
+// 26.1 has no per-run classpath, so the dev client's mods go into its mods folder, which holds only
+// what is listed here; the game test server loads Groundworks and nothing else (FactoryWorks ADR-0127).
 configurations {
     clientMods { transitive = false }
 }
@@ -82,8 +81,7 @@ dependencies {
     compileOnly 'maven.modrinth:jade:26.1.11+neoforge'
     clientMods 'maven.modrinth:jade:26.1.11+neoforge'
     clientMods 'curse.maven:emi-unofficial-port-1544558:8630349'
-    // Craftworks 0.4.1, its CurseForge file, on the dev client: its Assembler draws FE, so a pole has a
-    // machine to feed. Wireworks names none of its code.
+    // Craftworks' Assembler draws FE, so a pole has a machine to feed. Wireworks names none of its code.
     clientMods 'curse.maven:craftworks-1715876:9078919'
 
     // The JUnit tests run on a plain JVM, with no Minecraft on their classpath: they test the rules
