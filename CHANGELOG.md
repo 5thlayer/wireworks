@@ -19,6 +19,7 @@ Each version has two sections: Players, what a player or pack developer sees, an
 - `wireworks:steam_engine` is in `wireworks:generators`. Its fluid face is on every block of its footprint, insert-only, and steam taken in at either end of its row is offered on out of the other, and the Boiler's water and steam faces are on the port blocks, through NeoForge's `Capabilities.Fluid.BLOCK`. Wireworks names no pipe mod.
 - Any fluid in `c:crude_oil` sets as `wireworks:tar` where its source block touches lava, through NeoForge's `FluidInteractionRegistry`; a Consumer only tags its crude. `wireworks:tar`, the item, is in the new item tag `wireworks:plastic_resins`. (#26)
 - The Boiler and the Steam Engine ported from FactoryWorks Core, without Oritech or Pipeworks. The Core's `SteamEngineBlock` and `BoilerBlock` ids move from `factoryworks:` to `wireworks:`; a world made with them loses them. (#22)
+- Wireworks nests libworks-runtime 0.1.1 by jar-in-jar, up to but not including 0.2: its mod id is `libworks`, it rides inside the jar, and players install nothing more. The Boiler's item and fluid faces extend its `GuardedResourceHandler`. (#33)
 
 ## 0.5.0
 

@@ -50,6 +50,6 @@ Library.
 ## Consequences
 
 - `GuardedResourceHandler`, which stops a pipe that names no slot from walking past a per-slot
-  refusal, is a local copy under `wireworks.internal` until libworks-runtime ships (5thlayer/libworks#8).
-  The swap is one import in `BoilerItemHandler` and `FluidFace`.
+  refusal, is libworks-runtime's `io.github._5thlayer.libworks.transfer.GuardedResourceHandler`, nested in the
+  jar (5thlayer/libworks#8).
 - The art is Core's, unmodified, with the Boiler on vanilla textures until its 3x2 model is drawn.

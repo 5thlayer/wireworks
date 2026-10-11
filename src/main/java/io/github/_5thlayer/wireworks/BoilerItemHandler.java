@@ -3,7 +3,7 @@
 
 package io.github._5thlayer.wireworks;
 
-import io.github._5thlayer.wireworks.internal.GuardedResourceHandler;
+import io.github._5thlayer.libworks.transfer.GuardedResourceHandler;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.item.VanillaContainerWrapper;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
