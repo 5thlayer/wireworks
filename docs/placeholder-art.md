@@ -1,6 +1,6 @@
 # Placeholder art
 
-The Solar Panel, the Accumulator, the Transmission Pole, the Transformer and tar wear stand-in textures until real art is drawn. They are Wireworks' own, MIT, and the models that use them draw the whole footprint from the anchor's block model.
+The Solar Panel, the Accumulator, the Transmission Pole, the Transformer and tar wear stand-in textures until real art is drawn. They are Wireworks' own, MIT. The machines' models draw the whole footprint from the anchor's block model; tar's are a plain cube and a flat item.
 
 `scripts/build-placeholder-textures.py` draws every file below, and `--check` fails when a committed one is stale. Redraw a texture in that script and re-run it; never edit the PNGs.
 

@@ -192,13 +192,13 @@ public final class WireworksRegistries {
     }
 
     /** Every block's item the Library adds, the poles first. */
-    private static Stream<Item> machineItems() {
+    private static Stream<Item> blockItems() {
         return Stream.concat(poleItems(), Stream.of(SOLAR_PANEL_ITEM, ACCUMULATOR_ITEM, BOILER_ITEM, STEAM_ENGINE_ITEM).map(DeferredItem::get));
     }
 
-    /** Every item the Library adds, the machines first and then tar. */
+    /** Every item the Library adds, its blocks' first and then tar. */
     private static Stream<Item> items() {
-        return Stream.concat(machineItems(), Stream.of(TAR_ITEM.get()));
+        return Stream.concat(blockItems(), Stream.of(TAR_ITEM.get()));
     }
 
     private static Set<Block> poleBlocks() {
@@ -261,7 +261,7 @@ public final class WireworksRegistries {
 
     private static void addToCreativeTabs(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.FUNCTIONAL_BLOCKS) {
-            machineItems().forEach(event::accept);
+            blockItems().forEach(event::accept);
         } else if (event.getTabKey() == CreativeModeTabs.INGREDIENTS) {
             event.accept(TAR_ITEM.get());
         }

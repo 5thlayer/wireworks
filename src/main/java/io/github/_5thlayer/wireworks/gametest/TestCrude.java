@@ -24,7 +24,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 /**
- * A crude oil for the tests to set as tar, since Wireworks ships none and the tests run without
+ * A crude for the tests to set as tar, since Wireworks ships none and the tests run without
  * Fieldworks: a fluid of the tests' own, which the {@code gametest/pack} data pack puts in
  * {@code c:crude_oil}. Registered only when game tests are enabled, and the pack only found then.
  */
@@ -36,7 +36,8 @@ final class TestCrude {
     private static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(Wireworks.MOD_ID);
 
     static final DeferredHolder<FluidType, FluidType> TYPE = FLUID_TYPES.register("gametest_crude",
-            () -> new FluidType(FluidType.Properties.create().descriptionId("fluid_type.wireworks.gametest_crude")));
+            () -> new FluidType(FluidType.Properties.create()
+                    .descriptionId("fluid_type." + Wireworks.MOD_ID + ".gametest_crude")));
     static final DeferredHolder<Fluid, BaseFlowingFluid.Source> SOURCE =
             FLUIDS.register("gametest_crude", () -> new BaseFlowingFluid.Source(properties()));
     static final DeferredHolder<Fluid, BaseFlowingFluid.Flowing> FLOWING =

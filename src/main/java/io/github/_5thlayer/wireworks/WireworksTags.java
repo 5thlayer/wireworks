@@ -10,7 +10,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
 
-/** The tags a Consumer fills to tell Wireworks about its own items and blocks. */
+/** The tags a Consumer fills to tell Wireworks about its own items, blocks and fluids. */
 public final class WireworksTags {
 
     /** Items that wire and unwire poles by hand. */
@@ -22,7 +22,7 @@ public final class WireworksTags {
     /** Blocks a network discharges to cover a shortfall and charges from a generator surplus. */
     public static final TagKey<Block> ACCUMULATORS = TagKey.create(Registries.BLOCK, id("accumulators"));
 
-    /** Items that blast into plastic, tar among them. */
+    /** Plastic Resins, the items plastic is made from: tar among them. */
     public static final TagKey<Item> PLASTIC_RESINS = TagKey.create(Registries.ITEM, id("plastic_resins"));
 
     /** Crude: any fluid here whose source block touches lava sets as tar. Wireworks puts none in it. */

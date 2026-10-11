@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
@@ -31,9 +32,6 @@ import net.neoforged.neoforge.registries.NeoForgeRegistries;
  */
 final class TarInteraction {
 
-    /** The fizz lava makes setting water as stone. */
-    private static final int FIZZ = 1501;
-
     private TarInteraction() {
     }
 
@@ -45,8 +43,7 @@ final class TarInteraction {
         event.enqueueWork(() -> {
             FluidInteractionRegistry.addInteraction(NeoForgeMod.LAVA_TYPE.value(),
                     new InteractionInformation(TarInteraction::crudeArrived, TarInteraction::setCrudeAround));
-            InteractionInformation lavaArrived = new InteractionInformation(TarInteraction::lavaArrived,
-                    WireworksRegistries.TAR.get().defaultBlockState());
+            InteractionInformation lavaArrived = new InteractionInformation(TarInteraction::lavaArrived, tar());
             for (FluidType type : NeoForgeRegistries.FLUID_TYPES) {
                 FluidInteractionRegistry.addInteraction(type, lavaArrived);
             }
@@ -59,27 +56,34 @@ final class TarInteraction {
     }
 
     private static void setCrudeAround(Level level, BlockPos lava, BlockPos beside, FluidState lavaState) {
-        BlockState tar = WireworksRegistries.TAR.get().defaultBlockState();
         for (Direction side : Direction.values()) {
             BlockPos at = lava.relative(side);
             if (isCrudeSource(level, at)) {
-                level.setBlockAndUpdate(at, EventHooks.fireFluidPlaceBlockEvent(level, at, lava, tar));
-                level.levelEvent(FIZZ, at, 0);
+                level.setBlockAndUpdate(at, EventHooks.fireFluidPlaceBlockEvent(level, at, lava, tar()));
+                level.levelEvent(LevelEvent.LAVA_FIZZ, at, 0);
             }
         }
     }
 
-    /** A crude source at {@code crude} has lava at {@code beside}, or under it, where the registry does not look. */
+    /**
+     * A crude source at {@code crude} has lava at {@code beside}, or under it, where the registry does
+     * not look. The registry asks only for a liquid block, so the crude is one.
+     */
     private static boolean lavaArrived(Level level, BlockPos crude, BlockPos beside, FluidState crudeState) {
-        return crudeState.isSource() && crudeState.is(WireworksTags.CRUDE_OIL)
-                && (isLava(level, beside) || isLava(level, crude.below()));
+        return isCrudeSource(crudeState) && (isLava(level, beside) || isLava(level, crude.below()));
     }
 
     /** Only a liquid block: a fluid held in another block, as water in a waterlogged one, never sets. */
     private static boolean isCrudeSource(Level level, BlockPos pos) {
-        FluidState fluid = level.getFluidState(pos);
-        return fluid.isSource() && fluid.is(WireworksTags.CRUDE_OIL)
-                && level.getBlockState(pos).getBlock() instanceof LiquidBlock;
+        return isCrudeSource(level.getFluidState(pos)) && level.getBlockState(pos).getBlock() instanceof LiquidBlock;
+    }
+
+    private static boolean isCrudeSource(FluidState fluid) {
+        return fluid.isSource() && fluid.is(WireworksTags.CRUDE_OIL);
+    }
+
+    private static BlockState tar() {
+        return WireworksRegistries.TAR.get().defaultBlockState();
     }
 
     private static boolean isLava(Level level, BlockPos pos) {

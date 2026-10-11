@@ -32,18 +32,24 @@ final class TarTests {
     private static final BlockPos PUSHED = PISTON.east();
     private static final int PISTON_SETTLE = 10;
 
+    /** Which of the two fluids is placed second, the one whose arrival the other must answer. */
+    private enum Arriving { CRUDE, LAVA }
+
+    /** The crude a case places: a source sets as tar, flowing crude never does. */
+    private enum Crude { SOURCE, FLOWING }
+
     private TarTests() {
     }
 
     static void register(WireworksGameTests.Registrar tests) {
         tests.test("crude_source_placed_against_lava_sets_as_tar", 1,
-                helper -> eachSide(helper, true, true));
+                helper -> eachSide(helper, Arriving.CRUDE, Crude.SOURCE));
         tests.test("lava_placed_against_a_crude_source_sets_it_as_tar", 1,
-                helper -> eachSide(helper, false, true));
+                helper -> eachSide(helper, Arriving.LAVA, Crude.SOURCE));
         tests.test("flowing_crude_placed_against_lava_stays_crude", 1,
-                helper -> eachSide(helper, true, false));
+                helper -> eachSide(helper, Arriving.CRUDE, Crude.FLOWING));
         tests.test("lava_placed_against_flowing_crude_leaves_it_crude", 1,
-                helper -> eachSide(helper, false, false));
+                helper -> eachSide(helper, Arriving.LAVA, Crude.FLOWING));
         tests.test("breaking_tar_drops_one_tar", 20, TarTests::brokenByHand);
         tests.test("piston_breaks_tar_into_one_tar", 40, TarTests::pushedByPiston);
         tests.test("tar_is_a_plastic_resin", 1, TarTests::isAPlasticResin);
@@ -53,14 +59,15 @@ final class TarTests {
      * Puts crude, a source or flowing, against lava on each of the six sides, in the order asked, and
      * expects the crude set as tar only when it is a source, and the lava as it was.
      */
-    private static void eachSide(GameTestHelper helper, boolean crudeLast, boolean source) {
+    private static void eachSide(GameTestHelper helper, Arriving arriving, Crude kind) {
+        boolean source = kind == Crude.SOURCE;
         BlockState lava = Blocks.LAVA.defaultBlockState();
         BlockState crude = source
                 ? TestCrude.BLOCK.get().defaultBlockState()
                 : TestCrude.BLOCK.get().defaultBlockState().setValue(LiquidBlock.LEVEL, 1);
         for (Direction side : Direction.values()) {
             BlockPos at = LAVA.relative(side);
-            if (crudeLast) {
+            if (arriving == Arriving.CRUDE) {
                 helper.setBlock(LAVA, lava);
                 helper.setBlock(at, crude);
             } else {
@@ -72,7 +79,7 @@ final class TarTests {
             helper.setBlock(at, Blocks.AIR);
             helper.setBlock(LAVA, Blocks.AIR);
             String what = (source ? "a crude source" : "flowing crude") + " on lava's " + side + " side, "
-                    + (crudeLast ? "placed after the lava" : "with the lava placed after it");
+                    + (arriving == Arriving.CRUDE ? "placed after the lava" : "with the lava placed after it");
             if (source && !left.is(WireworksRegistries.TAR.get())) {
                 helper.fail(what + " became " + left + ", not tar", at);
             }
