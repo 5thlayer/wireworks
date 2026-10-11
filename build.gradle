@@ -5,9 +5,13 @@ plugins {
 }
 
 repositories {
-    // Groundworks, from the local maven only, where its releases are published. CI builds its tag there first.
+    // Groundworks and libworks-runtime, from the local maven only, where their releases are published.
+    // CI builds their tags there first.
     mavenLocal {
-        content { includeModule 'io.github.5thlayer', 'groundworks' }
+        content {
+            includeModule 'io.github.5thlayer', 'groundworks'
+            includeModule 'io.github.5thlayer', 'libworks-runtime'
+        }
     }
     maven { url = 'https://cursemaven.com' }
     maven {
@@ -27,6 +31,9 @@ libworks {
         tagPrefix = 'v'
         range = '[0.5.4,0.6)'
     }
+    // Nested by jar-in-jar, so players install nothing more; FML loads the newest nested copy in range,
+    // which runs to the next minor.
+    runtime = '0.1.1'
 }
 
 neoForge {
