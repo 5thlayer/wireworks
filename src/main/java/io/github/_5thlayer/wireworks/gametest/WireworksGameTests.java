@@ -27,8 +27,8 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  * structure, a stone floor, and sets up what it needs itself, so the setup is in the diff. The
  * floor is committed at 23x7x7: twenty-three wide, for a creative pole's 18x18 area, a small pole
  * wired seven blocks east and a consumer only that pole reaches, and seven tall, for a column of
- * {@code MAX_SEGMENTS} with a block above. {@code sh ./gradlew buildGametestStructures} writes the libworks
- * plugin's default 9x5x9 over it, so it is never run here.
+ * {@code MAX_SEGMENTS} with a block above. The libworks plugin's {@code buildGametestStructures} refuses
+ * to write its default over it.
  */
 public final class WireworksGameTests {
 

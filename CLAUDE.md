@@ -14,7 +14,7 @@ Conventional commits: `<type>(<optional scope>): <summary>`, with the summary in
 
 ## Testing
 
-`sh ./gradlew build` runs the JUnit tests, on a plain JVM with no Minecraft. `sh ./gradlew runGameTestServer` runs the game tests headless, a real player on a real server, and names each one it ran; it fails if it ran none. A new game test class is registered by a line in `WireworksGameTests.registerTests`, and its tests stand on the `gametest/platform` structure, committed at the size its javadoc gives: never run the plugin's `buildGametestStructures`, which writes its smaller default over it. CI (`.github/workflows/ci.yml`) runs both through libworks' `module-ci.yml`, at the tag of the plugin `build.gradle` applies, on every push and never publishes.
+`sh ./gradlew build` runs the JUnit tests, on a plain JVM with no Minecraft. `sh ./gradlew runGameTestServer` runs the game tests headless, a real player on a real server, and names each one it ran; it fails if it ran none. A new game test class is registered by a line in `WireworksGameTests.registerTests`, and its tests stand on the `gametest/platform` structure committed at the size its javadoc gives, which the plugin's `buildGametestStructures` refuses to overwrite. CI (`.github/workflows/ci.yml`) runs both through libworks' `module-ci.yml`, at the tag of the plugin `build.gradle` applies, on every push and never publishes.
 
 The `skillworks:quicklaunch` skill opens the dev client into the most recent save in `run/saves`, one client per checkout.
 

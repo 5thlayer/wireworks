@@ -1,12 +1,14 @@
 // ModDevGradle on Java 25, the game test server that names each test, the jar's licensing, ~/.m2-only
 // publishing and the release and upload tasks come from the libworks convention plugin (libworks ADR 0003).
 plugins {
-    id 'io.github.5thlayer.libworks.module' version '0.1.1'
+    id 'io.github.5thlayer.libworks.module' version '0.1.2'
 }
 
 repositories {
-    // Groundworks: its releases are published to the local maven repository only.
-    mavenLocal()
+    // Groundworks, from the local maven only, where its releases are published. CI builds its tag there first.
+    mavenLocal {
+        content { includeModule 'io.github.5thlayer', 'groundworks' }
+    }
     maven { url = 'https://cursemaven.com' }
     maven {
         url = 'https://api.modrinth.com/maven'
