@@ -4,7 +4,9 @@
 package io.github._5thlayer.wireworks;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -14,67 +16,48 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import java.util.zip.GZIPInputStream;
 
-/** Scans a mod's shipped JSON data for what stops it playing alone on Groundworks (ADR-0127). */
+/** Scans what a mod ships for what stops it playing alone on Groundworks (ADR-0127), one rule per method. */
 final class PlaysAlone {
 
     private static final Set<String> SUITE = Set.of("beltworks", "pipeworks", "wireworks", "craftworks", "fieldworks", "factoryworks");
 
-    /**
-     * The {@code c:} tags NeoForge ships with a vanilla member. The data cannot resolve a {@code c:} tag
-     * without the game, so a tag outside this list is reported until a game test resolves it.
-     */
-    private static final Set<String> VANILLA_COMMON_TAGS = Set.of(
-            "c:ingots/iron", "c:ingots/copper", "c:ingots/gold", "c:storage_blocks/iron", "c:storage_blocks/redstone",
-            "c:dusts/redstone", "c:glass_blocks");
-
+    private static final Pattern ID = Pattern.compile("\\b(" + String.join("|", SUITE) + "):[a-z0-9_./-]+");
     private static final Pattern STRING_ID = Pattern.compile("\"(#?)([a-z0-9_.-]+):([a-z0-9_./-]+)\"");
     private static final Pattern TAG_FIELD = Pattern.compile("\"tag\"\\s*:\\s*\"([a-z0-9_.-]+:[a-z0-9_./-]+)\"");
 
     private PlaysAlone() {
     }
 
-    static List<String> violations(Path data, String own) throws IOException {
+    /** Each {@code data/} or {@code assets/} folder under the resources in another suite mod's namespace. */
+    static List<String> foreignNamespaces(Path resources, String own) throws IOException {
         List<String> found = new ArrayList<>();
-        if (!Files.isDirectory(data)) {
-            return found;
-        }
-        try (Stream<Path> namespaces = Files.list(data)) {
-            namespaces.map(p -> p.getFileName().toString())
-                    .filter(ns -> SUITE.contains(ns) && !ns.equals(own))
-                    .forEach(ns -> found.add("ships data in the namespace " + ns));
-        }
-        try (Stream<Path> files = Files.walk(data)) {
-            for (Path file : (Iterable<Path>) files.filter(f -> f.toString().endsWith(".json"))::iterator) {
-                String text = Files.readString(file);
-                Matcher ids = STRING_ID.matcher(text);
-                while (ids.find()) {
-                    String ns = ids.group(2);
-                    if (SUITE.contains(ns) && !ns.equals(own)) {
-                        found.add(data.relativize(file) + " names " + ns + ":" + ids.group(3));
-                    }
-                }
+        for (String kind : List.of("assets", "data")) {
+            Path dir = resources.resolve(kind);
+            if (!Files.isDirectory(dir)) {
+                continue;
+            }
+            try (Stream<Path> namespaces = Files.list(dir)) {
+                namespaces.map(p -> p.getFileName().toString())
+                        .filter(ns -> SUITE.contains(ns) && !ns.equals(own))
+                        .sorted()
+                        .forEach(ns -> found.add(kind + "/" + ns));
             }
         }
-        Path recipes = data.resolve(own).resolve("recipe");
-        if (Files.isDirectory(recipes)) {
-            try (Stream<Path> files = Files.walk(recipes)) {
-                for (Path file : (Iterable<Path>) files.filter(f -> f.toString().endsWith(".json"))::iterator) {
-                    String text = Files.readString(file);
-                    Set<String> tags = new HashSet<>();
-                    Matcher ids = STRING_ID.matcher(text);
+        return found;
+    }
+
+    /** Every literal id in another suite mod's namespace, in any file under the roots. */
+    static List<String> foreignIds(List<Path> roots, String own) throws IOException {
+        List<String> found = new ArrayList<>();
+        for (Path root : roots) {
+            try (Stream<Path> files = Files.walk(root)) {
+                for (Path file : files.filter(Files::isRegularFile).sorted().toList()) {
+                    Matcher ids = ID.matcher(text(file));
                     while (ids.find()) {
-                        if (!ids.group(1).isEmpty()) {
-                            tags.add(ids.group(2) + ":" + ids.group(3));
-                        }
-                    }
-                    Matcher fields = TAG_FIELD.matcher(text);
-                    while (fields.find()) {
-                        tags.add(fields.group(1));
-                    }
-                    for (String tag : tags) {
-                        if (!hasVanillaMember(data, tag, own, new HashSet<>())) {
-                            found.add(data.relativize(file) + " consumes " + tag + ", which has no vanilla member");
+                        if (!ids.group(1).equals(own)) {
+                            found.add(root.relativize(file).toString().replace('\\', '/') + " names " + ids.group());
                         }
                     }
                 }
@@ -83,14 +66,50 @@ final class PlaysAlone {
         return found;
     }
 
+    /**
+     * Each tag a recipe consumes that reaches no vanilla item through the mod's own item tags. A {@code c:}
+     * tag is left to the game test that resolves every ingredient, since only the game knows what NeoForge
+     * puts in it.
+     */
+    static List<String> recipeTagsWithoutAVanillaMember(Path data, String own) throws IOException {
+        List<String> found = new ArrayList<>();
+        Path recipes = data.resolve(own).resolve("recipe");
+        if (!Files.isDirectory(recipes)) {
+            return found;
+        }
+        try (Stream<Path> files = Files.walk(recipes)) {
+            for (Path file : files.filter(f -> f.toString().endsWith(".json")).sorted().toList()) {
+                for (String tag : consumedTags(Files.readString(file))) {
+                    if (!tag.startsWith("c:") && !hasVanillaMember(data, tag, own, new HashSet<>())) {
+                        found.add(data.relativize(file).toString().replace('\\', '/') + " consumes " + tag
+                                + ", which has no vanilla member");
+                    }
+                }
+            }
+        }
+        return found;
+    }
+
+    private static Set<String> consumedTags(String recipe) {
+        Set<String> tags = new HashSet<>();
+        Matcher ids = STRING_ID.matcher(recipe);
+        while (ids.find()) {
+            if (!ids.group(1).isEmpty()) {
+                tags.add(ids.group(2) + ":" + ids.group(3));
+            }
+        }
+        Matcher fields = TAG_FIELD.matcher(recipe);
+        while (fields.find()) {
+            tags.add(fields.group(1));
+        }
+        return tags;
+    }
+
     private static boolean hasVanillaMember(Path data, String tag, String own, Set<String> seen) {
         String ns = tag.substring(0, tag.indexOf(':'));
         String path = tag.substring(tag.indexOf(':') + 1);
         if (ns.equals("minecraft")) {
             return true;
-        }
-        if (ns.equals("c")) {
-            return VANILLA_COMMON_TAGS.contains(tag);
         }
         if (!ns.equals(own) || !seen.add(tag)) {
             return false;
@@ -111,5 +130,16 @@ final class PlaysAlone {
             throw new UncheckedIOException(e);
         }
         return false;
+    }
+
+    private static String text(Path file) throws IOException {
+        byte[] bytes = Files.readAllBytes(file);
+        if (file.toString().endsWith(".nbt")) {
+            try (InputStream in = new GZIPInputStream(Files.newInputStream(file))) {
+                bytes = in.readAllBytes();
+            }
+        }
+        // Latin-1 maps every byte to a char, so a binary file still reads and an id in it still matches.
+        return new String(bytes, StandardCharsets.ISO_8859_1);
     }
 }
