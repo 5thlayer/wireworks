@@ -16,18 +16,33 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 
-/** Scans what a mod ships for what stops it playing alone on Groundworks (ADR-0127), one rule per method. */
+/** What a Module ships that stops it playing alone on Groundworks (FactoryWorks ADR-0127), one scan per rule. */
 final class PlaysAlone {
 
-    private static final Set<String> SUITE = Set.of("beltworks", "pipeworks", "wireworks", "craftworks", "fieldworks", "factoryworks");
+    /** The Modules of FactoryWorks' glossary but Wireworks and Groundworks, which every Module may require. */
+    private static final Set<String> OTHER_MODULES = Set.of("beltworks", "craftworks", "fieldworks", "gearworks", "pipeworks", "voidworks");
 
-    private static final Pattern ID = Pattern.compile("\\b(" + String.join("|", SUITE) + "):[a-z0-9_./-]+");
+    /** Not a Module since FactoryWorks Core retired (FactoryWorks ADR-0128), and no Module may name it either. */
+    private static final String RETIRED_PACK = "factoryworks";
 
     private PlaysAlone() {
     }
 
-    /** Each {@code data/} or {@code assets/} folder under the resources in another suite mod's namespace. */
-    static List<String> foreignNamespaces(Path resources, String own) throws IOException {
+    /** Each id in another Module's namespace that a file under {@code root} names, a structure's saved block ids included. */
+    static List<String> otherModulesIds(Path root) throws IOException {
+        Pattern ids = Pattern.compile("\\b(" + String.join("|", forbidden()) + "):[a-z0-9_./-]+");
+        List<String> found = new ArrayList<>();
+        for (Path file : files(root)) {
+            Matcher id = ids.matcher(text(file));
+            while (id.find()) {
+                found.add(relative(root, file) + " names " + id.group());
+            }
+        }
+        return found;
+    }
+
+    /** Each {@code data/<namespace>} or {@code assets/<namespace>} folder under {@code resources} that is another Module's. */
+    static List<String> otherModulesNamespaces(Path resources) throws IOException {
         List<String> found = new ArrayList<>();
         for (String kind : List.of("assets", "data")) {
             Path dir = resources.resolve(kind);
@@ -35,41 +50,34 @@ final class PlaysAlone {
                 continue;
             }
             try (Stream<Path> namespaces = Files.list(dir)) {
-                namespaces.map(p -> p.getFileName().toString())
-                        .filter(ns -> SUITE.contains(ns) && !ns.equals(own))
-                        .sorted()
+                namespaces.map(p -> p.getFileName().toString()).filter(forbidden()::contains).sorted()
                         .forEach(ns -> found.add(kind + "/" + ns));
             }
         }
         return found;
     }
 
-    /** Every literal id in another suite mod's namespace, in any file under the roots. */
-    static List<String> foreignIds(List<Path> roots, String own) throws IOException {
-        List<String> found = new ArrayList<>();
-        for (Path root : roots) {
-            try (Stream<Path> files = Files.walk(root)) {
-                for (Path file : files.filter(Files::isRegularFile).sorted().toList()) {
-                    Matcher ids = ID.matcher(text(file));
-                    while (ids.find()) {
-                        if (!ids.group(1).equals(own)) {
-                            found.add(root.relativize(file).toString().replace('\\', '/') + " names " + ids.group());
-                        }
-                    }
-                }
-            }
+    private static List<String> forbidden() {
+        return Stream.concat(OTHER_MODULES.stream(), Stream.of(RETIRED_PACK)).sorted().toList();
+    }
+
+    private static List<Path> files(Path root) throws IOException {
+        try (Stream<Path> files = Files.walk(root)) {
+            return files.filter(Files::isRegularFile).sorted().toList();
         }
-        return found;
+    }
+
+    private static String relative(Path root, Path file) {
+        return root.relativize(file).toString().replace('\\', '/');
     }
 
     private static String text(Path file) throws IOException {
-        byte[] bytes = Files.readAllBytes(file);
         if (file.toString().endsWith(".nbt")) {
             try (InputStream in = new GZIPInputStream(Files.newInputStream(file))) {
-                bytes = in.readAllBytes();
+                return new String(in.readAllBytes(), StandardCharsets.ISO_8859_1);
             }
         }
-        // Latin-1 maps every byte to a char, so a binary file still reads and an id in it still matches.
-        return new String(bytes, StandardCharsets.ISO_8859_1);
+        // Latin-1 maps every byte to a char, so a binary file such as a texture still reads.
+        return new String(Files.readAllBytes(file), StandardCharsets.ISO_8859_1);
     }
 }
