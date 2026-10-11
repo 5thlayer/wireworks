@@ -5,18 +5,12 @@ package io.github._5thlayer.wireworks.gametest;
 
 import io.github._5thlayer.wireworks.Wireworks;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
-import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.repository.Pack;
-import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.event.AddPackFindersEvent;
 import net.neoforged.neoforge.fluids.BaseFlowingFluid;
 import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -25,8 +19,8 @@ import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 /**
  * A crude for the tests to set as tar, since Wireworks ships none and the tests run without
- * Fieldworks: a fluid of the tests' own, which the {@code gametest/pack} data pack puts in
- * {@code c:crude_oil}. Registered only when game tests are enabled, and the pack only found then.
+ * Fieldworks: a fluid of the tests' own, which the game-test pack ({@code gametest_pack/}, switched on
+ * by DevPacks) puts in {@code c:crude_oil}. Registered only when game tests are enabled.
  */
 final class TestCrude {
 
@@ -52,13 +46,6 @@ final class TestCrude {
         FLUID_TYPES.register(modBus);
         FLUIDS.register(modBus);
         BLOCKS.register(modBus);
-        modBus.addListener(TestCrude::addPack);
-    }
-
-    /** The pack under {@code src/main/resources/gametest/pack}, always on, so no test has to switch it on. */
-    private static void addPack(AddPackFindersEvent event) {
-        event.addPackFinders(Identifier.fromNamespaceAndPath(Wireworks.MOD_ID, "gametest/pack"), PackType.SERVER_DATA,
-                Component.literal("Wireworks game test data"), PackSource.BUILT_IN, true, Pack.Position.TOP);
     }
 
     private static BaseFlowingFluid.Properties properties() {

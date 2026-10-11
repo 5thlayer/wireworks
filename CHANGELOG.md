@@ -13,6 +13,7 @@ Each version has two sections: Players, what a player or pack developer sees, an
 - The Boiler and the Steam Engine are mined with a pickaxe, and drop nothing from a bare hand.
 - Both craft from vanilla materials: the Boiler from a furnace, a bucket and seven iron ingots; the Engine from a piston, an iron block, two copper ingots and five iron ingots.
 - Tar: a crude source block that touches lava, on any side, sets as a tar block, and the lava stays. Flowing crude does nothing. Tar is broken by hand or with a shovel, and a piston pushing it breaks it, each time into one tar, so a fluid outlet, a piston and a hopper make a tar loop. Wireworks ships no crude of its own: any mod's crude in `c:crude_oil` works. (#26)
+- The game tests' datapack, which puts their own crude in `c:crude_oil`, no longer ships in the jar. Only Wireworks' own game tests ever switched it on (libworks ADR 0004).
 
 ### Consumers
 

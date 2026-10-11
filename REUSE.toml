@@ -13,6 +13,8 @@ path = [
     "scripts/*.py",
     "**/*.md",
     "src/main/resources/**/*.json",
+    "src/gametest/resources/**/*.json",
+    "src/gametest/resources/**/*.mcmeta",
     "src/main/resources/**/*.nbt",
     "src/main/resources/**/*.png",
     "src/main/resources/**/*.mcmeta",
