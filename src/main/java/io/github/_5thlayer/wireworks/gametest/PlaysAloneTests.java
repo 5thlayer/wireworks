@@ -16,7 +16,8 @@ import net.neoforged.fml.ModList;
 /** The Library plays alone on Groundworks (ADR-0127): nothing else loads, and every ingredient its recipes consume has a vanilla item. */
 final class PlaysAloneTests {
 
-    private static final Set<String> BASE = Set.of("minecraft", "neoforge", "groundworks", Wireworks.MOD_ID);
+    // libworks is libworks-runtime, nested in the Library's own jar.
+    private static final Set<String> BASE = Set.of("minecraft", "neoforge", "groundworks", "libworks", Wireworks.MOD_ID);
 
     private PlaysAloneTests() {
     }

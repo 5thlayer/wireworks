@@ -31,6 +31,15 @@ side = "BOTH"
 [[dependencies.${mod_id}]]
 modId = "groundworks"
 type = "required"
-versionRange = "${groundworksRange}"
+versionRange = "${groundworks_range}"
+ordering = "NONE"
+side = "BOTH"
+
+# libworks-runtime, nested by jar-in-jar: the Boiler's item and fluid faces are its GuardedResourceHandler.
+# The range is the one libworks { runtime } in build.gradle nests, to the next minor.
+[[dependencies.${mod_id}]]
+modId = "libworks"
+type = "required"
+versionRange = "${libworks_runtime_range}"
 ordering = "NONE"
 side = "BOTH"

@@ -24,8 +24,11 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 /**
  * The Library's game tests, run by the {@code gameTestServer} Gradle run: the Minecraft-integration
  * seam, with a real player on a real server. Each test stands on the {@code gametest/platform}
- * structure, a stone floor that {@code scripts/build-gametest-structures.py} writes, and sets up
- * what it needs itself, so the setup is in the diff.
+ * structure, a stone floor, and sets up what it needs itself, so the setup is in the diff. The
+ * floor is committed at 23x7x7: twenty-three wide, for a creative pole's 18x18 area, a small pole
+ * wired seven blocks east and a consumer only that pole reaches, and seven tall, for a column of
+ * {@code MAX_SEGMENTS} with a block above. The libworks plugin's {@code buildGametestStructures} refuses
+ * to write its default over it.
  */
 public final class WireworksGameTests {
 
@@ -53,6 +56,7 @@ public final class WireworksGameTests {
             return;
         }
         TestConsumer.register(modBus);
+        TestCrude.register(modBus);
         PoleReplaceTests.statePackGroup();
         modBus.addListener(WireworksGameTests::registerTests);
     }
@@ -79,6 +83,7 @@ public final class WireworksGameTests {
         BoilerTests.register(tests);
         SteamEngineTests.register(tests);
         EnergyBlockDataTests.register(tests);
+        TarTests.register(tests);
     }
 
     private static Identifier id(String path) {

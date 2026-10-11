@@ -1,6 +1,10 @@
 ![Wireworks](https://raw.githubusercontent.com/5thlayer/wireworks/main/publish/wireworks-cover.png)
 
-Wireworks brings Factorio's electric poles to NeoForge. A pole powers every machine inside its supply area, with no cable run to each machine and no face to connect. Wire poles together and they form one network that shares its generators' output among every machine it reaches.
+Wireworks brings Factorio's electric poles to NeoForge. A pole powers every machine inside its supply area without wires or cables from the pole to the machine. Poles can be wired together to form one network that shares its generators' output among every machine it reaches.
+
+## Why?
+
+Because I always loved the simplicity of Factorio's power mechanics and I couldn't find any mod to reproduce it exactly.
 
 **NeoForge, Minecraft 26.1.2 only.** Wireworks is early work, so please report any issues you find on [GitHub](https://github.com/5thlayer/wireworks/issues). From 0.2.0 the poles are named by size, with new ids, so a world made with 0.1.0 loses its poles.
 
