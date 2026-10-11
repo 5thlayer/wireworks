@@ -24,8 +24,11 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 /**
  * The Library's game tests, run by the {@code gameTestServer} Gradle run: the Minecraft-integration
  * seam, with a real player on a real server. Each test stands on the {@code gametest/platform}
- * structure, a stone floor that {@code scripts/build-gametest-structures.py} writes, and sets up
- * what it needs itself, so the setup is in the diff.
+ * structure, a stone floor, and sets up what it needs itself, so the setup is in the diff. The
+ * floor is committed at 23x7x7: twenty-three wide, for a creative pole's 18x18 area, a small pole
+ * wired seven blocks east and a consumer only that pole reaches, and seven tall, for a column of
+ * {@code MAX_SEGMENTS} with a block above. {@code sh ./gradlew buildGametestStructures} writes the libworks
+ * plugin's default 9x5x9 over it, so it is never run here.
  */
 public final class WireworksGameTests {
 
