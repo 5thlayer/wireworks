@@ -58,6 +58,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - run: python3 -m unittest discover scripts/tests
+      # The stand-in textures are drawn by the script, never by hand (docs/placeholder-art.md).
+      - run: python3 scripts/build-placeholder-textures.py --check
 
   reuse:
     runs-on: ubuntu-latest
