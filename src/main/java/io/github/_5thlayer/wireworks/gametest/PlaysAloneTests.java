@@ -20,19 +20,20 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.Identifier;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.neoforged.fml.ModList;
 
 /**
- * The Library plays alone on Groundworks (ADR-0127): nothing else loads, every ingredient its recipes
- * consume has a vanilla item, and every tag its code reads holds an entry of Minecraft or Wireworks.
+ * The Library plays alone on Groundworks (FactoryWorks ADR-0127): nothing else loads, every ingredient its loaded recipes
+ * consume has a vanilla item, and every tag its code reads or its data names holds an entry of Minecraft or Wireworks.
  */
 final class PlaysAloneTests {
 
     // libworks is libworks-runtime, nested in the Library's own jar.
-    private static final Set<String> BASE = Set.of("minecraft", "neoforge", "groundworks", "libworks", Wireworks.MOD_ID);
+    private static final Set<String> LOADED_ALONE = Set.of("minecraft", "neoforge", "groundworks", "libworks", Wireworks.MOD_ID);
 
     private static final Set<String> FILLS_ALONE = Set.of("minecraft", Wireworks.MOD_ID);
 
@@ -50,7 +51,7 @@ final class PlaysAloneTests {
     }
 
     private static void onlyGroundworks(GameTestHelper helper) {
-        List<String> extra = ModList.get().getMods().stream().map(m -> m.getModId()).filter(id -> !BASE.contains(id)).toList();
+        List<String> extra = ModList.get().getMods().stream().map(m -> m.getModId()).filter(id -> !LOADED_ALONE.contains(id)).toList();
         helper.assertTrue(extra.isEmpty(), "the run loads " + extra + " beside Groundworks");
         helper.succeed();
     }
@@ -78,13 +79,13 @@ final class PlaysAloneTests {
         helper.succeed();
     }
 
-    // c:crude_oil is left out: it is Fieldworks' crude, so alone the tar interaction that reads it stays
-    // inert, and plastic still has vanilla's resin clump (ADR-0127).
+    // WireworksTags.CRUDE_OIL is left out: Wireworks puts nothing in c:crude_oil, so without a mod that fills it
+    // the tar interaction that reads it stays inert (FactoryWorks ADR-0127).
     private static void tagsPlayAlone(GameTestHelper helper) {
-        List<TagKey<?>> read = List.of(WireworksTags.WIRE_TOOLS, WireworksTags.GENERATORS, WireworksTags.ACCUMULATORS);
-        Set<String> alone = Set.of("minecraft", Wireworks.MOD_ID);
-        for (TagKey<?> tag : read) {
-            helper.assertTrue(reachesAlone(helper, tag, alone), tag.location() + " holds no entry of " + alone);
+        List<TagKey<?>> consumed = List.of(WireworksTags.WIRE_TOOLS, WireworksTags.GENERATORS, WireworksTags.ACCUMULATORS,
+                WireworksTags.PLASTIC_RESINS, FluidTags.LAVA);
+        for (TagKey<?> tag : consumed) {
+            helper.assertTrue(reachesAlone(helper, tag), tag.location() + " holds no entry of " + FILLS_ALONE);
         }
         helper.succeed();
     }
@@ -125,9 +126,7 @@ final class PlaysAloneTests {
                 .anyMatch(entry -> entry.unwrapKey().filter(key -> FILLS_ALONE.contains(key.identifier().getNamespace())).isPresent());
     }
 
-    private static <T> boolean reachesAlone(GameTestHelper helper, TagKey<T> tag, Set<String> namespaces) {
-        return helper.getLevel().registryAccess().lookupOrThrow(tag.registry()).get(tag).stream()
-                .flatMap(set -> set.stream())
-                .anyMatch(holder -> holder.unwrapKey().filter(key -> namespaces.contains(key.identifier().getNamespace())).isPresent());
+    private static <T> boolean reachesAlone(GameTestHelper helper, TagKey<T> tag) {
+        return fillsAlone(helper.getLevel().registryAccess().lookupOrThrow(tag.registry()), tag.location());
     }
 }
