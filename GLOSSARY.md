@@ -105,6 +105,20 @@ _Avoid_: sunlight, light level (the game's block light, which a roof or torch ch
 The block whose energy a multiblock's part stands for, named through `EnergyOwner` or `EnergyOwnerBlock`; a Groundworks footprint's part stands for its origin, whatever mod declared it. A pole resolves each block to its owner first, so it counts and feeds each machine once. A face a pole reaches journals its buffer, since a pole measures room with an insert it then aborts.
 _Avoid_: controller, master (Oritech's terms for its own engines)
 
+### Resources
+
+**Crude**:
+Any fluid in `c:crude_oil`, which another mod ships, such as Fieldworks: Wireworks ships none.
+_Avoid_: oil, petroleum
+
+**Tar**:
+What a **Crude** source block sets as where it touches lava, on any side; the lava stays, and flowing crude never sets. A piston breaks the tar block, and it drops one tar, a **Plastic Resin**.
+_Avoid_: bitumen, asphalt
+
+**Plastic Resin**:
+An item in `wireworks:plastic_resins`, which plastic is made from. Tar is one.
+_Avoid_: resin (vanilla's resin clump alone)
+
 ### Drawing
 
 **Supply Area Square**:

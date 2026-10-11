@@ -12,10 +12,12 @@ Each version has two sections: Players, what a player or pack developer sees, an
 - `boiler.joules_per_burn_tick` in `wireworks-server.toml` sets what a tick of a fuel's vanilla burn time is worth to the Boiler: 2500 J by default, which makes coal Factorio's 4 MJ.
 - The Boiler and the Steam Engine are mined with a pickaxe, and drop nothing from a bare hand.
 - Both craft from vanilla materials: the Boiler from a furnace, a bucket and seven iron ingots; the Engine from a piston, an iron block, two copper ingots and five iron ingots.
+- Tar: a crude oil source block that touches lava, on any side, sets as a tar block, and the lava stays. Flowing crude does nothing. Tar is broken by hand or with a shovel, and a piston pushing it breaks it, each time into one tar, so a fluid outlet, a piston and a hopper make a tar loop. Wireworks ships no crude oil of its own: any mod's crude in `c:crude_oil` works. (#26)
 
 ### Consumers
 
 - `wireworks:steam_engine` is in `wireworks:generators`. Its fluid face is on every block of its footprint, insert-only, and steam taken in at either end of its row is offered on out of the other, and the Boiler's water and steam faces are on the port blocks, through NeoForge's `Capabilities.Fluid.BLOCK`. Wireworks names no pipe mod.
+- Any fluid in `c:crude_oil` sets as `wireworks:tar` where its source block touches lava, through NeoForge's `FluidInteractionRegistry`; a Consumer only tags its crude. `wireworks:tar`, the item, is in the new item tag `wireworks:plastic_resins`. (#26)
 - The Boiler and the Steam Engine ported from FactoryWorks Core, without Oritech or Pipeworks. The Core's `SteamEngineBlock` and `BoilerBlock` ids move from `factoryworks:` to `wireworks:`; a world made with them loses them. (#22)
 
 ## 0.5.0

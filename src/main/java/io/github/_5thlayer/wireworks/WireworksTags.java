@@ -8,6 +8,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.material.Fluid;
 
 /** The tags a Consumer fills to tell Wireworks about its own items and blocks. */
 public final class WireworksTags {
@@ -20,6 +21,13 @@ public final class WireworksTags {
 
     /** Blocks a network discharges to cover a shortfall and charges from a generator surplus. */
     public static final TagKey<Block> ACCUMULATORS = TagKey.create(Registries.BLOCK, id("accumulators"));
+
+    /** Items that blast into plastic, tar among them. */
+    public static final TagKey<Item> PLASTIC_RESINS = TagKey.create(Registries.ITEM, id("plastic_resins"));
+
+    /** Crude: any fluid here whose source block touches lava sets as tar. Wireworks puts none in it. */
+    public static final TagKey<Fluid> CRUDE_OIL =
+            TagKey.create(Registries.FLUID, Identifier.fromNamespaceAndPath("c", "crude_oil"));
 
     private WireworksTags() {
     }
