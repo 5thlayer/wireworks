@@ -18,8 +18,8 @@ import org.junit.jupiter.api.io.TempDir;
 
 /**
  * The mod plays alone on Groundworks (ADR-0127): nothing it ships names another suite mod's id or
- * puts files in its namespace, and its recipes consume no tag a vanilla item cannot fill. The tags its
- * code reads, and every {@code c:} tag, are resolved for real by the game tests in {@code PlaysAloneTests}.
+ * puts files in its namespace. The tags it consumes are resolved by the game tests in {@code PlaysAloneTests},
+ * the tags its data names read from the jar, so no static scan of the recipes' tags is kept here.
  */
 class PlaysAloneTest {
 
@@ -34,11 +34,6 @@ class PlaysAloneTest {
     @Test
     void theShippedFilesNameNoOtherSuiteModsId() throws IOException {
         assertEquals(List.of(), PlaysAlone.foreignIds(List.of(SOURCE, RESOURCES), Wireworks.MOD_ID));
-    }
-
-    @Test
-    void theShippedRecipesConsumeOnlyTagsWithAVanillaMember() throws IOException {
-        assertEquals(List.of(), PlaysAlone.recipeTagsWithoutAVanillaMember(RESOURCES.resolve("data"), Wireworks.MOD_ID));
     }
 
     @Test
@@ -88,28 +83,6 @@ class PlaysAloneTest {
                 "{\"a\":\"minecraft:glass\",\"b\":\"#c:glass_blocks\",\"c\":\"groundworks:x\",\"d\":\"neoforge:y\"}");
         assertEquals(List.of(), PlaysAlone.foreignNamespaces(root, Wireworks.MOD_ID));
         assertEquals(List.of(), PlaysAlone.foreignIds(List.of(root), Wireworks.MOD_ID));
-    }
-
-    @Test
-    void anOwnTagWithoutAVanillaMemberIsReported(@TempDir Path data) throws IOException {
-        write(data.resolve("wireworks/tags/item/rods.json"), "{\"values\":[\"wireworks:rod\"]}");
-        write(data.resolve("wireworks/recipe/x.json"), "{\"key\":{\"a\":\"#wireworks:rods\"}}");
-        assertEquals(List.of("wireworks/recipe/x.json consumes wireworks:rods, which has no vanilla member"),
-                PlaysAlone.recipeTagsWithoutAVanillaMember(data, Wireworks.MOD_ID));
-    }
-
-    @Test
-    void anOwnTagReachesAVanillaMemberThroughAnotherTag(@TempDir Path data) throws IOException {
-        write(data.resolve("wireworks/tags/item/outer.json"), "{\"values\":[\"#wireworks:inner\"]}");
-        write(data.resolve("wireworks/tags/item/inner.json"), "{\"values\":[\"minecraft:stick\"]}");
-        write(data.resolve("wireworks/recipe/x.json"), "{\"key\":{\"a\":\"#wireworks:outer\"}}");
-        assertEquals(List.of(), PlaysAlone.recipeTagsWithoutAVanillaMember(data, Wireworks.MOD_ID));
-    }
-
-    @Test
-    void aCommonTagIsLeftToTheGameTest(@TempDir Path data) throws IOException {
-        write(data.resolve("wireworks/recipe/x.json"), "{\"key\":{\"a\":{\"tag\":\"c:gems/ruby\"}}}");
-        assertEquals(List.of(), PlaysAlone.recipeTagsWithoutAVanillaMember(data, Wireworks.MOD_ID));
     }
 
     private static void write(Path file, String text) throws IOException {

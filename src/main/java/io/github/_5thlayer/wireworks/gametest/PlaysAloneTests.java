@@ -3,13 +3,23 @@
 
 package io.github._5thlayer.wireworks.gametest;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import io.github._5thlayer.wireworks.Wireworks;
 import io.github._5thlayer.wireworks.WireworksTags;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -24,6 +34,11 @@ final class PlaysAloneTests {
     // libworks is libworks-runtime, nested in the Library's own jar.
     private static final Set<String> BASE = Set.of("minecraft", "neoforge", "groundworks", "libworks", Wireworks.MOD_ID);
 
+    private static final Set<String> FILLS_ALONE = Set.of("minecraft", Wireworks.MOD_ID);
+
+    private static final Pattern HASHED_TAG = Pattern.compile("\"#([a-z0-9_.-]+:[a-z0-9_./-]+)\"");
+    private static final Pattern TAG_FIELD = Pattern.compile("\"tag\"\\s*:\\s*\"([a-z0-9_.-]+:[a-z0-9_./-]+)\"");
+
     private PlaysAloneTests() {
     }
 
@@ -31,6 +46,7 @@ final class PlaysAloneTests {
         tests.test("only_groundworks_is_loaded_beside_the_library", 1, PlaysAloneTests::onlyGroundworks);
         tests.test("every_ingredient_of_the_librarys_recipes_has_a_vanilla_item", 1, PlaysAloneTests::vanillaIngredients);
         tests.test("every_tag_wireworks_reads_holds_an_entry_of_minecraft_or_wireworks", 1, PlaysAloneTests::tagsPlayAlone);
+        tests.test("every_tag_the_librarys_data_names_holds_an_entry_of_minecraft_or_wireworks", 1, PlaysAloneTests::dataTagsFillAlone);
     }
 
     private static void onlyGroundworks(GameTestHelper helper) {
@@ -71,6 +87,42 @@ final class PlaysAloneTests {
             helper.assertTrue(reachesAlone(helper, tag, alone), tag.location() + " holds no entry of " + alone);
         }
         helper.succeed();
+    }
+
+    /**
+     * A recipe that names a tag no mod fills does not load, and one whose tag holds only another mod's items is
+     * dropped as unplaceable, so neither reaches the recipe manager: the tags are read from the jar's data.
+     */
+    private static void dataTagsFillAlone(GameTestHelper helper) {
+        Set<Identifier> tags = new TreeSet<>();
+        try {
+            for (Path root : ModList.get().getModFileById(Wireworks.MOD_ID).getFile().getContents().getContentRoots()) {
+                Path data = root.resolve("data");
+                if (!Files.isDirectory(data)) {
+                    continue;
+                }
+                try (Stream<Path> files = Files.walk(data)) {
+                    for (Path file : files.filter(f -> f.toString().endsWith(".json")).toList()) {
+                        String json = Files.readString(file);
+                        for (Pattern named : List.of(HASHED_TAG, TAG_FIELD)) {
+                            named.matcher(json).results().forEach(tag -> tags.add(Identifier.parse(tag.group(1))));
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        var registries = helper.getLevel().registryAccess();
+        List<Identifier> empty = tags.stream()
+                .filter(tag -> registries.registries().noneMatch(registry -> fillsAlone(registry.value(), tag))).toList();
+        helper.assertTrue(empty.isEmpty(), "these tags hold no entry of " + FILLS_ALONE + ": " + empty);
+        helper.succeed();
+    }
+
+    private static <T> boolean fillsAlone(Registry<T> registry, Identifier tag) {
+        return registry.get(TagKey.create(registry.key(), tag)).stream().flatMap(HolderSet::stream)
+                .anyMatch(entry -> entry.unwrapKey().filter(key -> FILLS_ALONE.contains(key.identifier().getNamespace())).isPresent());
     }
 
     private static <T> boolean reachesAlone(GameTestHelper helper, TagKey<T> tag, Set<String> namespaces) {

@@ -5,12 +5,10 @@ package io.github._5thlayer.wireworks;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -24,8 +22,6 @@ final class PlaysAlone {
     private static final Set<String> SUITE = Set.of("beltworks", "pipeworks", "wireworks", "craftworks", "fieldworks", "factoryworks");
 
     private static final Pattern ID = Pattern.compile("\\b(" + String.join("|", SUITE) + "):[a-z0-9_./-]+");
-    private static final Pattern STRING_ID = Pattern.compile("\"(#?)([a-z0-9_.-]+):([a-z0-9_./-]+)\"");
-    private static final Pattern TAG_FIELD = Pattern.compile("\"tag\"\\s*:\\s*\"([a-z0-9_.-]+:[a-z0-9_./-]+)\"");
 
     private PlaysAlone() {
     }
@@ -64,72 +60,6 @@ final class PlaysAlone {
             }
         }
         return found;
-    }
-
-    /**
-     * Each tag a recipe consumes that reaches no vanilla item through the mod's own item tags. A {@code c:}
-     * tag is left to the game test that resolves every ingredient, since only the game knows what NeoForge
-     * puts in it.
-     */
-    static List<String> recipeTagsWithoutAVanillaMember(Path data, String own) throws IOException {
-        List<String> found = new ArrayList<>();
-        Path recipes = data.resolve(own).resolve("recipe");
-        if (!Files.isDirectory(recipes)) {
-            return found;
-        }
-        try (Stream<Path> files = Files.walk(recipes)) {
-            for (Path file : files.filter(f -> f.toString().endsWith(".json")).sorted().toList()) {
-                for (String tag : consumedTags(Files.readString(file))) {
-                    if (!tag.startsWith("c:") && !hasVanillaMember(data, tag, own, new HashSet<>())) {
-                        found.add(data.relativize(file).toString().replace('\\', '/') + " consumes " + tag
-                                + ", which has no vanilla member");
-                    }
-                }
-            }
-        }
-        return found;
-    }
-
-    private static Set<String> consumedTags(String recipe) {
-        Set<String> tags = new HashSet<>();
-        Matcher ids = STRING_ID.matcher(recipe);
-        while (ids.find()) {
-            if (!ids.group(1).isEmpty()) {
-                tags.add(ids.group(2) + ":" + ids.group(3));
-            }
-        }
-        Matcher fields = TAG_FIELD.matcher(recipe);
-        while (fields.find()) {
-            tags.add(fields.group(1));
-        }
-        return tags;
-    }
-
-    private static boolean hasVanillaMember(Path data, String tag, String own, Set<String> seen) {
-        String ns = tag.substring(0, tag.indexOf(':'));
-        String path = tag.substring(tag.indexOf(':') + 1);
-        if (ns.equals("minecraft")) {
-            return true;
-        }
-        if (!ns.equals(own) || !seen.add(tag)) {
-            return false;
-        }
-        Path file = data.resolve(ns).resolve("tags/item").resolve(path + ".json");
-        if (!Files.isRegularFile(file)) {
-            return false;
-        }
-        try {
-            Matcher members = STRING_ID.matcher(Files.readString(file));
-            while (members.find()) {
-                String member = members.group(2) + ":" + members.group(3);
-                if (members.group(1).isEmpty() ? members.group(2).equals("minecraft") : hasVanillaMember(data, member, own, seen)) {
-                    return true;
-                }
-            }
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-        return false;
     }
 
     private static String text(Path file) throws IOException {
