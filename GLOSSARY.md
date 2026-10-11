@@ -91,10 +91,10 @@ _Avoid_: furnace, kettle
 
 **Steam Engine**:
 The **Generator** that burns **Steam**, 30 mB/s of it for up to 450 FE/t. A 2x1x2 footprint with its own steam tank, filled by a pipe or by a **Boiler** standing against it. Steam that comes in at one end of its row passes on out of the other, so Engines placed end to end share it.
-_Avoid_: turbine (the nuclear chapter's machine)
+_Avoid_: turbine (the **Steam Turbine**)
 
 **Steam**:
-The fluid the **Boiler** makes and the **Steam Engine** burns, Factorio's 165 degree steam. It has no bucket. It crosses between blocks through NeoForge's fluid capability, so Wireworks needs no pipe mod.
+The fluid the **Boiler** makes and the **Steam Engine** burns, Factorio's 165 degree steam. It has no bucket. It crosses between blocks through NeoForge's fluid capability, so Wireworks needs no pipe mod. The **Steam Turbine** refuses it.
 _Avoid_: vapour
 
 **Daylight**:
@@ -104,6 +104,36 @@ _Avoid_: sunlight, light level (the game's block light, which a roof or torch ch
 **Energy Owner**:
 The block whose energy a multiblock's part stands for, named through `EnergyOwner` or `EnergyOwnerBlock`; a Groundworks footprint's part stands for its origin, whatever mod declared it. A pole resolves each block to its owner first, so it counts and feeds each machine once. A face a pole reaches journals its buffer, since a pole measures room with an insert it then aborts.
 _Avoid_: controller, master (Oritech's terms for its own engines)
+
+### Nuclear
+
+**Reactor**:
+The machine that burns **Fission Fuel** to turn water into **Superheated Steam**, a 3x3x3 footprint. It has no temperature: while it has fuel, water and room for its steam it runs at its one rate, and it never melts down.
+_Avoid_: nuclear reactor, fission reactor, core
+
+**Steam Turbine**:
+The **Generator** that burns **Superheated Steam** and nothing else, a 3x1x2 footprint whose steam passes on out of the far end of its row, as the **Steam Engine**'s does.
+_Avoid_: turbine alone, generator (the role, which it plays)
+
+**Superheated Steam**:
+The fluid the **Reactor** makes and only the **Steam Turbine** burns, Factorio's 500 degree steam. It is a second fluid rather than a temperature, so nuclear power adds to the **Boiler** chain instead of retiring it.
+_Avoid_: hot steam, high-pressure steam
+
+**Fission Fuel**:
+Any item in `wireworks:fission_fuel`, which the **Reactor** burns: the **Fuel Cell** by default.
+_Avoid_: nuclear fuel, uranium (a **Fissile**)
+
+**Fuel Cell**:
+The **Fission Fuel** Wireworks ships, crafted from a **Fissile**. A burnt one leaves a **Depleted Fuel Cell**.
+_Avoid_: uranium fuel cell, fuel rod
+
+**Depleted Fuel Cell**:
+What a **Fuel Cell** leaves in the **Reactor** once burnt, which a **Fissile** refills into a Fuel Cell.
+_Avoid_: used-up fuel cell (Factorio's name), spent cell, nuclear waste
+
+**Fissile**:
+Any item in `wireworks:fissile`, which a **Fuel Cell** is crafted from: a uranium ingot or glowstone dust by default, so Wireworks plays alone.
+_Avoid_: fission fuel (what the **Reactor** burns), enriched uranium
 
 ### Resources
 
