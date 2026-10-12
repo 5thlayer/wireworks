@@ -155,20 +155,39 @@ public class BoilerBlockEntity extends BlockEntity implements Container, MenuPro
 
     /**
      * Consumes one fuel item whole and reports what it was worth: its burn time in joules, times the
-     * burner's effectivity.
+     * burner's effectivity. What the item leaves, a lava bucket's bucket, goes to the output; with no
+     * room for it there, nothing is lit.
      */
     private long light() {
         ItemStack stack = items.get(BoilerSlots.FUEL);
         long joules = fuelValue(stack);
-        if (joules <= 0L) {
+        ItemStackTemplate remainder = stack.getCraftingRemainder();
+        ItemStack left = remainder == null ? ItemStack.EMPTY : remainder.create();
+        if (joules <= 0L || !hasOutputRoom(left)) {
             return 0L;
         }
-        ItemStackTemplate remainder = stack.getCraftingRemainder();
         stack.shrink(1);
-        if (stack.isEmpty() && remainder != null) {
-            items.set(BoilerSlots.FUEL, remainder.create());
-        }
+        leave(left);
         return joules;
+    }
+
+    private boolean hasOutputRoom(ItemStack left) {
+        ItemStack output = items.get(BoilerSlots.OUTPUT);
+        return left.isEmpty() || output.isEmpty()
+                || (ItemStack.isSameItemSameComponents(output, left)
+                        && output.getCount() + left.getCount() <= output.getMaxStackSize());
+    }
+
+    private void leave(ItemStack left) {
+        if (left.isEmpty()) {
+            return;
+        }
+        ItemStack output = items.get(BoilerSlots.OUTPUT);
+        if (output.isEmpty()) {
+            items.set(BoilerSlots.OUTPUT, left);
+        } else {
+            output.grow(left.getCount());
+        }
     }
 
     private long fuelValue(ItemStack stack) {
@@ -186,12 +205,12 @@ public class BoilerBlockEntity extends BlockEntity implements Container, MenuPro
 
     @Override
     public boolean isEmpty() {
-        return items.get(BoilerSlots.FUEL).isEmpty();
+        return items.stream().allMatch(ItemStack::isEmpty);
     }
 
     @Override
     public ItemStack getItem(int slot) {
-        return slot == BoilerSlots.FUEL ? items.get(BoilerSlots.FUEL) : ItemStack.EMPTY;
+        return slot >= 0 && slot < BoilerSlots.SIZE ? items.get(slot) : ItemStack.EMPTY;
     }
 
     @Override
@@ -220,18 +239,19 @@ public class BoilerBlockEntity extends BlockEntity implements Container, MenuPro
         return Container.stillValidBlockEntity(this, player);
     }
 
+    /** Fuel goes in its slot; nothing is ever placed in the output, which only the Boiler fills. */
     @Override
     public boolean canPlaceItem(int slot, ItemStack stack) {
         return slot == BoilerSlots.FUEL && isFuel(stack);
     }
 
     /**
-     * Nothing comes out. A hopper under the anchor reaches this container itself rather than the
-     * item face, and would otherwise pull the fuel the Boiler is about to burn.
+     * Only the output comes out. A hopper under the anchor reaches this container itself rather than
+     * the item face, and would otherwise pull the fuel the Boiler is about to burn.
      */
     @Override
     public boolean canTakeItem(Container target, int slot, ItemStack stack) {
-        return false;
+        return slot == BoilerSlots.OUTPUT;
     }
 
     @Override

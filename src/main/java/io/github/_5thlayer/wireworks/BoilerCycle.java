@@ -25,7 +25,7 @@ public final class BoilerCycle {
      * @param perTick what a whole tick converts
      * @param joulesPerTick what a whole tick costs
      * @param ignite consumes one fuel item and returns what it was worth, or 0 when there is nothing
-     *     to light. Called only on a tick that already has both water and somewhere to put the steam.
+     *     to light or nowhere to put what it would leave. Called only on a tick that already has both water and somewhere to put the steam.
      * @return how many millibuckets of water became steam: {@code perTick}, or zero
      */
     public static int tick(int waterAvailable, int outputRoom, int perTick, long joulesPerTick,

@@ -4,6 +4,7 @@
 package io.github._5thlayer.wireworks.gametest;
 
 import io.github._5thlayer.wireworks.BoilerBlockEntity;
+import io.github._5thlayer.wireworks.BoilerMenu;
 import io.github._5thlayer.wireworks.BoilerSlots;
 import io.github._5thlayer.wireworks.SteamEngineBlockEntity;
 import io.github._5thlayer.wireworks.SteamFluids;
@@ -66,7 +67,14 @@ final class BoilerTests {
         tests.test("boiler_steam_port_gives_steam_and_takes_none", 20, BoilerTests::steamPortGivesSteamOnly);
         tests.test("boiler_item_face_takes_fuel_only", 20, BoilerTests::itemFaceTakesFuelOnly);
         tests.test("boiler_parts_reach_the_fuel_slot", 20, BoilerTests::partsReachTheFuelSlot);
-        tests.test("boiler_hoppers_feed_fuel_and_take_none", 60, BoilerTests::hoppers);
+        tests.test("boiler_hoppers_feed_fuel_and_take_only_the_output", 60, BoilerTests::hoppers);
+        tests.test("boiler_item_face_gives_the_output_and_takes_nothing_into_it", 20, BoilerTests::itemFaceGivesTheOutput);
+        tests.test("boiler_puts_a_burnt_fuels_remainder_in_its_output", 40, BoilerTests::remainderGoesToTheOutput);
+        tests.test("boiler_lights_no_fuel_while_its_output_holds_another_item", 40,
+                helper -> stallsOnAFullOutput(helper, new ItemStack(Items.STONE)));
+        tests.test("boiler_lights_no_fuel_while_its_output_is_a_full_stack", 40,
+                helper -> stallsOnAFullOutput(helper, new ItemStack(Items.BUCKET, Items.BUCKET.getDefaultMaxStackSize())));
+        tests.test("boiler_menu_shift_click_puts_nothing_in_the_output", 20, BoilerTests::shiftClickSkipsTheOutput);
         tests.test("boiler_feeds_a_steam_engine_against_its_steam_port", 200, BoilerTests::feedsAnEngine);
     }
 
@@ -343,7 +351,7 @@ final class BoilerTests {
 
     /**
      * Real hoppers, on a Boiler raised a block: one above the anchor pushes coal in, and one under the
-     * anchor and one under a back corner pull none of it out. The anchor's is the one that reaches the
+     * anchor and one under a back corner each pull buckets out of the output and none of the coal. The anchor's is the one that reaches the
      * block entity itself, a vanilla container, rather than the item face. With no water the Boiler
      * burns nothing, so the coal it holds at the end is all the coal it was given.
      */
@@ -352,16 +360,21 @@ final class BoilerTests {
         Network.footprint(helper, WireworksRegistries.BOILER_FOOTPRINT, raised, FACING);
         BlockPos above = raised.above();
         BlockPos underAnchor = ANCHOR;
-        BlockPos underCorner = helper.relativePos(
-                WireworksRegistries.BOILER_FOOTPRINT.positions(helper.absolutePos(raised), FACING).get(BACK_WEST)).below();
+        // Facing north, the back row is one south of the front.
+        BlockPos underCorner = ANCHOR.offset(-1, 0, 1);
+        helper.assertBlockPresent(WireworksRegistries.BOILER_PART.get(), underCorner.above());
         for (BlockPos hopper : List.of(above, underAnchor, underCorner)) {
             helper.setBlock(hopper, Blocks.HOPPER.defaultBlockState());
         }
         BoilerBlockEntity boiler = helper.getBlockEntity(raised, BoilerBlockEntity.class);
         helper.getBlockEntity(above, HopperBlockEntity.class).setItem(0, new ItemStack(Items.COAL, 1));
         boiler.setItem(BoilerSlots.FUEL, new ItemStack(Items.COAL, 4));
+        boiler.setItem(BoilerSlots.OUTPUT, new ItemStack(Items.BUCKET, 4));
         helper.startSequence()
-                .thenWaitUntil(() -> helper.assertValueEqual(boiler.getItem(BoilerSlots.FUEL).getCount(), 5, "coal in the boiler"))
+                .thenWaitUntil(() -> {
+                    helper.assertTrue(boiler.getItem(BoilerSlots.OUTPUT).isEmpty(), "the hoppers have not taken the buckets yet");
+                    helper.assertValueEqual(boiler.getItem(BoilerSlots.FUEL).getCount(), 5, "coal in the boiler");
+                })
                 .thenIdle(20)
                 .thenExecute(() -> {
                     helper.assertValueEqual(boiler.getItem(BoilerSlots.FUEL).getCount(), 5, "coal in the boiler after the hoppers ran on");
@@ -370,9 +383,74 @@ final class BoilerTests {
                         for (int slot = 0; slot < hopper.getContainerSize(); slot++) {
                             helper.assertFalse(hopper.getItem(slot).is(Items.COAL), "a hopper at " + under + " pulled coal out");
                         }
+                        helper.assertTrue(hopper.countItem(Items.BUCKET) > 0, "the hopper at " + under + " pulled no bucket");
                     }
                 })
                 .thenSucceed();
+    }
+
+    /** A pipe draws the output whether or not it names the slot, and can put nothing into it. */
+    private static void itemFaceGivesTheOutput(GameTestHelper helper) {
+        place(helper);
+        boiler(helper).setItem(BoilerSlots.OUTPUT, new ItemStack(Items.BUCKET, 2));
+        ItemResource bucket = ItemResource.of(new ItemStack(Items.BUCKET));
+        ResourceHandler<ItemResource> face =
+                helper.getLevel().getCapability(Capabilities.Item.BLOCK, part(helper, BACK_EAST), null);
+        try (Transaction transaction = Transaction.openRoot()) {
+            helper.assertValueEqual(face.insert(BoilerSlots.OUTPUT, bucket, 1, transaction), 0, "buckets put in the output by slot");
+            helper.assertValueEqual(face.extract(BoilerSlots.OUTPUT, bucket, 1, transaction), 1, "buckets drawn from the output by slot");
+            helper.assertValueEqual(face.extract(bucket, 1, transaction), 1, "buckets drawn slot-less");
+            transaction.commit();
+        }
+        helper.assertTrue(boiler(helper).getItem(BoilerSlots.OUTPUT).isEmpty(), "the output still holds a bucket");
+        helper.succeed();
+    }
+
+    /** A lava bucket burns, and its empty bucket lands in the output, leaving the fuel slot free for the next fuel. */
+    private static void remainderGoesToTheOutput(GameTestHelper helper) {
+        place(helper);
+        boiler(helper).setItem(BoilerSlots.FUEL, new ItemStack(Items.LAVA_BUCKET));
+        insert(fluidAt(helper, part(helper, WEST_END), null), water(), 600);
+        helper.startSequence()
+                .thenWaitUntil(() -> helper.assertTrue(boiler(helper).getItem(BoilerSlots.OUTPUT).is(Items.BUCKET),
+                        "the empty bucket has not reached the output"))
+                .thenExecute(() -> helper.assertTrue(boiler(helper).getItem(BoilerSlots.FUEL).isEmpty(),
+                        "the fuel slot still holds " + boiler(helper).getItem(BoilerSlots.FUEL)))
+                .thenSucceed();
+    }
+
+    /**
+     * An output the remainder cannot join stops the Boiler before it lights the fuel, as a full steam
+     * tank does: nothing is burnt and nothing is voided.
+     */
+    private static void stallsOnAFullOutput(GameTestHelper helper, ItemStack blocking) {
+        place(helper);
+        boiler(helper).setItem(BoilerSlots.FUEL, new ItemStack(Items.LAVA_BUCKET));
+        boiler(helper).setItem(BoilerSlots.OUTPUT, blocking);
+        insert(fluidAt(helper, part(helper, WEST_END), null), water(), 600);
+        helper.startSequence()
+                .thenIdle(WINDOW)
+                .thenExecute(() -> {
+                    helper.assertTrue(boiler(helper).getItem(BoilerSlots.FUEL).is(Items.LAVA_BUCKET), "the lava bucket was lit");
+                    helper.assertValueEqual(boiler(helper).data().get(BoilerBlockEntity.DATA_STEAM), 0, "steam made");
+                    boiler(helper).setItem(BoilerSlots.OUTPUT, ItemStack.EMPTY);
+                })
+                .thenWaitUntil(() -> helper.assertTrue(boiler(helper).getItem(BoilerSlots.OUTPUT).is(Items.BUCKET),
+                        "the Boiler did not resume once its output was emptied"))
+                .thenSucceed();
+    }
+
+    /** Shift-clicking a bucket out of the inventory leaves the output's bucket as it was: only the Boiler fills it. */
+    private static void shiftClickSkipsTheOutput(GameTestHelper helper) {
+        place(helper);
+        boiler(helper).setItem(BoilerSlots.OUTPUT, new ItemStack(Items.BUCKET));
+        ListeningPlayer player = new ListeningPlayer(helper, ANCHOR.above());
+        player.getInventory().setItem(0, new ItemStack(Items.BUCKET, 15));
+        BoilerMenu menu = new BoilerMenu(0, player.getInventory(), boiler(helper), boiler(helper).data());
+        int hotbarFirst = BoilerSlots.SIZE + 27;
+        menu.quickMoveStack(player, hotbarFirst);
+        helper.assertValueEqual(boiler(helper).getItem(BoilerSlots.OUTPUT).getCount(), 1, "buckets in the output");
+        helper.succeed();
     }
 
     /** The Boiler hands its steam to the Engine standing against its steam port, with no pipe between. */

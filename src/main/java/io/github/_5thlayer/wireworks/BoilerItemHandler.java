@@ -9,8 +9,9 @@ import net.neoforged.neoforge.transfer.item.VanillaContainerWrapper;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 /**
- * The Boiler's item face, for every side: fuel in, nothing out. The fuel in the slot is what the
- * Boiler is burning, and the guarded base keeps a slot-less extract from walking past the refusal.
+ * The Boiler's item face, for every side: fuel in, what burnt fuel leaves out, and nothing the other
+ * way. The fuel in the slot is what the Boiler is burning, and the guarded base keeps a slot-less
+ * call from walking past either refusal.
  */
 final class BoilerItemHandler extends GuardedResourceHandler<ItemResource> {
 
@@ -19,7 +20,12 @@ final class BoilerItemHandler extends GuardedResourceHandler<ItemResource> {
     }
 
     @Override
+    public int insert(int index, ItemResource resource, int amount, TransactionContext transaction) {
+        return index == BoilerSlots.FUEL ? super.insert(index, resource, amount, transaction) : 0;
+    }
+
+    @Override
     public int extract(int index, ItemResource resource, int amount, TransactionContext transaction) {
-        return 0;
+        return index == BoilerSlots.OUTPUT ? super.extract(index, resource, amount, transaction) : 0;
     }
 }

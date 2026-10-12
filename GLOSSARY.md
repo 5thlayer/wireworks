@@ -86,7 +86,7 @@ The **Generator** Wireworks ships: its output follows **Daylight**, and it makes
 _Avoid_: solar generator
 
 **Boiler**:
-The machine that burns fuel to turn water into **Steam**, at Factorio's 60 mB/s. A 3x2 **Groundworks** footprint: water goes in at the two ends of its front row, steam leaves its back middle, and fuel goes in through any block. It burns no fuel while its steam has nowhere to go.
+The machine that burns fuel to turn water into **Steam**, at Factorio's 60 mB/s. A 3x2 **Groundworks** footprint: water goes in at the two ends of its front row, steam leaves its back middle, and fuel goes in through any block. What a burnt fuel leaves, a lava bucket's bucket, goes to its output slot, which pipes and hoppers empty. It burns no fuel while its steam, or what the fuel would leave, has nowhere to go.
 _Avoid_: furnace, kettle
 
 **Steam Engine**:

@@ -14,10 +14,15 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * The Boiler's menu: one fuel slot and three gauges. A Boiler that has stopped is out of fuel, out of
- * water or backed up, and those three look the same from outside the block.
+ * The Boiler's menu: a fuel slot, an output slot for what burnt fuel leaves, and three gauges. A
+ * Boiler that has stopped is out of fuel, out of water or backed up, and those three look the same
+ * from outside the block.
  */
 public class BoilerMenu extends AbstractContainerMenu {
+
+    /** Where the output slot stands, beside the fuel slot; the screen draws its recess here. */
+    public static final int OUTPUT_X = 80;
+    public static final int OUTPUT_Y = 53;
 
     private final Container container;
     private final ContainerData data;
@@ -36,6 +41,12 @@ public class BoilerMenu extends AbstractContainerMenu {
         checkContainerDataCount(data, BoilerBlockEntity.DATA_COUNT);
 
         addSlot(new Slot(container, BoilerSlots.FUEL, 56, 53));
+        addSlot(new Slot(container, BoilerSlots.OUTPUT, OUTPUT_X, OUTPUT_Y) {
+            @Override
+            public boolean mayPlace(ItemStack stack) {
+                return false;
+            }
+        });
 
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 9; column++) {
@@ -91,7 +102,8 @@ public class BoilerMenu extends AbstractContainerMenu {
             if (!moveItemStackTo(stack, BoilerSlots.SIZE, slots.size(), true)) {
                 return ItemStack.EMPTY;
             }
-        } else if (!moveItemStackTo(stack, 0, BoilerSlots.SIZE, false)) {
+        // To the fuel slot only: vanilla's merge pass skips mayPlace, and would top up the output.
+        } else if (!moveItemStackTo(stack, BoilerSlots.FUEL, BoilerSlots.FUEL + 1, false)) {
             return ItemStack.EMPTY;
         }
 

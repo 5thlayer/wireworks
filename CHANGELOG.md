@@ -6,7 +6,7 @@ Each version has two sections: Players, what a player or pack developer sees, an
 
 ### Players
 
-- The Boiler: a 3x2 machine that burns a fuel item for its vanilla burn time and turns water into steam at Factorio's 60 mB/s, 3 mB a tick. Water goes in at either end of its front row, 600 mB in all; steam leaves its back middle, 200 mB. A Boiler with no room for steam makes none and burns no fuel. Right-click it for its fuel slot and gauges. Pipes and hoppers can put fuel in but never take it out.
+- The Boiler: a 3x2 machine that burns a fuel item for its vanilla burn time and turns water into steam at Factorio's 60 mB/s, 3 mB a tick. Water goes in at either end of its front row, 600 mB in all; steam leaves its back middle, 200 mB. A Boiler with no room for steam makes none and burns no fuel. Right-click it for its fuel slot, its output slot and its gauges. What a burnt fuel leaves, such as a lava bucket's empty bucket, goes to the output, and a Boiler whose output has no room for it lights nothing. Pipes and hoppers put fuel in and take the output out, and nothing the other way.
 - The Steam Engine: a 2x1x2 generator that burns 30 mB/s of steam for 450 FE/t, up to Factorio's 900 kW, from a 200 mB steam tank. A pole draws it once, whichever of its blocks the supply area reaches. Jade names "No steam" and "No pole".
 - Steam, a fluid with no bucket. A Boiler standing against an Engine's steam port feeds it with no pipe between, and Engines placed end to end share the steam: what comes in at one end passes on out of the other.
 - `boiler.joules_per_burn_tick` in `wireworks-server.toml` sets what a tick of a fuel's vanilla burn time is worth to the Boiler: 2500 J by default, which makes coal Factorio's 4 MJ.

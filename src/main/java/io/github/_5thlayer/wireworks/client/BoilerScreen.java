@@ -19,8 +19,9 @@ import net.minecraft.client.renderer.RenderPipelines;
 /**
  * The Boiler's screen: a fuel gauge and two tank gauges on vanilla's furnace background, with the
  * furnace's input and output recesses painted out, since the Boiler's water arrives and its steam
- * leaves through pipes. A stopped Boiler is out of fuel, out of water or backed up, and from outside
- * the block those three are the same still machine.
+ * leaves through pipes, and a slot beside the fuel for what burnt fuel leaves. A stopped Boiler is
+ * out of fuel, out of water or backed up, and from outside the block those three are the same still
+ * machine.
  */
 public class BoilerScreen extends AbstractContainerScreen<BoilerMenu> {
 
@@ -33,6 +34,8 @@ public class BoilerScreen extends AbstractContainerScreen<BoilerMenu> {
     private static final int EMPTY = 0xFF3A3A3A;
     private static final int BORDER = 0xFF373737;
     private static final int PANEL = 0xFFC6C6C6;
+    private static final int SLOT = 0xFF8B8B8B;
+    private static final int HIGHLIGHT = 0xFFFFFFFF;
 
     private static final int BAR_X = 106;
     private static final int BAR_WIDTH = 62;
@@ -63,10 +66,18 @@ public class BoilerScreen extends AbstractContainerScreen<BoilerMenu> {
         // has neither: water arrives through a pipe and steam leaves through one.
         graphics.fill(left + 55, top + 16, left + 73, top + 34, PANEL);
         graphics.fill(left + 111, top + 29, left + 137, top + 55, PANEL);
+        slot(graphics, left + BoilerMenu.OUTPUT_X - 1, top + BoilerMenu.OUTPUT_Y - 1);
 
         bar(graphics, FUEL_Y, menu.fuelLevel(), FUEL_FULL);
         bar(graphics, WATER_Y, level(menu.water(), menu.waterCapacity()), WATER_FULL);
         bar(graphics, STEAM_Y, level(menu.steam(), menu.steamCapacity()), STEAM_FULL);
+    }
+
+    /** A vanilla slot recess, 18 square: shadowed above and left, lit below and right. */
+    private static void slot(GuiGraphicsExtractor graphics, int x, int y) {
+        graphics.fill(x, y, x + 18, y + 18, HIGHLIGHT);
+        graphics.fill(x, y, x + 17, y + 17, BORDER);
+        graphics.fill(x + 1, y + 1, x + 17, y + 17, SLOT);
     }
 
     private static float level(int amount, int capacity) {
