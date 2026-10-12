@@ -1,5 +1,9 @@
 {
   "values": [
-    "wireworks:tar"
+    "minecraft:resin_clump",
+    {
+      "id": "#c:tar",
+      "required": false
+    }
   ]
 }

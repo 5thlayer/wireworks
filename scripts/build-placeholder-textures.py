@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2026 5thlayer
 # SPDX-License-Identifier: MIT
 
-"""Draws the stand-in textures of the Solar Panel, the Accumulator, the Transmission Pole, the Transformer and tar.
+"""Draws the stand-in textures of the Solar Panel, the Accumulator, the Transmission Pole and the Transformer.
 
 Each wears this placeholder art until real art is drawn (docs/placeholder-art.md). Each
 texture is sized to the model face it covers, so a face of 48 by 16 units is a 48 by 16 pixel
@@ -36,11 +36,6 @@ PANEL_LINE = (58, 92, 168, 255)
 CASING_CELL = (52, 58, 66, 255)
 CASING_CELL_LIGHT = (74, 82, 92, 255)
 CASING_TERMINAL = (200, 168, 70, 255)
-
-TAR = (24, 20, 18, 255)
-TAR_DARK = (12, 10, 9, 255)
-TAR_SHEEN = (70, 62, 56, 255)
-CLEAR = (0, 0, 0, 0)
 
 
 def blank(width, height, colour):
@@ -141,30 +136,6 @@ def transformer():
     return image
 
 
-def tar_block():
-    """Near-black tar with darker pits and a few brown-grey glints of sheen."""
-    image = blank(16, 16, TAR)
-    for x, y in ((2, 3), (3, 3), (9, 1), (12, 6), (13, 6), (5, 9), (6, 10), (10, 12), (1, 13), (14, 14)):
-        image[y][x] = TAR_DARK
-    for x, y in ((4, 5), (11, 3), (7, 13), (13, 10), (2, 11)):
-        image[y][x] = TAR_SHEEN
-    return image
-
-
-def tar_item():
-    """A lump of tar on a clear ground: a rounded blob, darker at its rim, with a glint at its top left."""
-    image = blank(16, 16, CLEAR)
-    for y in range(16):
-        for x in range(16):
-            dx, dy = x - 7.5, (y - 8.5) * 1.25
-            distance = dx * dx + dy * dy
-            if distance <= 36:
-                image[y][x] = TAR_DARK if distance > 26 else TAR
-    put_rect(image, 5, 5, 7, 6, TAR_SHEEN)
-    image[6][5] = TAR_SHEEN
-    return image
-
-
 TEXTURE_NAMES = {
     "block/transformer.png": transformer,
     "block/transmission_pole.png": transmission_pole,
@@ -174,8 +145,6 @@ TEXTURE_NAMES = {
     "block/solar_panel_top.png": solar_panel_top,
     "block/accumulator_casing.png": accumulator_casing,
     "block/accumulator_side.png": accumulator_side,
-    "block/tar.png": tar_block,
-    "item/tar.png": tar_item,
 }
 
 

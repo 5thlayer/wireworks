@@ -20,7 +20,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * The suite's Works tab holds every item the Library registers, the poles first and tar last, no other tab holds
+ * The suite's Works tab holds every item the Library registers, the poles first, no other tab holds
  * one, and the Library has no tab of its own (#23, FactoryWorks ADR-0128).
  */
 final class CreativeTabTests {
@@ -30,7 +30,7 @@ final class CreativeTabTests {
 
     static void register(WireworksGameTests.Registrar tests) {
         tests.test("works_tab_holds_every_item_the_library_adds", 1, CreativeTabTests::holdsEveryItem);
-        tests.test("works_tab_shows_the_poles_first_and_tar_last", 1, CreativeTabTests::showsItemsInOrder);
+        tests.test("works_tab_shows_the_poles_first", 1, CreativeTabTests::showsItemsInOrder);
         tests.test("library_registers_no_creative_tab_of_its_own", 1, CreativeTabTests::registersNoTab);
         tests.test("no_other_tab_holds_a_library_item", 1, CreativeTabTests::noOtherTab);
     }
@@ -54,7 +54,7 @@ final class CreativeTabTests {
                 WireworksRegistries.TRANSMISSION_POLE_ITEM.get(), WireworksRegistries.TRANSFORMER_ITEM.get(),
                 WireworksRegistries.CREATIVE_POLE_ITEM.get(), WireworksRegistries.SOLAR_PANEL_ITEM.get(),
                 WireworksRegistries.ACCUMULATOR_ITEM.get(), WireworksRegistries.BOILER_ITEM.get(),
-                WireworksRegistries.STEAM_ENGINE_ITEM.get(), WireworksRegistries.TAR_ITEM.get());
+                WireworksRegistries.STEAM_ENGINE_ITEM.get());
         if (!shown.equals(expected)) {
             helper.fail("the Works tab shows " + shown + ", not " + expected);
             return;
