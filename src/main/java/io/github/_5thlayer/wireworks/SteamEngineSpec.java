@@ -31,6 +31,19 @@ public final class SteamEngineSpec {
     private final double energyPerTick;
     private final int fluidBoxVolume;
 
+    /**
+     * A spec whose steam lands on a whole millibucket every tick, so it needs no carried fraction
+     * (ADR 0012). One that does not is refused.
+     */
+    static SteamEngineSpec wholeMillibuckets(double fluidUsagePerFactorioTick, double maxPowerOutputWatts,
+                                             int fluidBoxVolume) {
+        SteamEngineSpec spec = new SteamEngineSpec(fluidUsagePerFactorioTick, maxPowerOutputWatts, fluidBoxVolume);
+        if (Math.abs(spec.steamPerTick - Math.rint(spec.steamPerTick)) > EPSILON) {
+            throw new IllegalArgumentException(spec.steamPerTick + " mB a tick is not a whole millibucket");
+        }
+        return spec;
+    }
+
     SteamEngineSpec(double fluidUsagePerFactorioTick, double maxPowerOutputWatts, int fluidBoxVolume) {
         this.steamPerTick = fluidUsagePerFactorioTick * FACTORIO_TICKS_PER_SECOND / MINECRAFT_TICKS_PER_SECOND;
         this.energyPerTick = maxPowerOutputWatts / MINECRAFT_TICKS_PER_SECOND / ForgeEnergy.JOULES_PER_FE;

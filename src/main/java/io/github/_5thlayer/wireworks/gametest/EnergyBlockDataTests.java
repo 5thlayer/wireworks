@@ -15,8 +15,9 @@ import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.RecipeType;
 
 /**
- * What the Solar Panel, the Accumulator, the Boiler and the Steam Engine ship as data: the tags that
- * give them their roles on a network, and recipes that craft the item from the ingredients the tags name.
+ * What the Solar Panel, the Accumulator, the Boiler, the Steam Engine and the Steam Turbine ship as
+ * data: the tags that give them their roles on a network, and recipes that craft the item from the
+ * ingredients the tags name.
  */
 final class EnergyBlockDataTests {
 
@@ -42,6 +43,16 @@ final class EnergyBlockDataTests {
                 Items.COPPER_INGOT, Items.IRON_BLOCK, Items.COPPER_INGOT,
                 Items.IRON_INGOT, Items.IRON_INGOT, Items.IRON_INGOT), WireworksRegistries.STEAM_ENGINE_ITEM.get()));
         tests.test("steam_engine_is_a_generator_and_the_boiler_is_not", 1, EnergyBlockDataTests::steamTagged);
+        tests.test("steam_turbine_is_crafted_from_its_recipe", 1, helper -> crafted(helper, 3, List.of(
+                Items.COPPER_BLOCK, WireworksRegistries.PLASTIC.get(), Items.COPPER_BLOCK,
+                Items.PISTON, Items.IRON_BLOCK, Items.PISTON,
+                Items.COPPER_BLOCK, WireworksRegistries.PLASTIC.get(), Items.COPPER_BLOCK), WireworksRegistries.STEAM_TURBINE_ITEM.get()));
+        tests.test("steam_turbine_is_a_generator", 1, helper -> {
+            if (!WireworksRegistries.STEAM_TURBINE.get().defaultBlockState().is(WireworksTags.GENERATORS)) {
+                helper.fail("the steam turbine is not in wireworks:generators");
+            }
+            helper.succeed();
+        });
     }
 
     private static void steamTagged(GameTestHelper helper) {

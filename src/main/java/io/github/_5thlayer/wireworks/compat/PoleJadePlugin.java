@@ -17,7 +17,10 @@ import io.github._5thlayer.wireworks.PoleColumn;
 import io.github._5thlayer.wireworks.SolarPanelBlock;
 import io.github._5thlayer.wireworks.SteamEngineBlock;
 import io.github._5thlayer.wireworks.SteamEngineBlockEntity;
+import io.github._5thlayer.wireworks.SteamGeneratorBlockEntity;
 import io.github._5thlayer.wireworks.SteamEngineStatus;
+import io.github._5thlayer.wireworks.SteamTurbineBlock;
+import io.github._5thlayer.wireworks.SteamTurbineBlockEntity;
 import io.github._5thlayer.wireworks.SolarPanelBlockEntity;
 import io.github._5thlayer.wireworks.SupplyAreaPoleBlock;
 import io.github._5thlayer.wireworks.SupplyAreaPoleBlockEntity;
@@ -37,8 +40,8 @@ import snownee.jade.api.WailaPlugin;
 import snownee.jade.api.config.IPluginConfig;
 
 /**
- * What a pole is doing right now, on the HUD, and the same for the Solar Panel, the Accumulator and
- * the Steam Engine the Library ships.
+ * What a pole is doing right now, on the HUD, and the same for the Solar Panel, the Accumulator,
+ * the Steam Engine and the Steam Turbine the Library ships.
  *
  * <p>The item tooltip states what a pole <em>is</em> -- its footprint, that it is wireless, that the
  * area is measured at the base. This is the other half: the two numbers that can only be read from
@@ -83,7 +86,8 @@ public class PoleJadePlugin implements IWailaPlugin {
     private static final String SOLAR_OUTPUT = "SolarPanelOutput";
     private static final String SOLAR_SKY_HIDDEN = "SolarPanelSkyHidden";
     private static final String ACCUMULATOR_STATUS = "AccumulatorStatus";
-    private static final String STEAM_ENGINE_STATUS = "SteamEngineStatus";
+    private static final String STEAM_GENERATOR_STATUS = "SteamEngineStatus";
+    private static final String STEAM_GENERATOR_OUTPUT = "SteamGeneratorOutput";
 
     private static final Identifier SOLAR_UID =
             Identifier.fromNamespaceAndPath(Wireworks.MOD_ID, "solar_panel");
@@ -91,6 +95,8 @@ public class PoleJadePlugin implements IWailaPlugin {
             Identifier.fromNamespaceAndPath(Wireworks.MOD_ID, "accumulator");
     private static final Identifier STEAM_ENGINE_UID =
             Identifier.fromNamespaceAndPath(Wireworks.MOD_ID, "steam_engine");
+    private static final Identifier STEAM_TURBINE_UID =
+            Identifier.fromNamespaceAndPath(Wireworks.MOD_ID, "steam_turbine");
 
     /**
      * The numbers live on the server, so they have to be asked for.
@@ -321,34 +327,53 @@ public class PoleJadePlugin implements IWailaPlugin {
         }
     };
 
-    private static final IServerDataProvider<BlockAccessor> STEAM_ENGINE_DATA = new IServerDataProvider<>() {
-        @Override
-        public void appendServerData(CompoundTag tag, BlockAccessor accessor) {
-            if (accessor.getBlockEntity() instanceof SteamEngineBlockEntity engine) {
-                tag.putInt(STEAM_ENGINE_STATUS, engine.status().map(Enum::ordinal).orElse(-1));
-            }
-        }
-
-        @Override
-        public Identifier getUid() {
-            return STEAM_ENGINE_UID;
-        }
-    };
+    private static final IServerDataProvider<BlockAccessor> STEAM_ENGINE_DATA = steamGeneratorData(STEAM_ENGINE_UID);
+    private static final IServerDataProvider<BlockAccessor> STEAM_TURBINE_DATA = steamGeneratorData(STEAM_TURBINE_UID);
 
     /** The charge is Jade's own energy row and the steam its fluid row; this names only what they cannot. */
-    private static final IBlockComponentProvider STEAM_ENGINE_TOOLTIP = new IBlockComponentProvider() {
-        @Override
-        public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
-            SteamEngineStatus.fromOrdinal(accessor.getServerData().getIntOr(STEAM_ENGINE_STATUS, -1))
-                    .ifPresent(status -> tooltip.add(Component.translatable(status.langKey())
-                            .withStyle(ChatFormatting.RED)));
-        }
+    private static final IBlockComponentProvider STEAM_ENGINE_TOOLTIP = steamGeneratorTooltip(STEAM_ENGINE_UID, false);
 
-        @Override
-        public Identifier getUid() {
-            return STEAM_ENGINE_UID;
-        }
-    };
+    /** As the Engine's, and what the Turbine made last tick. */
+    private static final IBlockComponentProvider STEAM_TURBINE_TOOLTIP = steamGeneratorTooltip(STEAM_TURBINE_UID, true);
+
+    private static IServerDataProvider<BlockAccessor> steamGeneratorData(Identifier uid) {
+        return new IServerDataProvider<>() {
+            @Override
+            public void appendServerData(CompoundTag tag, BlockAccessor accessor) {
+                if (accessor.getBlockEntity() instanceof SteamGeneratorBlockEntity generator) {
+                    tag.putInt(STEAM_GENERATOR_STATUS, generator.status().map(Enum::ordinal).orElse(-1));
+                    tag.putLong(STEAM_GENERATOR_OUTPUT, generator.lastMade());
+                }
+            }
+
+            @Override
+            public Identifier getUid() {
+                return uid;
+            }
+        };
+    }
+
+    private static IBlockComponentProvider steamGeneratorTooltip(Identifier uid, boolean showsOutput) {
+        return new IBlockComponentProvider() {
+            @Override
+            public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
+                CompoundTag data = accessor.getServerData();
+                if (showsOutput && data.contains(STEAM_GENERATOR_OUTPUT)) {
+                    long fe = data.getLongOr(STEAM_GENERATOR_OUTPUT, 0L);
+                    tooltip.add(Component.translatable("tooltip.wireworks." + uid.getPath() + ".jade.output", fe)
+                            .withStyle(fe > 0L ? ChatFormatting.GREEN : ChatFormatting.GRAY));
+                }
+                SteamEngineStatus.fromOrdinal(data.getIntOr(STEAM_GENERATOR_STATUS, -1))
+                        .ifPresent(status -> tooltip.add(Component.translatable(status.langKey())
+                                .withStyle(ChatFormatting.RED)));
+            }
+
+            @Override
+            public Identifier getUid() {
+                return uid;
+            }
+        };
+    }
 
     @Override
     public void register(IWailaCommonRegistration registration) {
@@ -358,6 +383,7 @@ public class PoleJadePlugin implements IWailaPlugin {
         registration.registerBlockDataProvider(SOLAR_DATA, SolarPanelBlockEntity.class);
         registration.registerBlockDataProvider(ACCUMULATOR_DATA, AccumulatorBlockEntity.class);
         registration.registerBlockDataProvider(STEAM_ENGINE_DATA, SteamEngineBlockEntity.class);
+        registration.registerBlockDataProvider(STEAM_TURBINE_DATA, SteamTurbineBlockEntity.class);
     }
 
     @Override
@@ -368,5 +394,6 @@ public class PoleJadePlugin implements IWailaPlugin {
         registration.registerBlockComponent(SOLAR_TOOLTIP, SolarPanelBlock.class);
         registration.registerBlockComponent(ACCUMULATOR_TOOLTIP, AccumulatorBlock.class);
         registration.registerBlockComponent(STEAM_ENGINE_TOOLTIP, SteamEngineBlock.class);
+        registration.registerBlockComponent(STEAM_TURBINE_TOOLTIP, SteamTurbineBlock.class);
     }
 }

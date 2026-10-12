@@ -9,7 +9,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 
-/** Where the blocks of the Boiler and the Steam Engine stand, in the anchor's frame. */
+/** Where the blocks of the Boiler, the Steam Engine and the Steam Turbine stand, in the anchor's frame. */
 final class SteamFootprints {
 
     /**
@@ -26,6 +26,14 @@ final class SteamFootprints {
     /** The Steam Engine is 2x1x2: the anchor and three parts. */
     static final FootprintShape STEAM_ENGINE = FootprintShape.of(
             new Local(0, 1, 0), new Local(0, 0, -1), new Local(0, 1, -1));
+
+    /**
+     * The Steam Turbine is 3x1x2: three wide across its row and two tall, the anchor the bottom middle.
+     * Its row runs along local {@code x}, as the Engine's does.
+     */
+    static final FootprintShape STEAM_TURBINE = FootprintShape.of(
+            new Local(0, 0, -1), new Local(0, 0, 1),
+            new Local(0, 1, -1), new Local(0, 1, 0), new Local(0, 1, 1));
 
     private SteamFootprints() {
     }
@@ -57,8 +65,11 @@ final class SteamFootprints {
         return world(facing, 1, 0);
     }
 
-    /** The face of a Steam Engine's row end that its local {@code +x} looks out of; its row runs along this axis. */
-    static Direction engineRowSide(Direction facing) {
+    /**
+     * The face of a Steam Engine's or Steam Turbine's row end that its local {@code +x} looks out of;
+     * its row runs along this axis.
+     */
+    static Direction rowSide(Direction facing) {
         return world(facing, 1, 0);
     }
 

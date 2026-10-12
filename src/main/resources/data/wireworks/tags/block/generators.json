@@ -1,6 +1,7 @@
 {
   "values": [
     "wireworks:solar_panel",
-    "wireworks:steam_engine"
+    "wireworks:steam_engine",
+    "wireworks:steam_turbine"
   ]
 }

@@ -131,13 +131,27 @@ public final class WireworksRegistries {
             BLOCKS.registerBlock(SteamEngineBlock.BLOCK_NAME, SteamEngineBlock::new);
     public static final DeferredBlock<FootprintPartBlock> STEAM_ENGINE_PART =
             part("steam_engine_part", () -> WireworksRegistries.STEAM_ENGINE_FOOTPRINT);
-    public static final DeferredItem<SteamEngineItem> STEAM_ENGINE_ITEM =
-            ITEMS.registerItem(SteamEngineBlock.BLOCK_NAME, SteamEngineItem::new);
+    public static final DeferredItem<SteamGeneratorItem> STEAM_ENGINE_ITEM =
+            ITEMS.registerItem(SteamEngineBlock.BLOCK_NAME, props -> new SteamGeneratorItem(
+                    WireworksRegistries.STEAM_ENGINE_FOOTPRINT, SteamEngineBlockEntity.spec(), SteamEngineBlock.BLOCK_NAME, props));
     public static final Footprint STEAM_ENGINE_FOOTPRINT = Footprint.declare(
             SteamFootprints.STEAM_ENGINE, STEAM_ENGINE, STEAM_ENGINE_PART, STEAM_ENGINE_ITEM);
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SteamEngineBlockEntity>>
             STEAM_ENGINE_ENTITY = BLOCK_ENTITIES.register("steam_engine",
                     () -> new BlockEntityType<>(SteamEngineBlockEntity::new, STEAM_ENGINE.get()));
+
+    public static final DeferredBlock<SteamTurbineBlock> STEAM_TURBINE =
+            BLOCKS.registerBlock(SteamTurbineBlock.BLOCK_NAME, SteamTurbineBlock::new);
+    public static final DeferredBlock<FootprintPartBlock> STEAM_TURBINE_PART =
+            part("steam_turbine_part", () -> WireworksRegistries.STEAM_TURBINE_FOOTPRINT);
+    public static final DeferredItem<SteamGeneratorItem> STEAM_TURBINE_ITEM =
+            ITEMS.registerItem(SteamTurbineBlock.BLOCK_NAME, props -> new SteamGeneratorItem(
+                    WireworksRegistries.STEAM_TURBINE_FOOTPRINT, SteamTurbineBlockEntity.spec(), SteamTurbineBlock.BLOCK_NAME, props));
+    public static final Footprint STEAM_TURBINE_FOOTPRINT = Footprint.declare(
+            SteamFootprints.STEAM_TURBINE, STEAM_TURBINE, STEAM_TURBINE_PART, STEAM_TURBINE_ITEM);
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SteamTurbineBlockEntity>>
+            STEAM_TURBINE_ENTITY = BLOCK_ENTITIES.register("steam_turbine",
+                    () -> new BlockEntityType<>(SteamTurbineBlockEntity::new, STEAM_TURBINE.get()));
 
     /** Bioresin, a Plastic Resin made from plants: brewed from a water bottle and sugar cane, or crafted from honeycomb and kelp. */
     public static final DeferredItem<Item> BIORESIN = ITEMS.registerSimpleItem("bioresin");
@@ -175,7 +189,7 @@ public final class WireworksRegistries {
 
     /** Every item the Library adds, the poles first and the intermediates last. */
     private static Stream<Item> items() {
-        return Stream.concat(poleItems(), Stream.of(SOLAR_PANEL_ITEM, ACCUMULATOR_ITEM, BOILER_ITEM, STEAM_ENGINE_ITEM, BIORESIN, PLASTIC, BATTERY).map(DeferredItem::get));
+        return Stream.concat(poleItems(), Stream.of(SOLAR_PANEL_ITEM, ACCUMULATOR_ITEM, BOILER_ITEM, STEAM_ENGINE_ITEM, STEAM_TURBINE_ITEM, BIORESIN, PLASTIC, BATTERY).map(DeferredItem::get));
     }
 
     private static Set<Block> poleBlocks() {
@@ -204,8 +218,11 @@ public final class WireworksRegistries {
         energyOnAnchor(event, SOLAR_PANEL, SolarPanelBlockEntity.class, SolarPanelBlockEntity::energy);
         energyOnAnchor(event, ACCUMULATOR, AccumulatorBlockEntity.class, AccumulatorBlockEntity::energy);
         energyOnAnchor(event, STEAM_ENGINE, SteamEngineBlockEntity.class, SteamEngineBlockEntity::energy);
+        energyOnAnchor(event, STEAM_TURBINE, SteamTurbineBlockEntity.class, SteamTurbineBlockEntity::energy);
         event.registerBlockEntity(Capabilities.Fluid.BLOCK, STEAM_ENGINE_ENTITY.get(),
                 SteamEngineBlockEntity::steamFace);
+        event.registerBlockEntity(Capabilities.Fluid.BLOCK, STEAM_TURBINE_ENTITY.get(),
+                SteamTurbineBlockEntity::steamFace);
         event.registerBlockEntity(Capabilities.Item.BLOCK, BOILER_ENTITY.get(), (boiler, side) -> boiler.itemFace());
     }
 

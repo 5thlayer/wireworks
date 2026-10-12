@@ -17,11 +17,14 @@ Each version has two sections: Players, what a player or pack developer sees, an
 - The battery, crafted from a copper ingot, an iron ingot and redstone. (#27)
 - Bioresin, plastic and the battery wear textures by Malcolm Riley, from unused-textures, under CC-BY-4.0. (#37, #38)
 - Recipes change. The Solar Panel takes plastic where it took redstone; the large pole takes plastic where it took redstone; the Transformer takes one plastic in its bottom row; the Transmission Pole takes two plastic beside its post; and the Accumulator takes four batteries where it took four redstone blocks. The small and medium poles are unchanged. (#27)
+- The Steam Turbine: a 3x1x2 generator that burns 60 mB/s of superheated steam for 2,910 FE/t, Factorio's 5.82 MW, from a 200 mB tank. It refuses Steam, and the Steam Engine refuses superheated steam. Turbines placed end to end share their steam as Engines do. Jade shows what it makes each tick, and names "No steam" and "No pole". It is mined with a pickaxe and crafted from four copper blocks, two plastic, two pistons and an iron block. Its art is a vanilla placeholder. (#39)
+- Superheated Steam, a second fluid with no bucket, which only the Steam Turbine burns. (#39)
 - Wireworks' items are in the suite's shared Works tab, beside every other -works mod's, and in no other tab: the Wireworks tab is gone, and the blocks leave Functional Blocks. (#23)
 
 ### Consumers
 
 - `wireworks:steam_engine` is in `wireworks:generators`. Its fluid face is on every block of its footprint, insert-only, and steam taken in at either end of its row is offered on out of the other, and the Boiler's water and steam faces are on the port blocks, through NeoForge's `Capabilities.Fluid.BLOCK`. Wireworks names no pipe mod.
+- `wireworks:steam_turbine` is in `wireworks:generators`. Its fluid face is on every block of its footprint, insert-only, takes only `wireworks:superheated_steam`, and passes it along its row as the Steam Engine's does. (#39)
 - The new item tag `wireworks:plastic_resins`, the items plastic is made from, holds `minecraft:resin_clump` and, optionally, `#c:tar`, which Fieldworks fills. Wireworks makes no tar of its own. (#26, #34)
 - The new item `wireworks:bioresin` is in `wireworks:plastic_resins`. Its brewing is a NeoForge brewing recipe, registered on `RegisterBrewingRecipesEvent`, on a water bottle with sugar cane. (#28)
 - Breaking: the Solar Panel and the large pole no longer read `#c:dusts/redstone`, and the Accumulator no longer reads `#c:storage_blocks/redstone`: a pack that filled those tags to feed these recipes now feeds them plastic or batteries. (#27)

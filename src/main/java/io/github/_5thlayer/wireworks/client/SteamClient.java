@@ -14,11 +14,16 @@ import net.neoforged.neoforge.client.event.RegisterFluidModelsEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.fluid.FluidTintSources;
 
-/** The client half of the Boiler and steam: the Boiler's screen and how steam draws in a tank or a pipe. */
+/**
+ * The client half of the Boiler and the steams: the Boiler's screen and how each steam draws in a tank
+ * or a pipe. Superheated Steam wears Steam's sprite, tinted warm, until it has its own.
+ */
 public final class SteamClient {
 
     private static final Material STEAM_SPRITE =
             new Material(Identifier.fromNamespaceAndPath(Wireworks.MOD_ID, "block/fluid/steam"));
+
+    private static final int SUPERHEATED_TINT = 0xFFFFD8B0;
 
     private SteamClient() {
     }
@@ -36,5 +41,8 @@ public final class SteamClient {
         FluidModel.Unbaked model =
                 new FluidModel.Unbaked(STEAM_SPRITE, STEAM_SPRITE, null, FluidTintSources.constant(0xFFFFFFFF));
         event.register(model, SteamFluids.STEAM_SOURCE, SteamFluids.STEAM_FLOWING);
+        FluidModel.Unbaked superheated =
+                new FluidModel.Unbaked(STEAM_SPRITE, STEAM_SPRITE, null, FluidTintSources.constant(SUPERHEATED_TINT));
+        event.register(superheated, SteamFluids.SUPERHEATED_STEAM_SOURCE, SteamFluids.SUPERHEATED_STEAM_FLOWING);
     }
 }

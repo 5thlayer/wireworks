@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "C": "#c:storage_blocks/copper",
+    "X": "wireworks:plastic",
+    "P": "minecraft:piston",
+    "B": "#c:storage_blocks/iron"
+  },
+  "pattern": [
+    "CXC",
+    "PBP",
+    "CXC"
+  ],
+  "result": {
+    "id": "wireworks:steam_turbine",
+    "count": 1
+  }
+}

@@ -23,6 +23,10 @@ The models are `models/block/solar_panel.json` and `models/block/accumulator.jso
 
 The Boiler and the Steam Engine arrive with art drawn for FactoryWorks Core, 5thlayer's own and unmodified, under `textures/block/`: `steam_engine/steam_engine.png`, the model's texture, `kit/status_light_working.png`, its green light, `fluid_port_input.png` and `fluid_port_output.png`, the rings on the Boiler's port blocks, and `fluid/steam.png` with its animation. They are hand-drawn, so `build-placeholder-textures.py` does not draw them and leaves them alone. The Boiler's body is vanilla's furnace and iron block textures, and its model a stand-in until a 3x2 model is drawn. The Engine's model was exported from a Blockbench file that stays in the FactoryWorks Showcase. The Engine's `credit` line naming that export is dropped.
 
+## Vanilla stand-ins
+
+The Steam Turbine has no art of its own yet. Its anchor wears vanilla's piston top on its front and copper block on every other face, and each part block is a plain copper block, so the 3x1x2 shows block by block. Superheated Steam draws with `fluid/steam.png`, tinted warm in `client/SteamClient.java`, and its liquid block with vanilla's water model.
+
 ## From unused-textures
 
 Three item textures are Malcolm Riley's, from [unused-textures](https://github.com/malcolmriley/unused-textures), under [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/) (`LICENSES/CC-BY-4.0.txt`). Each is copied unmodified, and `REUSE.toml` annotates it. `build-placeholder-textures.py` does not draw them.

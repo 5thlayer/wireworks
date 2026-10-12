@@ -21,9 +21,10 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 /**
- * Steam, the fluid the Boiler makes and the Steam Engine eats: Factorio's 165 degree steam, one
- * fluid type with a still and a flowing fluid and a liquid block. It has no bucket, so steam stays in
- * tanks and pipes.
+ * The two steams, each one fluid type with a still and a flowing fluid and a liquid block, and no
+ * bucket, so steam stays in tanks and pipes. Steam is what the Boiler makes and the Steam Engine
+ * eats, Factorio's 165 degree steam. Superheated Steam is what the Reactor makes and only the Steam
+ * Turbine eats, Factorio's 500 degree steam, a second fluid rather than a temperature (ADR 0012).
  */
 public final class SteamFluids {
 
@@ -32,23 +33,21 @@ public final class SteamFluids {
     private static final DeferredRegister<Fluid> FLUIDS = DeferredRegister.create(Registries.FLUID, Wireworks.MOD_ID);
     private static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(Wireworks.MOD_ID);
 
-    public static final DeferredHolder<FluidType, FluidType> STEAM_TYPE = FLUID_TYPES.register("steam",
-            () -> new FluidType(FluidType.Properties.create()
-                    .descriptionId("fluid_type." + Wireworks.MOD_ID + ".steam")
-                    .lightLevel(0)
-                    .density(-10)
-                    // FluidType counts in kelvin.
-                    .temperature(BoilerSpec.TARGET_TEMPERATURE + 273)
-                    .viscosity(800)
-                    .rarity(Rarity.COMMON)));
+    /** Factorio's superheated steam, in degrees Celsius. */
+    static final int SUPERHEATED_TEMPERATURE = 500;
 
-    public static final DeferredHolder<Fluid, BaseFlowingFluid.Source> STEAM_SOURCE =
-            FLUIDS.register("steam", () -> new BaseFlowingFluid.Source(properties()));
-    public static final DeferredHolder<Fluid, BaseFlowingFluid.Flowing> STEAM_FLOWING =
-            FLUIDS.register("flowing_steam", () -> new BaseFlowingFluid.Flowing(properties()));
+    private static final Steam STEAM = new Steam("steam", BoilerSpec.TARGET_TEMPERATURE);
+    private static final Steam SUPERHEATED_STEAM = new Steam("superheated_steam", SUPERHEATED_TEMPERATURE);
 
-    public static final DeferredHolder<Block, SteamBlock> STEAM_BLOCK =
-            BLOCKS.registerBlock("steam", props -> new SteamBlock(STEAM_SOURCE.get(), liquid(props)));
+    public static final DeferredHolder<FluidType, FluidType> STEAM_TYPE = STEAM.type;
+    public static final DeferredHolder<Fluid, BaseFlowingFluid.Source> STEAM_SOURCE = STEAM.source;
+    public static final DeferredHolder<Fluid, BaseFlowingFluid.Flowing> STEAM_FLOWING = STEAM.flowing;
+    public static final DeferredHolder<Block, SteamBlock> STEAM_BLOCK = STEAM.block;
+
+    public static final DeferredHolder<FluidType, FluidType> SUPERHEATED_STEAM_TYPE = SUPERHEATED_STEAM.type;
+    public static final DeferredHolder<Fluid, BaseFlowingFluid.Source> SUPERHEATED_STEAM_SOURCE = SUPERHEATED_STEAM.source;
+    public static final DeferredHolder<Fluid, BaseFlowingFluid.Flowing> SUPERHEATED_STEAM_FLOWING = SUPERHEATED_STEAM.flowing;
+    public static final DeferredHolder<Block, SteamBlock> SUPERHEATED_STEAM_BLOCK = SUPERHEATED_STEAM.block;
 
     private SteamFluids() {
     }
@@ -60,8 +59,31 @@ public final class SteamFluids {
         }
     }
 
-    private static BaseFlowingFluid.Properties properties() {
-        return new BaseFlowingFluid.Properties(STEAM_TYPE, STEAM_SOURCE, STEAM_FLOWING).block(STEAM_BLOCK);
+    /** One steam's four registrations, named after it. */
+    private static final class Steam {
+
+        final DeferredHolder<FluidType, FluidType> type;
+        final DeferredHolder<Fluid, BaseFlowingFluid.Source> source;
+        final DeferredHolder<Fluid, BaseFlowingFluid.Flowing> flowing;
+        final DeferredHolder<Block, SteamBlock> block;
+
+        Steam(String name, int celsius) {
+            type = FLUID_TYPES.register(name, () -> new FluidType(FluidType.Properties.create()
+                    .descriptionId("fluid_type." + Wireworks.MOD_ID + "." + name)
+                    .lightLevel(0)
+                    .density(-10)
+                    // FluidType counts in kelvin.
+                    .temperature(celsius + 273)
+                    .viscosity(800)
+                    .rarity(Rarity.COMMON)));
+            source = FLUIDS.register(name, () -> new BaseFlowingFluid.Source(properties()));
+            flowing = FLUIDS.register("flowing_" + name, () -> new BaseFlowingFluid.Flowing(properties()));
+            block = BLOCKS.registerBlock(name, props -> new SteamBlock(source.get(), liquid(props)));
+        }
+
+        private BaseFlowingFluid.Properties properties() {
+            return new BaseFlowingFluid.Properties(type, source, flowing).block(block);
+        }
     }
 
     private static BlockBehaviour.Properties liquid(BlockBehaviour.Properties props) {

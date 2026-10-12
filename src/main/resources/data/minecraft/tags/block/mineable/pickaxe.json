@@ -3,6 +3,8 @@
     "wireworks:boiler",
     "wireworks:boiler_part",
     "wireworks:steam_engine",
-    "wireworks:steam_engine_part"
+    "wireworks:steam_engine_part",
+    "wireworks:steam_turbine",
+    "wireworks:steam_turbine_part"
   ]
 }

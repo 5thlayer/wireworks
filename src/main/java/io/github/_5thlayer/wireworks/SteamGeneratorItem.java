@@ -3,6 +3,7 @@
 
 package io.github._5thlayer.wireworks;
 
+import io.github._5thlayer.groundworks.Footprint;
 import io.github._5thlayer.groundworks.FootprintItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -12,21 +13,26 @@ import net.minecraft.world.item.component.TooltipDisplay;
 
 import java.util.function.Consumer;
 
-/** Places the whole Steam Engine, or nothing, and says what it burns and what it makes. */
-public class SteamEngineItem extends FootprintItem {
+/** Places a whole Steam Engine or Steam Turbine, or nothing, and says what it burns and what it makes. */
+public class SteamGeneratorItem extends FootprintItem {
 
-    public SteamEngineItem(Properties properties) {
-        super(WireworksRegistries.STEAM_ENGINE_FOOTPRINT, properties);
+    private final SteamEngineSpec spec;
+    private final String name;
+
+    /** @param name the block's name, which keys its tooltip lines */
+    public SteamGeneratorItem(Footprint footprint, SteamEngineSpec spec, String name, Properties properties) {
+        super(footprint, properties);
+        this.spec = spec;
+        this.name = name;
     }
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display,
                                 Consumer<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, context, display, tooltip, flag);
-        SteamEngineSpec spec = SteamEngineBlockEntity.spec();
-        tooltip.accept(Component.translatable("tooltip.wireworks.steam_engine.burns_steam",
+        tooltip.accept(Component.translatable("tooltip.wireworks." + name + ".burns_steam",
                 BoilerItem.number(spec.steamPerSecond())).withStyle(ChatFormatting.GRAY));
-        tooltip.accept(Component.translatable("tooltip.wireworks.steam_engine.makes_up_to",
+        tooltip.accept(Component.translatable("tooltip.wireworks." + name + ".makes_up_to",
                 BoilerItem.number(spec.energyPerTick())).withStyle(ChatFormatting.GRAY));
     }
 }
