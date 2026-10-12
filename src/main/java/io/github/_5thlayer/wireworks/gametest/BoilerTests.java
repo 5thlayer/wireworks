@@ -7,7 +7,7 @@ import io.github._5thlayer.libworks.ghost.Ghosts;
 import io.github._5thlayer.wireworks.BoilerBlockEntity;
 import io.github._5thlayer.wireworks.BoilerMenu;
 import io.github._5thlayer.wireworks.BoilerSlots;
-import io.github._5thlayer.wireworks.BoilerState;
+import io.github._5thlayer.wireworks.BoilerStatus;
 import io.github._5thlayer.wireworks.SteamEngineBlockEntity;
 import io.github._5thlayer.wireworks.SteamFluids;
 import io.github._5thlayer.wireworks.WireworksRegistries;
@@ -214,7 +214,7 @@ final class BoilerTests {
                     if (boiler.data().get(BoilerBlockEntity.DATA_WATER) != held[1]) {
                         helper.fail("a blocked Boiler spent water", ANCHOR);
                     }
-                    expectState(helper, BoilerState.STEAM_BACKED_UP);
+                    expectStatus(helper, BoilerStatus.STEAM_BACKED_UP);
                     if (extract(fluidAt(helper, part(helper, STEAM_PART), Direction.SOUTH), steam(), 30) != 30) {
                         helper.fail("a pipe could not draw 30 mB from the full steam tank", ANCHOR);
                     }
@@ -470,7 +470,7 @@ final class BoilerTests {
                 .thenExecute(() -> {
                     helper.assertTrue(boiler(helper).getItem(BoilerSlots.FUEL).is(Items.LAVA_BUCKET), "the lava bucket was lit");
                     helper.assertValueEqual(boiler(helper).data().get(BoilerBlockEntity.DATA_STEAM), 0, "steam made");
-                    expectState(helper, BoilerState.OUTPUT_FULL);
+                    expectStatus(helper, BoilerStatus.OUTPUT_FULL);
                     boiler(helper).setItem(BoilerSlots.OUTPUT, ItemStack.EMPTY);
                 })
                 .thenWaitUntil(() -> helper.assertTrue(boiler(helper).getItem(BoilerSlots.OUTPUT).is(Items.BUCKET),
@@ -574,6 +574,8 @@ final class BoilerTests {
                 .thenExecute(() -> {
                     helper.assertValueEqual(boiler(helper).data().get(BoilerBlockEntity.DATA_WATER), 0, "water in the tank");
                     helper.assertTrue(boiler(helper).getItem(BoilerSlots.WATER).is(Items.WATER_BUCKET), "the water bucket left its slot");
+                    // Not "no water": the water is there, waiting on the output.
+                    expectStatus(helper, BoilerStatus.OUTPUT_FULL);
                 })
                 .thenSucceed();
     }
@@ -595,7 +597,7 @@ final class BoilerTests {
     }
 
     /**
-     * The state the screen and Jade name: no water first, then fuel, then boiling. The backed-up and
+     * The status the screen and Jade name: no water first, then fuel, then boiling. The backed-up and
      * output-full states are asserted where those stalls are set up.
      */
     private static void saysWhy(GameTestHelper helper) {
@@ -603,27 +605,27 @@ final class BoilerTests {
         helper.startSequence()
                 .thenIdle(1)
                 .thenExecute(() -> {
-                    expectState(helper, BoilerState.NO_WATER);
+                    expectStatus(helper, BoilerStatus.NO_WATER);
                     insert(fluidAt(helper, part(helper, WEST_END), null), water(), WATER_CAPACITY);
                 })
                 .thenIdle(1)
                 .thenExecute(() -> {
-                    expectState(helper, BoilerState.NO_FUEL);
+                    expectStatus(helper, BoilerStatus.NO_FUEL);
                     boiler(helper).setItem(BoilerSlots.FUEL, new ItemStack(Items.COAL));
                 })
                 .thenIdle(1)
-                .thenExecute(() -> expectState(helper, BoilerState.BOILING))
+                .thenExecute(() -> expectStatus(helper, BoilerStatus.BOILING))
                 .thenSucceed();
     }
 
-    private static void expectState(GameTestHelper helper, BoilerState expected) {
-        BoilerState state = boiler(helper).state();
-        if (state != expected) {
-            helper.fail("the Boiler says " + state + ", not " + expected, ANCHOR);
+    private static void expectStatus(GameTestHelper helper, BoilerStatus expected) {
+        BoilerStatus status = boiler(helper).status();
+        if (status != expected) {
+            helper.fail("the Boiler says " + status + ", not " + expected, ANCHOR);
         }
-        int synced = boiler(helper).data().get(BoilerBlockEntity.DATA_STATE);
+        int synced = boiler(helper).data().get(BoilerBlockEntity.DATA_STATUS);
         if (synced != expected.ordinal()) {
-            helper.fail("the menu is sent state " + synced + ", not " + expected.ordinal(), ANCHOR);
+            helper.fail("the menu is sent status " + synced + ", not " + expected.ordinal(), ANCHOR);
         }
     }
 

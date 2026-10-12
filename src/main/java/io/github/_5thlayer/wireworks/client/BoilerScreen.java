@@ -31,7 +31,7 @@ import net.minecraft.world.level.material.Fluids;
  * The Boiler's screen, a stand-in drawn from fills as Fieldworks' Harvester's is: down the left, each
  * input slot beside what it feeds, the fuel slot beside the fuel it has banked, the water slot beside
  * the water tank and the steam slot beside the steam tank; the output on the right; and below them the
- * state, which says why a stopped Boiler stopped. Its empty input slots show ghosts of what goes in
+ * status, which says why a stopped Boiler stopped. Its empty input slots show ghosts of what goes in
  * them, and EMI's recipe and usage keys work on those.
  */
 public class BoilerScreen extends AbstractContainerScreen<BoilerMenu> {
@@ -55,7 +55,7 @@ public class BoilerScreen extends AbstractContainerScreen<BoilerMenu> {
     private static final int GAUGE_X = 28;
     private static final int GAUGE_WIDTH = 100;
     private static final int GAUGE_DROP = 2;
-    private static final int STATE_Y = 78;
+    private static final int STATUS_Y = 78;
 
     /** What the empty fuel, water and steam slots show, and what EMI's shortcuts ask of. */
     private final Ghosts ghosts = new Ghosts(() -> leftPos, () -> topPos);
@@ -90,7 +90,7 @@ public class BoilerScreen extends AbstractContainerScreen<BoilerMenu> {
     @Override
     protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         super.extractLabels(graphics, mouseX, mouseY);
-        graphics.text(font, menu.state().line(), MARGIN, STATE_Y, TEXT, false);
+        graphics.text(font, menu.status().line(), MARGIN, STATUS_Y, TEXT, false);
     }
 
     /** The ghost stack under the mouse, with the top-left of its slot on screen, for EMI's recipe and usage keys. */
@@ -125,10 +125,11 @@ public class BoilerScreen extends AbstractContainerScreen<BoilerMenu> {
         return x >= GAUGE_X && x < GAUGE_X + GAUGE_WIDTH && y >= top && y < top + BAR_HEIGHT;
     }
 
+    /** The seconds banked; nothing on an empty bar, since the status line already says the Boiler is out of fuel. */
     private Component burnLabel() {
         int joules = menu.fuelStored();
         return joules <= 0
-                ? Component.translatable("tooltip.wireworks.boiler.fuel.out")
+                ? Component.empty()
                 : Component.translatable("tooltip.wireworks.boiler.burn", BoilerSpec.secondsOfFuel(joules));
     }
 

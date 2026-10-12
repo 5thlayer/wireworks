@@ -13,7 +13,7 @@ import net.minecraft.network.chat.Component;
  * for the steam, then fuel, which it cannot light while the output has no room for what the fuel would
  * leave. Its screen and Jade both name it, in the same words.
  */
-public enum BoilerState {
+public enum BoilerStatus {
     BOILING,
     NO_WATER,
     STEAM_BACKED_UP,
@@ -22,13 +22,13 @@ public enum BoilerState {
 
     /** "Boiling" in green, or why not in red. */
     public Component line() {
-        return Component.translatable("tooltip.wireworks.boiler.state." + name().toLowerCase(Locale.ROOT))
+        return Component.translatable("tooltip.wireworks.boiler.status." + name().toLowerCase(Locale.ROOT))
                 .withStyle(this == BOILING ? ChatFormatting.GREEN : ChatFormatting.RED);
     }
 
-    /** The state a menu or Jade was sent, or {@link #NO_FUEL} for a number it does not know. */
-    public static BoilerState of(int ordinal) {
-        BoilerState[] states = values();
-        return ordinal >= 0 && ordinal < states.length ? states[ordinal] : NO_FUEL;
+    /** The status a menu or Jade was sent, or {@link #NO_FUEL} for a number it does not know. */
+    public static BoilerStatus of(int ordinal) {
+        BoilerStatus[] all = values();
+        return ordinal >= 0 && ordinal < all.length ? all[ordinal] : NO_FUEL;
     }
 }

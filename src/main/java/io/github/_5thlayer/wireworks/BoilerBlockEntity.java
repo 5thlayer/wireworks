@@ -55,7 +55,7 @@ public class BoilerBlockEntity extends BlockEntity implements Container, MenuPro
     public static final int DATA_STEAM = 3;
     public static final int DATA_WATER_CAPACITY = 4;
     public static final int DATA_STEAM_CAPACITY = 5;
-    public static final int DATA_STATE = 6;
+    public static final int DATA_STATUS = 6;
     public static final int DATA_COUNT = 7;
 
     private static final String WATER = "Water";
@@ -71,7 +71,7 @@ public class BoilerBlockEntity extends BlockEntity implements Container, MenuPro
     private final ResourceHandler<ItemResource> itemFace = new BoilerItemHandler(this);
 
     /** What the last tick did, for the screen and Jade; worked out again every tick, so never saved. */
-    private BoilerState state = BoilerState.NO_FUEL;
+    private BoilerStatus status = BoilerStatus.NO_FUEL;
 
     private final ContainerData data = new ContainerData() {
         @Override
@@ -83,7 +83,7 @@ public class BoilerBlockEntity extends BlockEntity implements Container, MenuPro
                 case DATA_STEAM -> steam.amount();
                 case DATA_WATER_CAPACITY -> water.capacity();
                 case DATA_STEAM_CAPACITY -> steam.capacity();
-                case DATA_STATE -> state.ordinal();
+                case DATA_STATUS -> status.ordinal();
                 default -> 0;
             };
         }
@@ -155,28 +155,29 @@ public class BoilerBlockEntity extends BlockEntity implements Container, MenuPro
             steam.fill(steam.amount() + converted);
             setChanged();
         }
-        state = stateAfter(converted);
+        status = statusAfter(converted);
         exchange(BoilerSlots.STEAM);
         passSteamOn();
     }
 
     /** Why a tick that converted nothing did not, asked in {@link BoilerCycle}'s order. */
-    private BoilerState stateAfter(int converted) {
+    private BoilerStatus statusAfter(int converted) {
         if (converted > 0) {
-            return BoilerState.BOILING;
+            return BoilerStatus.BOILING;
         }
         if (water.amount() < BoilerSpec.MILLIBUCKETS_PER_TICK) {
-            return BoilerState.NO_WATER;
+            // A water container still in its slot with the tank this low is waiting on the output.
+            return items.get(BoilerSlots.WATER).isEmpty() ? BoilerStatus.NO_WATER : BoilerStatus.OUTPUT_FULL;
         }
         if (steam.room() < BoilerSpec.MILLIBUCKETS_PER_TICK) {
-            return BoilerState.STEAM_BACKED_UP;
+            return BoilerStatus.STEAM_BACKED_UP;
         }
         ItemStack stack = items.get(BoilerSlots.FUEL);
-        return fuelValue(stack) > 0L && !hasOutputRoom(leftBy(stack)) ? BoilerState.OUTPUT_FULL : BoilerState.NO_FUEL;
+        return fuelValue(stack) > 0L && !hasOutputRoom(leftBy(stack)) ? BoilerStatus.OUTPUT_FULL : BoilerStatus.NO_FUEL;
     }
 
-    public BoilerState state() {
-        return state;
+    public BoilerStatus status() {
+        return status;
     }
 
     /**

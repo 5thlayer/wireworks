@@ -17,7 +17,7 @@ import net.minecraft.world.level.Level;
 /**
  * The Boiler's menu, laid out as Fieldworks' Harvester's: the three input slots down the left, fuel,
  * then a water container, then an empty container for steam, each beside the gauge it feeds or fills;
- * the output on the right, where all three leave what they become; and the state the Boiler is in,
+ * the output on the right, where all three leave what they become; and the status the Boiler is in,
  * which says why a stopped Boiler stopped.
  */
 public class BoilerMenu extends AbstractContainerMenu {
@@ -30,7 +30,7 @@ public class BoilerMenu extends AbstractContainerMenu {
     /** The output, right of the gauges, level with the middle row. */
     public static final int OUTPUT_X = 134;
     public static final int OUTPUT_Y = 36;
-    /** Where the player's inventory starts, from the top of the screen: below the state line. */
+    /** Where the player's inventory starts, from the top of the screen: below the status line. */
     public static final int INVENTORY_Y = 100;
 
     /** The container slots shift-click fills, in the order it tries them. */
@@ -90,12 +90,13 @@ public class BoilerMenu extends AbstractContainerMenu {
         return data.get(BoilerBlockEntity.DATA_WATER_CAPACITY);
     }
 
-    public BoilerState state() {
-        return BoilerState.of(data.get(BoilerBlockEntity.DATA_STATE));
-    }
-
     public int steamCapacity() {
         return data.get(BoilerBlockEntity.DATA_STEAM_CAPACITY);
+    }
+
+    /** Whether the Boiler boiled on its last tick, and if not, why not. */
+    public BoilerStatus status() {
+        return BoilerStatus.of(data.get(BoilerBlockEntity.DATA_STATUS));
     }
 
     @Override

@@ -9,7 +9,8 @@ import java.util.Optional;
 
 import io.github._5thlayer.wireworks.BoilerBlock;
 import io.github._5thlayer.wireworks.BoilerBlockEntity;
-import io.github._5thlayer.wireworks.BoilerState;
+import io.github._5thlayer.wireworks.BoilerSpec;
+import io.github._5thlayer.wireworks.BoilerStatus;
 import io.github._5thlayer.wireworks.SteamFluids;
 import io.github._5thlayer.wireworks.Wireworks;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -44,7 +45,7 @@ import snownee.jade.api.view.ItemView;
 import snownee.jade.api.view.ViewGroup;
 
 /**
- * A Boiler in Jade, built as Fieldworks' Harvester's is: its state, in the same words as its screen,
+ * A Boiler in Jade, built as Fieldworks' Harvester's is: its status, in the same words as its screen,
  * so a stopped Boiler says why; its slots as icons with their counts; and each tank as its own titled
  * bar, since its tanks answer on no face of the anchor Jade reads. The fuel it has banked is the
  * screen's.
@@ -61,19 +62,19 @@ public class BoilerJadePlugin implements IWailaPlugin {
     private static final String WATER = "water";
     private static final String STEAM = "steam";
 
-    private static final StreamCodec<RegistryFriendlyByteBuf, BoilerState> STATE_CODEC =
-            ByteBufCodecs.idMapper(BoilerState::of, BoilerState::ordinal).cast();
+    private static final StreamCodec<RegistryFriendlyByteBuf, BoilerStatus> STATUS_CODEC =
+            ByteBufCodecs.idMapper(BoilerStatus::of, BoilerStatus::ordinal).cast();
 
-    private static class Report implements StreamServerDataProvider<BlockAccessor, BoilerState> {
+    private static class Report implements StreamServerDataProvider<BlockAccessor, BoilerStatus> {
 
         @Override
-        public @Nullable BoilerState streamData(BlockAccessor accessor) {
-            return accessor.getBlockEntity() instanceof BoilerBlockEntity boiler ? boiler.state() : null;
+        public @Nullable BoilerStatus streamData(BlockAccessor accessor) {
+            return accessor.getBlockEntity() instanceof BoilerBlockEntity boiler ? boiler.status() : null;
         }
 
         @Override
-        public StreamCodec<RegistryFriendlyByteBuf, BoilerState> streamCodec() {
-            return STATE_CODEC;
+        public StreamCodec<RegistryFriendlyByteBuf, BoilerStatus> streamCodec() {
+            return STATUS_CODEC;
         }
 
         @Override
@@ -82,12 +83,12 @@ public class BoilerJadePlugin implements IWailaPlugin {
         }
     }
 
-    /** Draws the state; apart from {@link Report} so that a dedicated server never loads Jade's drawing. */
+    /** Draws the status; apart from {@link Report} so that a dedicated server never loads Jade's drawing. */
     private static final class Client extends Report implements IBlockComponentProvider {
 
         @Override
         public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
-            decodeFromData(accessor).ifPresent(state -> tooltip.add(state.line()));
+            decodeFromData(accessor).ifPresent(status -> tooltip.add(status.line()));
         }
     }
 
@@ -138,8 +139,8 @@ public class BoilerJadePlugin implements IWailaPlugin {
             if (!(accessor instanceof BlockAccessor block) || !(block.getBlockEntity() instanceof BoilerBlockEntity boiler)) {
                 return null;
             }
-            return List.of(tank(WATER, Fluids.WATER, boiler.water(), boiler.data().get(BoilerBlockEntity.DATA_WATER_CAPACITY)),
-                    tank(STEAM, SteamFluids.STEAM_SOURCE.get(), boiler.steam(), boiler.data().get(BoilerBlockEntity.DATA_STEAM_CAPACITY)));
+            return List.of(tank(WATER, Fluids.WATER, boiler.water(), BoilerSpec.WATER_CAPACITY),
+                    tank(STEAM, SteamFluids.STEAM_SOURCE.get(), boiler.steam(), BoilerSpec.STEAM_CAPACITY));
         }
 
         @Override
