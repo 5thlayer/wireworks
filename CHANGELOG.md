@@ -15,6 +15,7 @@ Each version has two sections: Players, what a player or pack developer sees, an
 - Bioresin, a plastic resin made from plants: a brewing stand turns a water bottle and sugar cane into bioresin, and honeycomb and kelp craft one. No vanilla brew changes. EMI shows the brew with its water bottle. (#28)
 - Plastic, blasted one for one from any plastic resin: vanilla's resin clump, bioresin, or tar when a mod makes it. (#27)
 - The battery, crafted from a copper ingot, an iron ingot and redstone. (#27)
+- Bioresin, plastic and the battery wear textures by Malcolm Riley, from unused-textures, under CC-BY-4.0. (#37, #38)
 - Recipes change. The Solar Panel takes plastic where it took redstone; the large pole takes plastic where it took redstone; the Transformer takes one plastic in its bottom row; the Transmission Pole takes two plastic beside its post; and the Accumulator takes four batteries where it took four redstone blocks. The small and medium poles are unchanged. (#27)
 - Wireworks' items are in the suite's shared Works tab, beside every other -works mod's, and in no other tab: the Wireworks tab is gone, and the blocks leave Functional Blocks. (#23)
 

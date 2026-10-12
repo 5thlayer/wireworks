@@ -10,6 +10,7 @@ modId = "${mod_id}"
 version = "${version}"
 displayName = "${mod_name}"
 authors = "5thlayer"
+credits = "Bioresin, plastic and battery textures by Malcolm Riley (github.com/malcolmriley/unused-textures), CC-BY-4.0"
 description = '''
 ${mod_description}
 '''

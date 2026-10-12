@@ -32,4 +32,4 @@ Wireworks is also a library, carved out of the [FactoryWorks](https://github.com
 
 ## License
 
-MIT, under REUSE (`REUSE.toml`). The cover art uses Minecraft's dirt texture, which remains Mojang's. Source is on [GitHub](https://github.com/5thlayer/wireworks).
+MIT, under REUSE (`REUSE.toml`). The cover art uses Minecraft's dirt texture, which remains Mojang's. The bioresin, plastic and battery item textures are by Malcolm Riley, from [unused-textures](https://github.com/malcolmriley/unused-textures), under [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/). Source is on [GitHub](https://github.com/5thlayer/wireworks).

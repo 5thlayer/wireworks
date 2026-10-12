@@ -38,3 +38,15 @@ SPDX-License-Identifier = "Apache-2.0"
 path = ["publish/*.png"]
 SPDX-FileCopyrightText = ["Mojang AB", "2026 5thlayer"]
 SPDX-License-Identifier = "LicenseRef-Mojang"
+
+# Bioresin's, plastic's and the battery's item textures are Malcolm Riley's, from
+# https://github.com/malcolmriley/unused-textures, unmodified; see docs/placeholder-art.md.
+[[annotations]]
+path = [
+    "src/main/resources/assets/wireworks/textures/item/bioresin.png",
+    "src/main/resources/assets/wireworks/textures/item/plastic.png",
+    "src/main/resources/assets/wireworks/textures/item/battery.png",
+]
+precedence = "override"
+SPDX-FileCopyrightText = "Malcolm Riley"
+SPDX-License-Identifier = "CC-BY-4.0"
