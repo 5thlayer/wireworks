@@ -33,6 +33,12 @@ public final class WireworksTags {
     /** Electrolytes, one of each battery's three parts: redstone, and sulfur from {@code c:dusts/sulfur} when a mod fills it. */
     public static final TagKey<Item> ELECTROLYTES = TagKey.create(Registries.ITEM, id("electrolytes"));
 
+    /** Fission Fuel, what the Reactor burns: the Fuel Cell. */
+    public static final TagKey<Item> FISSION_FUEL = TagKey.create(Registries.ITEM, id("fission_fuel"));
+
+    /** Fissiles, what a Fuel Cell is crafted and refilled from: glowstone dust, and uranium from {@code c:ingots/uranium} when a mod fills it. */
+    public static final TagKey<Item> FISSILE = TagKey.create(Registries.ITEM, id("fissile"));
+
     private WireworksTags() {
     }
 

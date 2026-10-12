@@ -15,9 +15,9 @@ import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.RecipeType;
 
 /**
- * What the Solar Panel, the Accumulator, the Boiler, the Steam Engine and the Steam Turbine ship as
- * data: the tags that give them their roles on a network, and recipes that craft the item from the
- * ingredients the tags name.
+ * What the Solar Panel, the Accumulator, the Boiler, the Steam Engine, the Steam Turbine and the
+ * Reactor ship as data: the tags that give them their roles on a network, and recipes that craft the
+ * item from the ingredients the tags name; and the Fuel Cell's two recipes and the two nuclear tags.
  */
 final class EnergyBlockDataTests {
 
@@ -47,6 +47,24 @@ final class EnergyBlockDataTests {
                 Items.COPPER_BLOCK, WireworksRegistries.PLASTIC.get(), Items.COPPER_BLOCK,
                 Items.PISTON, Items.IRON_BLOCK, Items.PISTON,
                 Items.COPPER_BLOCK, WireworksRegistries.PLASTIC.get(), Items.COPPER_BLOCK), WireworksRegistries.STEAM_TURBINE_ITEM.get()));
+        tests.test("reactor_is_crafted_from_its_recipe", 1, helper -> crafted(helper, 3, List.of(
+                Items.IRON_BLOCK, WireworksRegistries.PLASTIC.get(), Items.IRON_BLOCK,
+                Items.NETHERITE_BLOCK, Items.BLAST_FURNACE, Items.NETHERITE_BLOCK,
+                Items.IRON_BLOCK, WireworksRegistries.PLASTIC.get(), Items.IRON_BLOCK), WireworksRegistries.REACTOR_ITEM.get()));
+        tests.test("fuel_cell_is_crafted_from_iron_round_glowstone_dust", 1, helper -> crafted(helper, 3, List.of(
+                Items.IRON_INGOT, Items.IRON_INGOT, Items.IRON_INGOT,
+                Items.IRON_INGOT, Items.GLOWSTONE_DUST, Items.IRON_INGOT,
+                Items.IRON_INGOT, Items.IRON_INGOT, Items.IRON_INGOT), WireworksRegistries.FUEL_CELL.get()));
+        tests.test("depleted_fuel_cell_and_glowstone_dust_refill_a_fuel_cell", 1, helper -> crafted(helper, 2, List.of(
+                WireworksRegistries.DEPLETED_FUEL_CELL.get(), Items.GLOWSTONE_DUST,
+                Items.AIR, Items.AIR), WireworksRegistries.FUEL_CELL.get()));
+        tests.test("the_nuclear_tags_hold_their_defaults_and_differ", 1, EnergyBlockDataTests::nuclearTags);
+        tests.test("reactor_is_neither_a_generator_nor_an_accumulator", 1, helper -> {
+            var reactor = WireworksRegistries.REACTOR.get().defaultBlockState();
+            helper.assertFalse(reactor.is(WireworksTags.GENERATORS) || reactor.is(WireworksTags.ACCUMULATORS),
+                    "the reactor makes no FE and must be in neither tag");
+            helper.succeed();
+        });
         tests.test("steam_turbine_is_a_generator", 1, helper -> {
             if (!WireworksRegistries.STEAM_TURBINE.get().defaultBlockState().is(WireworksTags.GENERATORS)) {
                 helper.fail("the steam turbine is not in wireworks:generators");
@@ -63,6 +81,19 @@ final class EnergyBlockDataTests {
                 || WireworksRegistries.BOILER.get().defaultBlockState().is(WireworksTags.ACCUMULATORS)) {
             helper.fail("the boiler makes no FE and must be in neither tag");
         }
+        helper.succeed();
+    }
+
+    /** The Fuel Cell is Fission Fuel and glowstone dust a Fissile, and neither is the other. */
+    private static void nuclearTags(GameTestHelper helper) {
+        ItemStack cell = new ItemStack(WireworksRegistries.FUEL_CELL.get());
+        ItemStack glowstone = new ItemStack(Items.GLOWSTONE_DUST);
+        helper.assertTrue(cell.is(WireworksTags.FISSION_FUEL), "the fuel cell is not fission fuel");
+        helper.assertTrue(glowstone.is(WireworksTags.FISSILE), "glowstone dust is not a fissile");
+        helper.assertFalse(cell.is(WireworksTags.FISSILE), "the fuel cell is a fissile");
+        helper.assertFalse(glowstone.is(WireworksTags.FISSION_FUEL), "glowstone dust is fission fuel");
+        helper.assertFalse(new ItemStack(WireworksRegistries.DEPLETED_FUEL_CELL.get()).is(WireworksTags.FISSION_FUEL),
+                "the depleted fuel cell is fission fuel");
         helper.succeed();
     }
 

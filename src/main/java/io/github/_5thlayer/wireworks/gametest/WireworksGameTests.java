@@ -82,6 +82,7 @@ public final class WireworksGameTests {
         BoilerTests.register(tests);
         SteamEngineTests.register(tests);
         SteamTurbineTests.register(tests);
+        ReactorTests.register(tests);
         EnergyBlockDataTests.register(tests);
         BioresinTests.register(tests);
         PlasticAndBatteryTests.register(tests);

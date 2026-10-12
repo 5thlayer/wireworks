@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "I": "#c:storage_blocks/iron",
+    "P": "wireworks:plastic",
+    "N": "#c:storage_blocks/netherite",
+    "F": "minecraft:blast_furnace"
+  },
+  "pattern": [
+    "IPI",
+    "NFN",
+    "IPI"
+  ],
+  "result": {
+    "id": "wireworks:reactor",
+    "count": 1
+  }
+}

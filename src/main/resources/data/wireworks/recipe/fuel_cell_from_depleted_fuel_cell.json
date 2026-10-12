@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "wireworks:depleted_fuel_cell",
+    "#wireworks:fissile"
+  ],
+  "result": {
+    "id": "wireworks:fuel_cell",
+    "count": 1
+  }
+}

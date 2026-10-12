@@ -1,0 +1,9 @@
+{
+  "values": [
+    {
+      "id": "#c:ingots/uranium",
+      "required": false
+    },
+    "minecraft:glowstone_dust"
+  ]
+}

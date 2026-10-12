@@ -153,6 +153,23 @@ public final class WireworksRegistries {
             STEAM_TURBINE_ENTITY = BLOCK_ENTITIES.register("steam_turbine",
                     () -> new BlockEntityType<>(SteamTurbineBlockEntity::new, STEAM_TURBINE.get()));
 
+    public static final DeferredBlock<ReactorBlock> REACTOR = BLOCKS.registerBlock(ReactorBlock.BLOCK_NAME, ReactorBlock::new);
+    public static final DeferredBlock<ReactorPartBlock> REACTOR_PART = BLOCKS.registerBlock("reactor_part",
+            props -> new ReactorPartBlock(props.noLootTable(), () -> WireworksRegistries.REACTOR_FOOTPRINT));
+    public static final DeferredItem<ReactorItem> REACTOR_ITEM =
+            ITEMS.registerItem(ReactorBlock.BLOCK_NAME, ReactorItem::new);
+    public static final Footprint REACTOR_FOOTPRINT = Footprint.declare(
+            SteamFootprints.REACTOR, REACTOR, REACTOR_PART, REACTOR_ITEM);
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ReactorBlockEntity>>
+            REACTOR_ENTITY = BLOCK_ENTITIES.register("reactor",
+                    () -> new BlockEntityType<>(ReactorBlockEntity::new, REACTOR.get()));
+
+    /** The Fuel Cell, the Fission Fuel Wireworks ships: crafted from a Fissile, it runs a Reactor for 4,000 ticks. */
+    public static final DeferredItem<Item> FUEL_CELL = ITEMS.registerSimpleItem("fuel_cell");
+
+    /** What a burnt Fuel Cell leaves in the Reactor, which a Fissile refills into a Fuel Cell. */
+    public static final DeferredItem<Item> DEPLETED_FUEL_CELL = ITEMS.registerSimpleItem("depleted_fuel_cell");
+
     /** Bioresin, a Plastic Resin made from plants: brewed from a water bottle and sugar cane, or crafted from honeycomb and kelp. */
     public static final DeferredItem<Item> BIORESIN = ITEMS.registerSimpleItem("bioresin");
 
@@ -189,7 +206,7 @@ public final class WireworksRegistries {
 
     /** Every item the Library adds, the poles first and the intermediates last. */
     private static Stream<Item> items() {
-        return Stream.concat(poleItems(), Stream.of(SOLAR_PANEL_ITEM, ACCUMULATOR_ITEM, BOILER_ITEM, STEAM_ENGINE_ITEM, STEAM_TURBINE_ITEM, BIORESIN, PLASTIC, BATTERY).map(DeferredItem::get));
+        return Stream.concat(poleItems(), Stream.of(SOLAR_PANEL_ITEM, ACCUMULATOR_ITEM, BOILER_ITEM, STEAM_ENGINE_ITEM, STEAM_TURBINE_ITEM, REACTOR_ITEM, BIORESIN, PLASTIC, BATTERY, FUEL_CELL, DEPLETED_FUEL_CELL).map(DeferredItem::get));
     }
 
     private static Set<Block> poleBlocks() {
@@ -207,7 +224,7 @@ public final class WireworksRegistries {
         modBus.addListener(WireworksRegistries::addToCreativeTabs);
         modBus.addListener(WireworksRegistries::registerCapabilities);
         // Ahead of Groundworks' forwarding, which answers a part with its anchor's face and so cannot tell which port was reached.
-        modBus.addListener(EventPriority.HIGHEST, RegisterCapabilitiesEvent.class, WireworksRegistries::registerBoilerPorts);
+        modBus.addListener(EventPriority.HIGHEST, RegisterCapabilitiesEvent.class, WireworksRegistries::registerPorts);
     }
 
     /**
@@ -224,10 +241,11 @@ public final class WireworksRegistries {
         event.registerBlockEntity(Capabilities.Fluid.BLOCK, STEAM_TURBINE_ENTITY.get(),
                 SteamTurbineBlockEntity::steamFace);
         event.registerBlockEntity(Capabilities.Item.BLOCK, BOILER_ENTITY.get(), (boiler, side) -> boiler.itemFace());
+        event.registerBlockEntity(Capabilities.Item.BLOCK, REACTOR_ENTITY.get(), (reactor, side) -> reactor.itemFace());
     }
 
-    /** The Boiler's part blocks answer for their own port (ADR-0011). */
-    private static void registerBoilerPorts(RegisterCapabilitiesEvent event) {
+    /** The Boiler's and the Reactor's part blocks answer for their own port (ADR-0011). */
+    private static void registerPorts(RegisterCapabilitiesEvent event) {
         event.registerBlock(Capabilities.Fluid.BLOCK, (level, pos, state, entity, side) -> {
             BlockPos at = BOILER_FOOTPRINT.standingOrigin(level, pos, state);
             if (at == null || !(level.getBlockEntity(at) instanceof BoilerBlockEntity boiler)) {
@@ -235,6 +253,13 @@ public final class WireworksRegistries {
             }
             return boiler.fluidFace(SteamFootprints.partOf(state), state.getValue(Footprint.FACING), side);
         }, BOILER_PART.get());
+        event.registerBlock(Capabilities.Fluid.BLOCK, (level, pos, state, entity, side) -> {
+            BlockPos at = REACTOR_FOOTPRINT.standingOrigin(level, pos, state);
+            if (at == null || !(level.getBlockEntity(at) instanceof ReactorBlockEntity reactor)) {
+                return null;
+            }
+            return reactor.fluidFace(SteamFootprints.partOf(state), state.getValue(Footprint.FACING), side);
+        }, REACTOR_PART.get());
     }
 
     /**

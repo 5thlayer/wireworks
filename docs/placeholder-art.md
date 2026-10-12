@@ -27,6 +27,8 @@ The Boiler and the Steam Engine arrive with art drawn for FactoryWorks Core, 5th
 
 The Steam Turbine has no art of its own yet. Its anchor wears vanilla's piston top on its front and copper block on every other face, and each part block is a plain copper block, so the 3x1x2 shows block by block. Superheated Steam draws with `fluid/steam.png`, tinted warm in `client/SteamClient.java`, and its liquid block with vanilla's water model.
 
+The Reactor has no art of its own yet either. A block model reaches only one block past its own and the Reactor's anchor is the bottom centre of a 3x3x3, so until a model is drawn each part block draws itself (`ReactorPartBlock`): vanilla's iron block for the casing, prismarine bricks for the four water ports, and the blast furnace's top on the steam port. `blockstates/reactor_part.json` picks the model by part number, water at parts 2, 4, 5 and 7 and steam at 22, the order `FootprintShape.standing(3, 3)` numbers them. Its item is a blast furnace face on iron. The Fuel Cell wears vanilla's bottle o' enchanting and the Depleted Fuel Cell the glass bottle.
+
 ## From unused-textures
 
 Three item textures are Malcolm Riley's, from [unused-textures](https://github.com/malcolmriley/unused-textures), under [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/) (`LICENSES/CC-BY-4.0.txt`). Each is copied unmodified, and `REUSE.toml` annotates it. `build-placeholder-textures.py` does not draw them.

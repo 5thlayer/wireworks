@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": "#c:ingots/iron",
+    "F": "#wireworks:fissile"
+  },
+  "pattern": [
+    "III",
+    "IFI",
+    "III"
+  ],
+  "result": {
+    "id": "wireworks:fuel_cell",
+    "count": 1
+  }
+}

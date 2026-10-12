@@ -55,8 +55,9 @@ final class CreativeTabTests {
                 WireworksRegistries.CREATIVE_POLE_ITEM.get(), WireworksRegistries.SOLAR_PANEL_ITEM.get(),
                 WireworksRegistries.ACCUMULATOR_ITEM.get(), WireworksRegistries.BOILER_ITEM.get(),
                 WireworksRegistries.STEAM_ENGINE_ITEM.get(), WireworksRegistries.STEAM_TURBINE_ITEM.get(),
-                WireworksRegistries.BIORESIN.get(),
-                WireworksRegistries.PLASTIC.get(), WireworksRegistries.BATTERY.get());
+                WireworksRegistries.REACTOR_ITEM.get(), WireworksRegistries.BIORESIN.get(),
+                WireworksRegistries.PLASTIC.get(), WireworksRegistries.BATTERY.get(),
+                WireworksRegistries.FUEL_CELL.get(), WireworksRegistries.DEPLETED_FUEL_CELL.get());
         if (!shown.equals(expected)) {
             helper.fail("the Works tab shows " + shown + ", not " + expected);
             return;

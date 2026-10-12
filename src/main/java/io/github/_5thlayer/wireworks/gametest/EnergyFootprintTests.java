@@ -25,7 +25,7 @@ import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.transfer.energy.EnergyHandler;
 
 /**
- * The Solar Panel, the Accumulator, the Steam Engine, the Steam Turbine and the Boiler as footprints: each placed whole from its one item, broken as
+ * The Solar Panel, the Accumulator, the Steam Engine, the Steam Turbine, the Boiler and the Reactor as footprints: each placed whole from its one item, broken as
  * one with one item back whichever block is hit, and, where they hold energy, answering the energy
  * capability on every block with the anchor's buffer.
  *
@@ -41,7 +41,7 @@ final class EnergyFootprintTests {
     }
 
     static void register(WireworksGameTests.Registrar tests) {
-        for (Kind kind : List.of(solar(), accumulator(), steamEngine(), steamTurbine(), boiler())) {
+        for (Kind kind : List.of(solar(), accumulator(), steamEngine(), steamTurbine(), boiler(), reactor())) {
             tests.test(kind.name + "_is_placed_whole_from_its_item", 20, helper -> placedWhole(helper, kind));
             tests.test(kind.name + "_breaks_as_one_when_a_part_is_broken", 20,
                     helper -> brokenWhole(helper, kind, kind.lastPart(helper), true));
@@ -91,6 +91,12 @@ final class EnergyFootprintTests {
     private static Kind boiler() {
         return new Kind("boiler", WireworksRegistries.BOILER_FOOTPRINT,
                 WireworksRegistries.BOILER_ITEM.get(), 6, false, true);
+    }
+
+    /** Holds no energy either, and is as large as a footprint gets: 27 blocks. */
+    private static Kind reactor() {
+        return new Kind("reactor", WireworksRegistries.REACTOR_FOOTPRINT,
+                WireworksRegistries.REACTOR_ITEM.get(), 27, false, true);
     }
 
     private static void placedWhole(GameTestHelper helper, Kind kind) {

@@ -101,7 +101,8 @@ final class PlaysAloneTests {
 
     private static void tagsPlayAlone(GameTestHelper helper) {
         List<TagKey<?>> consumed = List.of(WireworksTags.WIRE_TOOLS, WireworksTags.GENERATORS, WireworksTags.ACCUMULATORS,
-                WireworksTags.PLASTIC_RESINS, WireworksTags.CATHODES, WireworksTags.ANODES, WireworksTags.ELECTROLYTES);
+                WireworksTags.PLASTIC_RESINS, WireworksTags.CATHODES, WireworksTags.ANODES, WireworksTags.ELECTROLYTES,
+                WireworksTags.FISSION_FUEL, WireworksTags.FISSILE);
         for (TagKey<?> tag : consumed) {
             helper.assertTrue(reachesAlone(helper, tag), tag.location() + " holds no entry of " + FILLS_ALONE);
         }

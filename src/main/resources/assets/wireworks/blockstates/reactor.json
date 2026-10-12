@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "wireworks:block/reactor"
+    },
+    "facing=east": {
+      "model": "wireworks:block/reactor"
+    },
+    "facing=south": {
+      "model": "wireworks:block/reactor"
+    },
+    "facing=west": {
+      "model": "wireworks:block/reactor"
+    }
+  }
+}
