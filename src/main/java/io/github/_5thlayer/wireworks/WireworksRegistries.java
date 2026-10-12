@@ -19,11 +19,8 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.material.MapColor;
-import net.minecraft.world.level.material.PushReaction;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.capabilities.Capabilities;
@@ -147,17 +144,6 @@ public final class WireworksRegistries {
             STEAM_ENGINE_ENTITY = BLOCK_ENTITIES.register("steam_engine",
                     () -> new BlockEntityType<>(SteamEngineBlockEntity::new, STEAM_ENGINE.get()));
 
-    /**
-     * Tar, which crude sets as where its source block touches lava ({@link TarInteraction}). A piston
-     * breaks the block rather than pushing it, and the block drops one tar, which is not placeable.
-     */
-    public static final DeferredBlock<Block> TAR = BLOCKS.registerSimpleBlock("tar", props -> props
-            .mapColor(MapColor.COLOR_BLACK)
-            .strength(0.5F)
-            .sound(SoundType.MUD)
-            .pushReaction(PushReaction.DESTROY));
-    public static final DeferredItem<Item> TAR_ITEM = ITEMS.registerSimpleItem("tar");
-
     /** The first end of a wire a tool is holding, on the stack so it survives a relog and the client can draw it. */
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<GlobalPos>>
             PENDING_WIRE = DATA_COMPONENTS.register("pending_wire",
@@ -191,14 +177,9 @@ public final class WireworksRegistries {
                 .map(DeferredItem::get);
     }
 
-    /** Every block's item the Library adds, the poles first. */
-    private static Stream<Item> blockItems() {
-        return Stream.concat(poleItems(), Stream.of(SOLAR_PANEL_ITEM, ACCUMULATOR_ITEM, BOILER_ITEM, STEAM_ENGINE_ITEM).map(DeferredItem::get));
-    }
-
-    /** Every item the Library adds, its blocks' first and then tar. */
+    /** Every item the Library adds, the poles first. */
     private static Stream<Item> items() {
-        return Stream.concat(blockItems(), Stream.of(TAR_ITEM.get()));
+        return Stream.concat(poleItems(), Stream.of(SOLAR_PANEL_ITEM, ACCUMULATOR_ITEM, BOILER_ITEM, STEAM_ENGINE_ITEM).map(DeferredItem::get));
     }
 
     private static Set<Block> poleBlocks() {
@@ -261,9 +242,7 @@ public final class WireworksRegistries {
 
     private static void addToCreativeTabs(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.FUNCTIONAL_BLOCKS) {
-            blockItems().forEach(event::accept);
-        } else if (event.getTabKey() == CreativeModeTabs.INGREDIENTS) {
-            event.accept(TAR_ITEM.get());
+            items().forEach(event::accept);
         }
     }
 }

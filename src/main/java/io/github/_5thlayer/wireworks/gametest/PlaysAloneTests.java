@@ -20,7 +20,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.Identifier;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -83,11 +82,9 @@ final class PlaysAloneTests {
         helper.succeed();
     }
 
-    // WireworksTags.CRUDE_OIL is left out: the tar interaction that reads it moves to Fieldworks with the tag
-    // (5thlayer/fieldworks#22).
     private static void tagsPlayAlone(GameTestHelper helper) {
         List<TagKey<?>> consumed = List.of(WireworksTags.WIRE_TOOLS, WireworksTags.GENERATORS, WireworksTags.ACCUMULATORS,
-                WireworksTags.PLASTIC_RESINS, FluidTags.LAVA);
+                WireworksTags.PLASTIC_RESINS);
         for (TagKey<?> tag : consumed) {
             helper.assertTrue(reachesAlone(helper, tag), tag.location() + " holds no entry of " + FILLS_ALONE);
         }
