@@ -23,9 +23,11 @@ Each version has two sections: Players, what a player or pack developer sees, an
 - The Boiler takes as long to mine as its hardness of 3.5 says, and the Reactor its 5; both had broken as fast as the other machines' 2.
 - The Fuel Cell, crafted from eight iron ingots round glowstone dust, or a uranium ingot when a mod adds one; and the Depleted Fuel Cell, which one glowstone dust or uranium ingot refills into a Fuel Cell. (#40)
 - Wireworks' items are in the suite's shared Works tab, beside every other -works mod's, and in no other tab: the Wireworks tab is gone, and the blocks leave Functional Blocks. (#23)
+- The Boiler's screen looks as it did, but a status line too long for the panel is cut short and shown whole on hover, and an empty tank's gauge reads no amount where it read 0 mB. (#44)
 
 ### Consumers
 
+- Wireworks nests libworks-runtime 0.1.2, in the range `[0.1.2,0.2)`, and draws the Boiler's screen and Jade view with its shared machine look in place of a copy of it. (#44)
 - The new item `wireworks:steam_bucket`, a plain `BucketItem`, so it has NeoForge's fluid item capability; it is `wireworks:steam`'s bucket. The Boiler's item face takes fuel, water containers and empty containers steam can go into, each in its own slot, and gives only the output. (#42)
 - `wireworks:steam_engine` is in `wireworks:generators`. Its fluid face is on every block of its footprint, insert-only, and steam taken in at either end of its row is offered on out of the other, and the Boiler's water and steam faces are on the port blocks, through NeoForge's `Capabilities.Fluid.BLOCK`. Wireworks names no pipe mod.
 - `wireworks:steam_turbine` is in `wireworks:generators`. Its fluid face is on every block of its footprint, insert-only, takes only `wireworks:superheated_steam`, and passes it along its row as the Steam Engine's does. (#39)
