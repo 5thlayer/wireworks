@@ -6,6 +6,7 @@ package io.github._5thlayer.wireworks;
 import io.github._5thlayer.groundworks.Footprint;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -36,12 +37,17 @@ import java.util.Optional;
  */
 public abstract class SteamGeneratorBlockEntity extends BlockEntity {
 
+    /** How long a generator shows itself running after the last burn: a second. */
+    private static final int RUNNING_HOLD_TICKS = 20;
+
     private final SteamEngineSpec spec;
     private final Footprint footprint;
     private long stored;
     private long made;
     private SteamEngineSpec.Carry carry = SteamEngineSpec.Carry.NONE;
     private boolean burning;
+    /** Ticks since the generator last burnt, up to {@link #RUNNING_HOLD_TICKS}; it starts still. */
+    private int ticksSinceBurnt = RUNNING_HOLD_TICKS;
     private final LongSnapshotJournal journal = new LongSnapshotJournal(() -> stored, v -> stored = v, this::setChanged);
     private final SingleFluidTank tank;
     private final ResourceHandler<FluidResource> steamFace;
@@ -104,12 +110,33 @@ public abstract class SteamGeneratorBlockEntity extends BlockEntity {
         if (changed) {
             setChanged();
         }
-        afterTick(burning);
+        ticksSinceBurnt = burning ? 0 : Math.min(ticksSinceBurnt + 1, RUNNING_HOLD_TICKS);
+        showRunning(ticksSinceBurnt < RUNNING_HOLD_TICKS);
         passSteamOn();
     }
 
-    /** Called at the end of each tick with whether it burnt steam; the Steam Turbine spins its fan by it. */
-    void afterTick(boolean burning) {
+    /**
+     * Sets {@link SteamGeneratorBlock#RUNNING} while the generator burns and for
+     * {@link #RUNNING_HOLD_TICKS} after, so one at part load, which burns on some ticks and not others,
+     * does not flicker. It is set on every block of the footprint that carries it: the Turbine's anchor
+     * alone, whose fan is the only thing that moves, and each of the Engine's blocks, since its engine
+     * is drawn across all four. Each block is asked, not the anchor alone, since a turn lays the parts
+     * afresh, still. A block of the footprint that is not a generator's, as after a part was replaced,
+     * is left, even one with a {@code running} property of its own.
+     */
+    private void showRunning(boolean running) {
+        if (level == null) {
+            return;
+        }
+        Direction facing = getBlockState().getValue(Footprint.FACING);
+        for (BlockPos pos : footprint.positions(worldPosition, facing)) {
+            BlockState state = level.getBlockState(pos);
+            boolean generators = state.getBlock() instanceof SteamGeneratorBlock
+                    || state.getBlock() instanceof SteamEnginePartBlock;
+            if (generators && state.getValue(SteamGeneratorBlock.RUNNING) != running) {
+                level.setBlock(pos, state.setValue(SteamGeneratorBlock.RUNNING, running), Block.UPDATE_ALL);
+            }
+        }
     }
 
     /** Offers what the tank holds to whatever stands against the row end the steam did not come in at. */

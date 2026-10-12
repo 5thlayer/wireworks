@@ -1,7 +1,262 @@
 {
-  "variants": {
-    "": {
-      "model": "wireworks:block/steam_engine_part"
+  "multipart": [
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "running": "false"
+      },
+      "apply": {
+        "model": "wireworks:block/steam_engine_cylinder_top"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "running": "true"
+      },
+      "apply": {
+        "model": "wireworks:block/steam_engine_cylinder_top_on"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "running": "false"
+      },
+      "apply": {
+        "model": "wireworks:block/steam_engine_cylinder_top",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "running": "true"
+      },
+      "apply": {
+        "model": "wireworks:block/steam_engine_cylinder_top_on",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "running": "false"
+      },
+      "apply": {
+        "model": "wireworks:block/steam_engine_cylinder_top",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "running": "true"
+      },
+      "apply": {
+        "model": "wireworks:block/steam_engine_cylinder_top_on",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "running": "false"
+      },
+      "apply": {
+        "model": "wireworks:block/steam_engine_cylinder_top",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "running": "true"
+      },
+      "apply": {
+        "model": "wireworks:block/steam_engine_cylinder_top_on",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "2",
+        "running": "false"
+      },
+      "apply": {
+        "model": "wireworks:block/steam_engine_wheel_bottom"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "2",
+        "running": "true"
+      },
+      "apply": {
+        "model": "wireworks:block/steam_engine_wheel_bottom_on"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "2",
+        "running": "false"
+      },
+      "apply": {
+        "model": "wireworks:block/steam_engine_wheel_bottom",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "2",
+        "running": "true"
+      },
+      "apply": {
+        "model": "wireworks:block/steam_engine_wheel_bottom_on",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "2",
+        "running": "false"
+      },
+      "apply": {
+        "model": "wireworks:block/steam_engine_wheel_bottom",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "2",
+        "running": "true"
+      },
+      "apply": {
+        "model": "wireworks:block/steam_engine_wheel_bottom_on",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "2",
+        "running": "false"
+      },
+      "apply": {
+        "model": "wireworks:block/steam_engine_wheel_bottom",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "2",
+        "running": "true"
+      },
+      "apply": {
+        "model": "wireworks:block/steam_engine_wheel_bottom_on",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "3",
+        "running": "false"
+      },
+      "apply": {
+        "model": "wireworks:block/steam_engine_wheel_top"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "3",
+        "running": "true"
+      },
+      "apply": {
+        "model": "wireworks:block/steam_engine_wheel_top_on"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "3",
+        "running": "false"
+      },
+      "apply": {
+        "model": "wireworks:block/steam_engine_wheel_top",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "3",
+        "running": "true"
+      },
+      "apply": {
+        "model": "wireworks:block/steam_engine_wheel_top_on",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "3",
+        "running": "false"
+      },
+      "apply": {
+        "model": "wireworks:block/steam_engine_wheel_top",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "3",
+        "running": "true"
+      },
+      "apply": {
+        "model": "wireworks:block/steam_engine_wheel_top_on",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "3",
+        "running": "false"
+      },
+      "apply": {
+        "model": "wireworks:block/steam_engine_wheel_top",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "3",
+        "running": "true"
+      },
+      "apply": {
+        "model": "wireworks:block/steam_engine_wheel_top_on",
+        "y": 270
+      }
     }
-  }
+  ]
 }

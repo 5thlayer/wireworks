@@ -4,7 +4,7 @@
 package io.github._5thlayer.wireworks.gametest;
 
 import io.github._5thlayer.wireworks.SteamFluids;
-import io.github._5thlayer.wireworks.SteamTurbineBlock;
+import io.github._5thlayer.wireworks.SteamGeneratorBlock;
 import io.github._5thlayer.wireworks.SteamTurbineBlockEntity;
 import io.github._5thlayer.wireworks.WireworksRegistries;
 import net.minecraft.core.BlockPos;
@@ -174,7 +174,7 @@ final class SteamTurbineTests {
     }
 
     private static void expectRunning(GameTestHelper helper, boolean expected, String which) {
-        if (helper.getBlockState(ANCHOR).getValue(SteamTurbineBlock.RUNNING) != expected) {
+        if (helper.getBlockState(ANCHOR).getValue(SteamGeneratorBlock.RUNNING) != expected) {
             helper.fail(which + (expected ? " shows its fan still" : " shows its fan spinning"), ANCHOR);
         }
     }

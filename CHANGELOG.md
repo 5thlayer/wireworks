@@ -4,9 +4,14 @@ Each version has two sections: Players, what a player or pack developer sees, an
 
 ## Unreleased
 
+### Players
+
+- The Steam Engine is built as the Steam Turbine is, a cube for each block, in place of its model from FactoryWorks Core. Its front and back draw one engine across its four blocks, a copper cylinder driving a flywheel, which turns while it burns and for a second after, set into an iron duct casing with intakes down its narrow sides and a vent on top. Its textures are Malcolm Riley's, from unused-textures, under CC-BY-4.0: the casing copied, the engine drawn in shades adapted from his duct and copper tank. (#47)
+
 ### Consumers
 
 - Wireworks nests libworks-runtime 0.1.7, which offers the Boiler's and the Reactor's ghosts to EMI in place of Wireworks' own stack provider: the recipe and usage keys still work on a ghost and a click still reaches its empty slot (libworks#23).
+- `wireworks:steam_engine` and `wireworks:steam_engine_part` carry a `running` block state property, set on every block of the Engine while it burns and for a second after. The Steam Turbine's `running` is the same property, declared on `SteamGeneratorBlock.RUNNING`; `SteamTurbineBlock.RUNNING` still names it, by inheritance. `WireworksRegistries.STEAM_ENGINE_PART` is a `DeferredBlock<SteamEnginePartBlock>`, a `FootprintPartBlock`, where it was a `DeferredBlock<FootprintPartBlock>`. (#47)
 
 ## 0.6.1
 

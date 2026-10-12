@@ -23,16 +23,23 @@ half runs down the left edge, and then its left half mirrored onto its right: ea
 dark half band down either edge, which meet whole where two blocks do, and the coil's shine sits in the
 middle, so a face three blocks wide reads the same from either end.
 
+The Steam Engine's front and back draw one engine side-on across its four blocks: a copper cylinder
+with its steam chest and pipe, the piston rod into a crosshead in its guides, the connecting rod to a
+crank on a spoked flywheel, all on a bed plate, in a recess let into the iron duct's plain panel. It is
+drawn here, in shades taken from the duct and from the copper tank's side, and cut into each block's
+quarter. The running engine turns its flywheel once over sixteen frames, the crosshead sliding with
+the crank; the still one is the first frame.
+
 Run from the repository root; it needs Pillow. `--check` builds and diffs, and fails when a committed
 texture is stale.
 """
 
 import io
-import shutil
+import math
 import sys
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageDraw, ImageEnhance
 
 ROOT = Path(__file__).resolve().parent.parent
 ART = ROOT / "data" / "art"
@@ -51,6 +58,25 @@ BRICK_RED = 18
 COIL_BAND_HALF = 2
 # The line inside a solar cell's frame, a navy darker than the cell.
 CELL_LINE = (30, 30, 58, 255)
+# The Steam Engine's front, two blocks square, and how many frames its flywheel turns once in.
+ENGINE = 2 * SIZE
+ENGINE_FRAMES = 16
+# The crank's angle on the still engine, a little past level so the rods read as two.
+ENGINE_STILL = 0.6
+# The width of the casing round the engine's recess, and how dark the recess is against it.
+ENGINE_FRAME = 2
+ENGINE_RECESS = 0.35
+# The cylinder's box, and the flywheel's centre, radius, crank and connecting rod.
+CYLINDER = (3, 12, 11, 21)
+WHEEL = (24, 16)
+WHEEL_RADIUS = 7
+CRANK = 3.0
+CONNECTING_ROD = 8.0
+# The piston and connecting rods, bright steel against the dark recess.
+PISTON_ROD = (222, 222, 214, 255)
+ROD = (200, 200, 192, 255)
+# The running engine's animation: a frame a tick, so it turns about 75 times a minute.
+ENGINE_ANIMATION = b'{\n\t"animation": {\n\t\t"frametime": 1\n\t}\n}\n'
 
 
 def frames(name):
@@ -126,13 +152,105 @@ def coil_side():
     return turned
 
 
+def shades(name, count):
+    """Count of the sprite's colours, darkest to lightest, evenly picked."""
+    sprite = frames(name)[0]
+    pixels = sprite.load()
+    seen = {pixels[x, y] for y in range(SIZE) for x in range(SIZE) if pixels[x, y][3] > 0}
+    ordered = sorted(seen, key=lambda p: (0.3 * p[0] + 0.59 * p[1] + 0.11 * p[2], p))
+    return [ordered[i * (len(ordered) - 1) // (count - 1)] for i in range(count)]
+
+
+def engine_front(theta):
+    """The Steam Engine's front at this crank angle: the cylinder on the left, the flywheel on the right."""
+    iron = shades("industrial_metal_duct_flat_1", 6)
+    copper = shades("metal_tank_copper_sides", 6)
+    panel = frames("industrial_metal_duct_flat_2")[0]
+    image = Image.new("RGBA", (ENGINE, ENGINE))
+    for x in (0, SIZE):
+        for y in (0, SIZE):
+            image.paste(panel, (x, y))
+    inner = (ENGINE_FRAME, ENGINE_FRAME, ENGINE - ENGINE_FRAME, ENGINE - ENGINE_FRAME)
+    image.paste(ImageEnhance.Brightness(image.crop(inner)).enhance(ENGINE_RECESS), inner[:2])
+    draw = ImageDraw.Draw(image)
+    pixels = image.load()
+    last = ENGINE - ENGINE_FRAME - 1
+
+    # The bed plate.
+    draw.rectangle((ENGINE_FRAME, 25, last, last), fill=iron[2])
+    draw.line((ENGINE_FRAME, 25, last, 25), fill=iron[4])
+    draw.line((ENGINE_FRAME, last, last, last), fill=iron[1])
+
+    # The cylinder, banded light to dark down its round body, with an iron flange at each end, its
+    # rivets, its feet, and the steam chest on top with its pipe up out of the casing.
+    x0, y0, x1, y1 = CYLINDER
+    bands = (0.15, 0.35, 0.6, 0.85)
+    for y in range(y0, y1 + 1):
+        t = (y - y0) / (y1 - y0)
+        draw.line((x0, y, x1, y), fill=copper[5 - sum(t >= b for b in bands)])
+    for x in (x0, x1):
+        draw.line((x, y0 - 1, x, y1 + 1), fill=iron[3])
+        pixels[x, y0 - 1] = iron[5]
+    for x in (x0 + 4, x0 + 7):
+        for y in range(y0 + 1, y1, 3):
+            pixels[x, y] = copper[0]
+    draw.rectangle((5, y1 + 1, 6, 24), fill=iron[2])
+    draw.rectangle((9, y1 + 1, 10, 24), fill=iron[2])
+    draw.rectangle((5, y0 - 3, 9, y0 - 1), fill=copper[2])
+    draw.line((5, y0 - 3, 9, y0 - 3), fill=copper[4])
+    draw.rectangle((6, ENGINE_FRAME, 7, y0 - 4), fill=copper[3])
+    draw.line((6, ENGINE_FRAME, 6, y0 - 4), fill=copper[5])
+
+    # The crosshead's guides, and the flywheel's stand behind it.
+    cx, cy = WHEEL
+    draw.line((x1 + 1, cy - 1, 18, cy - 1), fill=iron[1])
+    draw.line((x1 + 1, cy + 2, 18, cy + 2), fill=iron[1])
+    draw.polygon([(20, 24), (26, 24), (cx, cy), (cx - 2, cy)], fill=iron[2])
+    draw.line((cx - 2, cy, 20, 24), fill=iron[3])
+
+    # The flywheel: a rim lit from the top left, six spokes turned to theta, and the hub.
+    rim = WHEEL_RADIUS - 1.8
+    for y in range(ENGINE):
+        for x in range(ENGINE):
+            r = math.hypot(x - cx, y - cy)
+            if rim < r <= WHEEL_RADIUS + 0.5:
+                lit = (y - cy) < -(x - cx) * 0.5 and r > WHEEL_RADIUS - 0.8
+                pixels[x, y] = iron[5] if lit else iron[4] if r > WHEEL_RADIUS - 0.9 else iron[3]
+            elif r < 1.6:
+                pixels[x, y] = iron[5]
+            elif r <= rim:
+                off = (math.atan2(y - cy, x - cx) - theta + math.pi / 6) % (math.pi / 3) - math.pi / 6
+                if r * abs(math.sin(off)) < 0.75:
+                    pixels[x, y] = iron[4]
+
+    # The crank pin, the connecting rod back to the crosshead, and the piston rod into the cylinder.
+    pin = (round(cx + CRANK * math.cos(theta)), round(cy + CRANK * math.sin(theta)))
+    head = round(cx + CRANK * math.cos(theta) - math.sqrt(CONNECTING_ROD ** 2 - (CRANK * math.sin(theta)) ** 2))
+    draw.line((x1 + 1, cy, head, cy), fill=PISTON_ROD)
+    draw.rectangle((head - 1, cy - 1, head, cy + 1), fill=copper[4])
+    draw.line((head, cy, *pin), fill=ROD)
+    pixels[pin] = copper[5]
+    return image
+
+
+def engine_quarter(column, row, running):
+    """One block's quarter of the engine's front, column 0 the cylinder's and row 0 the top; running, every frame."""
+    turns = range(ENGINE_FRAMES) if running else range(1)
+    box = (column * SIZE, row * SIZE, column * SIZE + SIZE, row * SIZE + SIZE)
+    built = [engine_front(ENGINE_STILL + 2 * math.pi * i / ENGINE_FRAMES).crop(box) for i in turns]
+    strip = Image.new("RGBA", (SIZE, SIZE * len(built)))
+    for i, frame in enumerate(built):
+        strip.paste(frame, (0, SIZE * i))
+    return strip
+
+
 def png(image):
     out = io.BytesIO()
     image.save(out, format="PNG")
     return out.getvalue()
 
 
-# Each built texture, its builder, and the animation copied beside it, if any.
+# Each built texture, its builder, and the animation beside it, if any: copied from data/art/, or written.
 TEXTURES = {
     BLOCK / "boiler" / "front_off.png": (lambda: boiler_front("device_smelter_front"), None),
     BLOCK / "boiler" / "front_on.png": (lambda: boiler_front("device_smelter_front_lit"), "device_smelter_front_lit.png.mcmeta"),
@@ -141,6 +259,9 @@ TEXTURES = {
     BLOCK / "steam_turbine" / "fan_off.png": (still_fan, None),
     BLOCK / "steam_turbine" / "coil_side.png": (coil_side, None),
 }
+for name, column, row in (("cylinder_top", 0, 0), ("cylinder_bottom", 0, 1), ("wheel_top", 1, 0), ("wheel_bottom", 1, 1)):
+    TEXTURES[BLOCK / "steam_engine" / f"{name}.png"] = (lambda c=column, r=row: engine_quarter(c, r, False), None)
+    TEXTURES[BLOCK / "steam_engine" / f"{name}_on.png"] = (lambda c=column, r=row: engine_quarter(c, r, True), ENGINE_ANIMATION)
 
 
 def main():
@@ -149,10 +270,11 @@ def main():
     for path, (build, animation) in TEXTURES.items():
         image = png(build())
         meta = path.with_name(path.name + ".mcmeta")
+        animation = animation if animation is None or isinstance(animation, bytes) else (ART / animation).read_bytes()
         if check:
             current = path.is_file() and path.read_bytes() == image
             if animation:
-                current = current and meta.is_file() and meta.read_bytes() == (ART / animation).read_bytes()
+                current = current and meta.is_file() and meta.read_bytes() == animation
             print(("ok   %s is current" if current else "FAIL %s is stale -- re-run scripts/build-textures.py")
                   % path.relative_to(ROOT))
             stale = stale or not current
@@ -160,7 +282,7 @@ def main():
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(image)
         if animation:
-            shutil.copyfile(ART / animation, meta)
+            meta.write_bytes(animation)
         print(f"wrote {path.relative_to(ROOT)}")
     return 1 if stale else 0
 

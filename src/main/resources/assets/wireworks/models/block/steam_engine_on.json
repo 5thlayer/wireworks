@@ -1,0 +1,9 @@
+{
+  "parent": "wireworks:block/steam_engine_block",
+  "textures": {
+    "side": "wireworks:block/steam_engine/cylinder_bottom_on",
+    "end": "wireworks:block/steam_engine/duct",
+    "up": "wireworks:block/reactor/vent",
+    "down": "wireworks:block/steam_engine/duct"
+  }
+}

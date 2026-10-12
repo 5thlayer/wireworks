@@ -8,6 +8,7 @@ import io.github._5thlayer.wireworks.NetworkReading;
 import io.github._5thlayer.wireworks.PoleTier;
 import io.github._5thlayer.wireworks.SteamEngineBlockEntity;
 import io.github._5thlayer.wireworks.SteamFluids;
+import io.github._5thlayer.wireworks.SteamGeneratorBlock;
 import io.github._5thlayer.wireworks.SupplyAreaPoleBlockEntity;
 import io.github._5thlayer.wireworks.SupplyAreaScan;
 import io.github._5thlayer.wireworks.WireworksRegistries;
@@ -48,6 +49,13 @@ final class SteamEngineTests {
 
     private static final int SETTLE = Network.SETTLE;
     private static final int MEASURED = 20;
+    /** How long the engine runs on after the last burn, in ticks: a literal second. */
+    private static final int RUNNING_HOLD = 20;
+    /** Ten ticks of the engine's steam, at 1.5 mB a tick: a literal. */
+    private static final int TEN_TICKS_OF_STEAM = 15;
+    /** Every block of the engine at {@link #ANCHOR}: the anchor, the block above, and those two one west. */
+    private static final BlockPos[] ENGINE_BLOCKS = {
+            ANCHOR, ANCHOR.above(), ANCHOR.west(), ANCHOR.west().above()};
 
     private SteamEngineTests() {
     }
@@ -59,6 +67,8 @@ final class SteamEngineTests {
         tests.test("steam_engine_answers_the_fluid_capability_on_every_block_with_the_anchors_tank", 20,
                 SteamEngineTests::sharesItsTank);
         tests.test("fed_steam_engine_makes_its_rate", 100, SteamEngineTests::fed);
+        tests.test("steam_engine_runs_on_every_block_while_it_burns_and_a_second_after", 100,
+                SteamEngineTests::runsASecond);
         tests.test("starved_steam_engine_makes_what_its_steam_is_worth", 100, SteamEngineTests::starved);
         tests.test("steam_engine_row_on_fed_steam_makes_its_rate_per_engine", 100, SteamEngineTests::fedRow);
         tests.test("steam_engine_row_fed_from_the_other_end_makes_its_rate_per_engine", 100,
@@ -349,6 +359,41 @@ final class SteamEngineTests {
                     }
                 })
                 .thenSucceed();
+    }
+
+    /**
+     * Every block of the engine is still until it burns, runs while it does, and runs on for a second
+     * after the last burn, so one at part load does not flicker, and then stops: the engine its front
+     * and back draw spans all four blocks, so they turn together.
+     */
+    private static void runsASecond(GameTestHelper helper) {
+        place(helper);
+        helper.onEachTick(() -> drain(helper));
+        helper.startSequence()
+                .thenIdle(1)
+                .thenExecute(() -> {
+                    expectRunning(helper, false, "an engine that has never burnt");
+                    insert(helper, steam(), TEN_TICKS_OF_STEAM);
+                })
+                .thenWaitUntil(() -> {
+                    if (steamFace(helper).getAmountAsInt(0) > 0) {
+                        helper.fail("the engine has not burnt its steam yet", ANCHOR);
+                    }
+                })
+                .thenExecute(() -> expectRunning(helper, true, "an engine that burnt a tick ago"))
+                .thenIdle(RUNNING_HOLD - 3)
+                .thenExecute(() -> expectRunning(helper, true, "an engine that burnt under a second ago"))
+                .thenIdle(5)
+                .thenExecute(() -> expectRunning(helper, false, "an engine that last burnt over a second ago"))
+                .thenSucceed();
+    }
+
+    private static void expectRunning(GameTestHelper helper, boolean expected, String which) {
+        for (BlockPos block : ENGINE_BLOCKS) {
+            if (helper.getBlockState(block).getValue(SteamGeneratorBlock.RUNNING) != expected) {
+                helper.fail(which + (expected ? " shows still at " : " shows running at ") + block, block);
+            }
+        }
     }
 
     /** Fed under what it burns, an engine makes what the steam is worth, give or take a millibucket and a buffer. */

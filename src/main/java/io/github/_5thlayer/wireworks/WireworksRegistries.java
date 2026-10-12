@@ -140,8 +140,8 @@ public final class WireworksRegistries {
 
     public static final DeferredBlock<SteamEngineBlock> STEAM_ENGINE =
             BLOCKS.registerBlock(SteamEngineBlock.BLOCK_NAME, SteamEngineBlock::new);
-    public static final DeferredBlock<FootprintPartBlock> STEAM_ENGINE_PART =
-            part("steam_engine_part", () -> WireworksRegistries.STEAM_ENGINE_FOOTPRINT);
+    public static final DeferredBlock<SteamEnginePartBlock> STEAM_ENGINE_PART = BLOCKS.registerBlock("steam_engine_part",
+            props -> new SteamEnginePartBlock(props.noLootTable(), () -> WireworksRegistries.STEAM_ENGINE_FOOTPRINT));
     public static final DeferredItem<SteamGeneratorItem> STEAM_ENGINE_ITEM =
             ITEMS.registerItem(SteamEngineBlock.BLOCK_NAME, props -> new SteamGeneratorItem(
                     WireworksRegistries.STEAM_ENGINE_FOOTPRINT, SteamEngineBlockEntity.spec(), SteamEngineBlock.BLOCK_NAME, props));
