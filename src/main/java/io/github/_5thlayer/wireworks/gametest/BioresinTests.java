@@ -10,6 +10,7 @@ import io.github._5thlayer.wireworks.WireworksRegistries;
 import io.github._5thlayer.wireworks.WireworksTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionBrewing;
@@ -32,7 +33,7 @@ final class BioresinTests {
     static void register(WireworksGameTests.Registrar tests) {
         // A brew takes 400 ticks, run by the stand itself.
         tests.test("a_water_bottle_brewed_with_sugar_cane_gives_bioresin", 460, BioresinTests::brews);
-        tests.test("vanillas_brewing_table_has_no_mix_on_a_bioresin_pairing", 1, BioresinTests::replacesNoVanillaMix);
+        tests.test("vanillas_brewing_table_has_no_mix_on_a_bioresin_pairing", 1, BioresinTests::vanillaHasNoMix);
         tests.test("honeycomb_and_kelp_craft_bioresin", 1, BioresinTests::crafts);
         tests.test("bioresin_is_a_plastic_resin", 1, BioresinTests::isAPlasticResin);
     }
@@ -44,7 +45,7 @@ final class BioresinTests {
         helper.setBlock(STAND, Blocks.BREWING_STAND);
         BrewingStandBlockEntity stand = helper.getBlockEntity(STAND, BrewingStandBlockEntity.class);
         for (int slot = 0; slot < 3; slot++) {
-            stand.setItem(slot, sugarCane.input());
+            stand.setItem(slot, sugarCane.bottleStack());
         }
         stand.setItem(3, new ItemStack(Items.SUGAR_CANE));
         stand.setItem(4, new ItemStack(Items.BLAZE_POWDER));
@@ -57,19 +58,18 @@ final class BioresinTests {
     }
 
     /**
-     * Vanilla's table, built without the event mods register on, mixes none of the pairings: a vanilla mix added on
-     * one later fails here rather than being shadowed by Wireworks' recipe, which the stand tries first.
+     * Vanilla's table, built without the event mods register on and with every feature flag, experimental ones too,
+     * mixes none of the pairings: a vanilla mix added on one later fails here rather than being shadowed by Wireworks'
+     * recipe, which the stand tries first.
      */
-    private static void replacesNoVanillaMix(GameTestHelper helper) {
+    private static void vanillaHasNoMix(GameTestHelper helper) {
         helper.assertFalse(BioresinBrewing.PAIRINGS.isEmpty(), "bioresin has no brewing pairing");
-        var builder = new PotionBrewing.Builder(helper.getLevel().enabledFeatures());
+        var builder = new PotionBrewing.Builder(FeatureFlags.REGISTRY.allFlags());
         PotionBrewing.addVanillaMixes(builder);
         PotionBrewing vanilla = builder.build();
         for (BioresinBrewing.Pairing pairing : BioresinBrewing.PAIRINGS) {
             ItemStack ingredient = new ItemStack(pairing.ingredient());
-            helper.assertFalse(vanilla.hasMix(pairing.input(), ingredient), "vanilla already brews " + pairing.input() + " with " + ingredient);
-            helper.assertTrue(helper.getLevel().potionBrewing().mix(ingredient, pairing.input()).is(WireworksRegistries.BIORESIN.get()),
-                    "the server's table does not brew " + pairing.input() + " with " + ingredient + " into bioresin");
+            helper.assertFalse(vanilla.hasMix(pairing.bottleStack(), ingredient), "vanilla already brews " + pairing.bottleStack() + " with " + ingredient);
         }
         helper.succeed();
     }

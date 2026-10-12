@@ -38,8 +38,8 @@ public final class BioresinBrewing {
 
     private static void registerBrewing(RegisterBrewingRecipesEvent event) {
         for (Pairing pairing : PAIRINGS) {
-            Ingredient bottle = DataComponentIngredient.of(DataComponents.POTION_CONTENTS, new PotionContents(pairing.bottle()), Items.POTION);
-            event.getBuilder().addRecipe(bottle, Ingredient.of(pairing.ingredient()), new ItemStack(WireworksRegistries.BIORESIN.get()));
+            event.getBuilder().addRecipe(pairing.bottleIngredient(), Ingredient.of(pairing.ingredient()),
+                    new ItemStack(WireworksRegistries.BIORESIN.get()));
         }
     }
 
@@ -47,8 +47,12 @@ public final class BioresinBrewing {
     public record Pairing(Holder<Potion> bottle, Item ingredient) {
 
         /** The bottle as it stands in a brewing stand's bottle slot. */
-        public ItemStack input() {
+        public ItemStack bottleStack() {
             return PotionContents.createItemStack(Items.POTION, bottle);
+        }
+
+        Ingredient bottleIngredient() {
+            return DataComponentIngredient.of(DataComponents.POTION_CONTENTS, new PotionContents(bottle), Items.POTION);
         }
     }
 }
