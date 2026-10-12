@@ -37,11 +37,13 @@ public final class BoilerSpec {
     /** How much of a fuel item's value the burner banks. Factorio's is 1. */
     public static final double EFFECTIVITY = 1.0;
 
-    /** One of the Boiler's three water ports, and its steam port: Factorio's 200-unit fluid boxes. */
-    public static final int PORT_VOLUME = 200;
-
-    /** The water front row is three ports joined into one tank. */
-    public static final int WATER_PORTS = 3;
+    /**
+     * The water tank, which the front row's three ports share, and the steam tank: two buckets each.
+     * Factorio's 200-unit boxes would hold less than a bucket, which could then never empty into the
+     * water tank or fill from the steam tank (#42).
+     */
+    public static final int WATER_CAPACITY = 2_000;
+    public static final int STEAM_CAPACITY = 2_000;
 
     public static final long JOULES_PER_TICK = joulesPerTick(ENERGY_CONSUMPTION);
     public static final long JOULES_PER_MILLIBUCKET =

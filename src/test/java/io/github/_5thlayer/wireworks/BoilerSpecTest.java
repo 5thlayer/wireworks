@@ -72,10 +72,10 @@ class BoilerSpecTest {
     }
 
     @Test
-    @DisplayName("each fluid box is 200 mB, and the water row is three of them")
-    void fluidBoxes() {
-        assertEquals(200, BoilerSpec.PORT_VOLUME);
-        assertEquals(3, BoilerSpec.WATER_PORTS);
+    @DisplayName("each tank holds two buckets, so a bucket empties into it or fills from it whole")
+    void tanks() {
+        assertEquals(2_000, BoilerSpec.WATER_CAPACITY);
+        assertEquals(2_000, BoilerSpec.STEAM_CAPACITY);
     }
 
     @Test

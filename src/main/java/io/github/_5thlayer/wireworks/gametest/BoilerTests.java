@@ -55,13 +55,17 @@ final class BoilerTests {
     private static final int MILLIBUCKETS_PER_TICK = 3;
     private static final int WINDOW = 10;
 
+    /** Each tank's two buckets: literals, so the test cannot agree with the spec by construction. */
+    private static final int WATER_CAPACITY = 2_000;
+    private static final int STEAM_CAPACITY = 2_000;
+
     private BoilerTests() {
     }
 
     static void register(WireworksGameTests.Registrar tests) {
         tests.test("boiler_boils", 100, BoilerTests::boils);
         tests.test("boiler_draws_every_block_of_its_footprint", 20, BoilerTests::drawsEveryBlock);
-        tests.test("boiler_stalls_when_the_steam_backs_up_and_burns_nothing", 200, BoilerTests::stalls);
+        tests.test("boiler_stalls_when_the_steam_backs_up_and_burns_nothing", 800, BoilerTests::stalls);
         tests.test("boiler_ports_open_onto_the_faces_adr_says", 20, BoilerTests::portsOpenWhereTheyShould);
         tests.test("boiler_ports_follow_the_facing", 20, BoilerTests::portsFollowTheFacing);
         tests.test("boiler_water_port_takes_water_only", 20, BoilerTests::waterPortTakesWaterOnly);
@@ -138,7 +142,7 @@ final class BoilerTests {
         helper.startSequence()
                 .thenExecute(() -> {
                     boiler(helper).setItem(BoilerSlots.FUEL, new ItemStack(Items.COAL, 8));
-                    insert(fluidAt(helper, part(helper, WEST_END), null), water(), 600);
+                    insert(fluidAt(helper, part(helper, WEST_END), null), water(), WATER_CAPACITY);
                 })
                 // One tick to light, so the window is whole ticks of boiling and not the one that paid for the first.
                 .thenIdle(1)
@@ -167,15 +171,18 @@ final class BoilerTests {
         int[] held = new int[3];
         helper.startSequence()
                 .thenExecute(() -> {
-                    boiler(helper).setItem(BoilerSlots.FUEL, new ItemStack(Items.COAL, 2));
-                    insert(fluidAt(helper, part(helper, WEST_END), null), water(), 600);
+                    // 2,000 mB is 667 ticks of boiling, and a coal 44.
+                    boiler(helper).setItem(BoilerSlots.FUEL, new ItemStack(Items.COAL, 20));
+                    insert(fluidAt(helper, part(helper, WEST_END), null), water(), WATER_CAPACITY);
                 })
                 .thenWaitUntil(() -> {
-                    if (boiler(helper).data().get(BoilerBlockEntity.DATA_STEAM) < 200 - MILLIBUCKETS_PER_TICK + 1) {
+                    if (boiler(helper).data().get(BoilerBlockEntity.DATA_STEAM) < STEAM_CAPACITY - MILLIBUCKETS_PER_TICK + 1) {
                         helper.fail("the steam tank has not filled yet", ANCHOR);
                     }
                 })
                 .thenExecute(() -> {
+                    // The tanks are the same size, so the water has run down as the steam filled.
+                    insert(fluidAt(helper, part(helper, WEST_END), null), water(), WATER_CAPACITY);
                     held[0] = boiler(helper).data().get(BoilerBlockEntity.DATA_FUEL);
                     held[1] = boiler(helper).data().get(BoilerBlockEntity.DATA_WATER);
                     held[2] = boiler(helper).getItem(BoilerSlots.FUEL).getCount();
@@ -222,9 +229,9 @@ final class BoilerTests {
         ResourceHandler<FluidResource> west = fluidAt(helper, part(helper, WEST_END), Direction.WEST);
         ResourceHandler<FluidResource> east = fluidAt(helper, part(helper, EAST_END), Direction.EAST);
         ResourceHandler<FluidResource> steamPort = fluidAt(helper, part(helper, STEAM_PART), Direction.SOUTH);
-        if (west.getCapacityAsInt(0, water()) != 600 || steamPort.getCapacityAsInt(0, steam()) != 200) {
+        if (west.getCapacityAsInt(0, water()) != WATER_CAPACITY || steamPort.getCapacityAsInt(0, steam()) != STEAM_CAPACITY) {
             helper.fail("the water row holds " + west.getCapacityAsInt(0, water()) + " mB and the steam port "
-                    + steamPort.getCapacityAsInt(0, steam()) + " mB, not three ports of 200 and one of 200", ANCHOR);
+                    + steamPort.getCapacityAsInt(0, steam()) + " mB, not " + WATER_CAPACITY + " and " + STEAM_CAPACITY, ANCHOR);
         }
         insert(west, water(), 100);
         if (east.getAmountAsInt(0) != 100) {
@@ -422,7 +429,7 @@ final class BoilerTests {
     private static void remainderGoesToTheOutput(GameTestHelper helper) {
         place(helper);
         boiler(helper).setItem(BoilerSlots.FUEL, new ItemStack(Items.LAVA_BUCKET));
-        insert(fluidAt(helper, part(helper, WEST_END), null), water(), 600);
+        insert(fluidAt(helper, part(helper, WEST_END), null), water(), WATER_CAPACITY);
         helper.startSequence()
                 .thenWaitUntil(() -> helper.assertTrue(boiler(helper).getItem(BoilerSlots.OUTPUT).is(Items.BUCKET),
                         "the empty bucket has not reached the output"))
@@ -439,7 +446,7 @@ final class BoilerTests {
         place(helper);
         boiler(helper).setItem(BoilerSlots.FUEL, new ItemStack(Items.LAVA_BUCKET));
         boiler(helper).setItem(BoilerSlots.OUTPUT, blocking);
-        insert(fluidAt(helper, part(helper, WEST_END), null), water(), 600);
+        insert(fluidAt(helper, part(helper, WEST_END), null), water(), WATER_CAPACITY);
         helper.startSequence()
                 .thenIdle(WINDOW)
                 .thenExecute(() -> {
@@ -473,7 +480,7 @@ final class BoilerTests {
         helper.startSequence()
                 .thenExecute(() -> {
                     boiler(helper).setItem(BoilerSlots.FUEL, new ItemStack(Items.COAL, 4));
-                    insert(fluidAt(helper, part(helper, WEST_END), null), water(), 600);
+                    insert(fluidAt(helper, part(helper, WEST_END), null), water(), WATER_CAPACITY);
                 })
                 .thenWaitUntil(() -> {
                     if (helper.getBlockEntity(engine, SteamEngineBlockEntity.class).energy().getAmountAsLong() < 450L) {

@@ -57,9 +57,9 @@ public class BoilerBlockEntity extends BlockEntity implements Container, MenuPro
 
     private final NonNullList<ItemStack> items = NonNullList.withSize(BoilerSlots.SIZE, ItemStack.EMPTY);
     private final FuelBuffer fuel = new FuelBuffer();
-    private final SingleFluidTank water = new SingleFluidTank(Fluids.WATER, BoilerSpec.WATER_PORTS * BoilerSpec.PORT_VOLUME, this::setChanged);
+    private final SingleFluidTank water = new SingleFluidTank(Fluids.WATER, BoilerSpec.WATER_CAPACITY, this::setChanged);
     private final SingleFluidTank steam =
-            new SingleFluidTank(SteamFluids.STEAM_SOURCE.get(), BoilerSpec.PORT_VOLUME, this::setChanged);
+            new SingleFluidTank(SteamFluids.STEAM_SOURCE.get(), BoilerSpec.STEAM_CAPACITY, this::setChanged);
     private final ResourceHandler<FluidResource> waterFace = new FluidFace(water, true, true);
     private final ResourceHandler<FluidResource> steamFace = new FluidFace(steam, false, true);
     private final ResourceHandler<ItemResource> itemFace = new BoilerItemHandler(this);
