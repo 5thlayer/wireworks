@@ -83,8 +83,8 @@ final class PlaysAloneTests {
         helper.succeed();
     }
 
-    // WireworksTags.CRUDE_OIL is left out: Wireworks puts nothing in c:crude_oil, so without a mod that fills it
-    // the tar interaction that reads it stays inert (FactoryWorks ADR-0127).
+    // WireworksTags.CRUDE_OIL is left out: the tar interaction that reads it moves to Fieldworks with the tag
+    // (5thlayer/fieldworks#22).
     private static void tagsPlayAlone(GameTestHelper helper) {
         List<TagKey<?>> consumed = List.of(WireworksTags.WIRE_TOOLS, WireworksTags.GENERATORS, WireworksTags.ACCUMULATORS,
                 WireworksTags.PLASTIC_RESINS, FluidTags.LAVA);
