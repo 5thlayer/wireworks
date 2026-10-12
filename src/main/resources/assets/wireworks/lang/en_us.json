@@ -31,7 +31,6 @@
   "item.wireworks.tar": "Tar",
   "item.wireworks.transformer": "Transformer",
   "item.wireworks.transmission_pole": "Transmission Pole",
-  "itemGroup.wireworks.items": "Wireworks",
   "message.wireworks.cross_system": "A Transformer joins a Transmission Line to a Distribution Pole.",
   "message.wireworks.other_tier": "A %s cannot extend a %s column.",
   "message.wireworks.replace_refused": "The pole column cannot be replaced here.",

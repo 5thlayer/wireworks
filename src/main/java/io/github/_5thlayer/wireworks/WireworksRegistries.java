@@ -6,18 +6,16 @@ package io.github._5thlayer.wireworks;
 import io.github._5thlayer.groundworks.Footprint;
 import io.github._5thlayer.groundworks.FootprintItem;
 import io.github._5thlayer.groundworks.FootprintPartBlock;
+import io.github._5thlayer.libworks.WorksTab;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -43,7 +41,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/** The Library's blocks, items and block entity types, its creative tab and the held wire end. */
+/** The Library's blocks, items and block entity types, and the held wire end. */
 public final class WireworksRegistries {
 
     private static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(Wireworks.MOD_ID);
@@ -53,8 +51,6 @@ public final class WireworksRegistries {
     private static final DeferredRegister<DataComponentType<?>> DATA_COMPONENTS =
             DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, Wireworks.MOD_ID);
     private static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(Registries.MENU, Wireworks.MOD_ID);
-    private static final DeferredRegister<CreativeModeTab> CREATIVE_TABS =
-            DeferredRegister.create(Registries.CREATIVE_MODE_TAB, Wireworks.MOD_ID);
 
     private static final Map<PoleTier, DeferredBlock<SupplyAreaPoleBlock>> POLES = new EnumMap<>(PoleTier.class);
     private static final Map<PoleTier, DeferredItem<SupplyAreaPoleItem>> POLE_ITEMS = new EnumMap<>(PoleTier.class);
@@ -166,14 +162,6 @@ public final class WireworksRegistries {
                             .networkSynchronized(GlobalPos.STREAM_CODEC)
                             .build());
 
-    /** The Library's creative tab, {@code wireworks:items}. */
-    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> CREATIVE_TAB =
-            CREATIVE_TABS.register("items", () -> CreativeModeTab.builder()
-                    .title(Component.translatable("itemGroup.wireworks.items"))
-                    .icon(() -> new ItemStack(poleItem(PoleTier.LARGE).get()))
-                    .displayItems((parameters, output) -> items().forEach(output::accept))
-                    .build());
-
     private WireworksRegistries() {
     }
 
@@ -213,7 +201,6 @@ public final class WireworksRegistries {
         BLOCK_ENTITIES.register(modBus);
         MENUS.register(modBus);
         DATA_COMPONENTS.register(modBus);
-        CREATIVE_TABS.register(modBus);
         modBus.addListener(WireworksRegistries::addToCreativeTabs);
         modBus.addListener(WireworksRegistries::registerCapabilities);
         // Ahead of Groundworks' forwarding, which answers a part with its anchor's face and so cannot tell which port was reached.
@@ -260,7 +247,9 @@ public final class WireworksRegistries {
     }
 
     private static void addToCreativeTabs(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey() == CreativeModeTabs.FUNCTIONAL_BLOCKS) {
+        if (event.getTabKey() == WorksTab.KEY) {
+            items().forEach(event::accept);
+        } else if (event.getTabKey() == CreativeModeTabs.FUNCTIONAL_BLOCKS) {
             blockItems().forEach(event::accept);
         } else if (event.getTabKey() == CreativeModeTabs.INGREDIENTS) {
             event.accept(TAR_ITEM.get());

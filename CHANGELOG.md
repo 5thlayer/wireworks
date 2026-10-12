@@ -14,6 +14,7 @@ Each version has two sections: Players, what a player or pack developer sees, an
 - Both craft from vanilla materials: the Boiler from a furnace, a bucket and seven iron ingots; the Engine from a piston, an iron block, two copper ingots and five iron ingots.
 - Tar: a crude source block that touches lava, on any side, sets as a tar block, and the lava stays. Flowing crude does nothing. Tar is broken by hand or with a shovel, and a piston pushing it breaks it, each time into one tar, so a fluid outlet, a piston and a hopper make a tar loop. Wireworks ships no crude of its own: any mod's crude in `c:crude_oil` works. (#26)
 - The game tests' datapack, which puts their own crude in `c:crude_oil`, no longer ships in the jar. Only Wireworks' own game tests ever switched it on (libworks ADR 0004).
+- Wireworks' items are in the suite's shared Works tab, beside every other -works mod's, and the Wireworks tab is gone. The blocks stay in Functional Blocks and tar in Ingredients. (#23)
 
 ### Consumers
 
@@ -21,6 +22,7 @@ Each version has two sections: Players, what a player or pack developer sees, an
 - Any fluid in `c:crude_oil` sets as `wireworks:tar` where its source block touches lava, through NeoForge's `FluidInteractionRegistry`; a Consumer only tags its crude. `wireworks:tar`, the item, is in the new item tag `wireworks:plastic_resins`. (#26)
 - The Boiler and the Steam Engine ported from FactoryWorks Core, without Oritech or Pipeworks. The Core's `SteamEngineBlock` and `BoilerBlock` ids move from `factoryworks:` to `wireworks:`; a world made with them loses them. (#22)
 - Wireworks nests libworks-runtime 0.1.1 by jar-in-jar, up to but not including 0.2: its mod id is `libworks`, it rides inside the jar, and players install nothing more. The Boiler's item and fluid faces extend its `GuardedResourceHandler`. (#33)
+- The creative tab `wireworks:items` and its lang key `itemGroup.wireworks.items` are removed, with `WireworksRegistries.CREATIVE_TAB`: the items are in libworks' `WorksTab.KEY`. (#23)
 
 ## 0.5.0
 
