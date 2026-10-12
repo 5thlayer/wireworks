@@ -38,8 +38,8 @@ final class SteamFootprints {
     /** The Reactor is 3x3x3, the anchor the bottom centre, so it stands centred on the block clicked. */
     static final FootprintShape REACTOR = FootprintShape.standing(3, 3);
 
-    /** The top centre block, the only superheated steam port. */
-    static final int REACTOR_STEAM_PART = REACTOR.offsets().indexOf(new Local(0, 2, 0));
+    /** The back middle block of the middle layer, the only superheated steam port. */
+    static final int REACTOR_STEAM_PART = REACTOR.offsets().indexOf(new Local(1, 1, 0));
 
     private SteamFootprints() {
     }
@@ -52,7 +52,7 @@ final class SteamFootprints {
 
     /**
      * Whether the Reactor's port block of this part number opens onto this face: each water port
-     * outward from its side, the steam port upward. Every other face opens onto nothing.
+     * outward from its side, the steam port backward. Every other face opens onto nothing.
      */
     static boolean reactorPortOpens(int part, Direction facing, Direction face) {
         ReactorPort port = reactorPort(part);
@@ -62,8 +62,13 @@ final class SteamFootprints {
         Local at = REACTOR.offsets().get(part);
         return switch (port) {
             case WATER -> face == world(facing, at.x(), at.z());
-            case STEAM -> face == Direction.UP;
+            case STEAM -> face == reactorSteamSide(facing);
         };
+    }
+
+    /** The direction the Reactor's steam port faces, where a pipe or a Turbine row takes the steam from it. */
+    static Direction reactorSteamSide(Direction facing) {
+        return world(facing, 1, 0);
     }
 
     /** The Boiler port a block of the footprint is, from its part number: 0 is the anchor. */

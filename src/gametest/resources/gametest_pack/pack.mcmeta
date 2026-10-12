@@ -1,0 +1,7 @@
+{
+  "pack": {
+    "description": "Wireworks game tests: Fission Fuel beside the Fuel Cell, for what a burnt cell leaves",
+    "min_format": [101, 1],
+    "max_format": [101, 1]
+  }
+}

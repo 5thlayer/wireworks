@@ -24,7 +24,6 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.transfer.ResourceHandler;
-import net.neoforged.neoforge.transfer.ResourceHandlerUtil;
 import net.neoforged.neoforge.transfer.fluid.FluidResource;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
@@ -37,22 +36,24 @@ import net.neoforged.neoforge.transfer.transaction.Transaction;
  * the stop {@code ReactorCycleTest}'s; what is asserted here is that they survive a running block entity.
  *
  * <p>The Reactor's anchor is its bottom centre, so its water ports are one block off the anchor along
- * each horizontal axis and its steam port two blocks above it.
+ * each horizontal axis. It faces west, so its steam port, the back middle of its middle layer, opens
+ * east, along the platform's long side.
  */
 final class ReactorTests {
 
     private static final BlockPos ANCHOR = new BlockPos(2, 1, 3);
-    private static final Direction FACING = Direction.NORTH;
+    private static final Direction FACING = Direction.WEST;
 
     /** What a whole tick converts, in millibuckets. A literal, so the test cannot agree with the spec by construction. */
     private static final int MILLIBUCKETS_PER_TICK = 21;
     private static final long TURBINE_FE_PER_TICK = 2_910L;
     private static final int TURBINES = 7;
     private static final int CELL_TICKS = 4_000;
-    private static final int STEAM_CAPACITY = 200;
+    private static final int TANK_CAPACITY = 10_000;
 
     private static final BlockPos WEST_WATER = ANCHOR.west();
-    private static final BlockPos STEAM_PORT = ANCHOR.above(2);
+    private static final BlockPos STEAM_PORT = ANCHOR.offset(1, 1, 0);
+    private static final Direction STEAM_SIDE = Direction.EAST;
 
     private static final int WINDOW = 5;
     private static final int MEASURED = 20;
@@ -61,12 +62,12 @@ final class ReactorTests {
     }
 
     static void register(WireworksGameTests.Registrar tests) {
-        tests.test("reactor_fills_seven_turbines_end_to_end_at_their_rate", 140, ReactorTests::fillsSevenTurbines);
-        tests.test("reactor_offers_its_steam_to_what_stands_on_its_top_centre", 40, ReactorTests::offersSteamUpward);
+        tests.test("reactor_fills_seven_turbines_in_a_row_against_its_steam_port_at_their_rate", 140, ReactorTests::fillsSevenTurbines);
         tests.test("reactor_makes_21_mb_a_tick_spending_water_unit_for_unit", 40, ReactorTests::makesItsRate);
         tests.test("reactor_burns_nothing_without_water", 40, ReactorTests::stopsWithoutWater);
         tests.test("reactor_burns_nothing_without_room_for_its_steam_and_resumes_when_drawn", 100, ReactorTests::stopsWithoutRoom);
         tests.test("reactor_burnt_cell_leaves_a_depleted_fuel_cell", 40, ReactorTests::leavesDepletedCell);
+        tests.test("reactor_other_fission_fuel_leaves_its_crafting_remainder_or_nothing", 40, ReactorTests::otherFuelLeavesItsRemainder);
         tests.test("reactor_full_depleted_slot_stops_it_until_one_is_taken", 40, ReactorTests::fullDepletedSlotStops);
         tests.test("reactor_slots_are_reached_from_every_block_and_depleted_only_lets_out", 20, ReactorTests::slotsFromEveryBlock);
         tests.test("reactor_hoppers_feed_fuel_and_take_only_depleted_cells", 60, ReactorTests::hoppers);
@@ -139,22 +140,26 @@ final class ReactorTests {
 
     /** Sets the loaded cell's ticks left as a saved Reactor would load them, so a test need not run 4,000 ticks. */
     private static void setCellTicksLeft(GameTestHelper helper, int ticks) {
+        loadSaved(helper, "CellTicks", ticks);
+    }
+
+    /** Sets one saved number of the Reactor's and loads it back, as a saved Reactor would load. */
+    private static void loadSaved(GameTestHelper helper, String key, int value) {
         var registries = helper.getLevel().registryAccess();
         CompoundTag saved = reactor(helper).saveWithoutMetadata(registries);
-        saved.putInt("CellTicks", ticks);
+        saved.putInt(key, value);
         reactor(helper).loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, registries, saved));
     }
 
     /**
-     * Seven Turbines in a row along x, facing west so steam taken in at the west end passes east. The
-     * test is the pipe: each tick it tops up the water and moves the Reactor's steam into the first
-     * Turbine's west end, then empties every Turbine's buffer.
+     * Seven Turbines in a row along x, the first standing against the steam port, so the Reactor hands
+     * them its steam with no pipe. Each tick the test tops up the water and empties every Turbine's buffer.
      */
     private static void fillsSevenTurbines(GameTestHelper helper) {
         place(helper);
         BlockPos[] turbines = new BlockPos[TURBINES];
         for (int i = 0; i < TURBINES; i++) {
-            turbines[i] = new BlockPos(5 + i, 1, 3);
+            turbines[i] = STEAM_PORT.relative(STEAM_SIDE, 1 + i).below();
             Network.footprint(helper, WireworksRegistries.STEAM_TURBINE_FOOTPRINT, turbines[i], Direction.WEST);
         }
         reactor(helper).setItem(ReactorSlots.FUEL, cells(1));
@@ -162,8 +167,6 @@ final class ReactorTests {
         int[] tick = {0};
         helper.onEachTick(() -> {
             fillWater(helper);
-            ResourceHandlerUtil.move(fluidAt(helper, STEAM_PORT, Direction.UP), fluidAt(helper, turbines[0], Direction.WEST),
-                    resource -> true, Integer.MAX_VALUE, null);
             boolean measured = tick[0] >= Network.SETTLE && tick[0] < Network.SETTLE + MEASURED;
             for (int i = 0; i < TURBINES; i++) {
                 try (Transaction transaction = Transaction.openRoot()) {
@@ -188,21 +191,6 @@ final class ReactorTests {
                     }
                     if (!reactor(helper).getItem(ReactorSlots.FUEL).isEmpty()) {
                         helper.fail("the reactor never loaded its cell", ANCHOR);
-                    }
-                })
-                .thenSucceed();
-    }
-
-    /** A Turbine standing on the top centre fills from it with no pipe between. */
-    private static void offersSteamUpward(GameTestHelper helper) {
-        place(helper);
-        BlockPos turbine = STEAM_PORT.above();
-        Network.footprint(helper, WireworksRegistries.STEAM_TURBINE_FOOTPRINT, turbine, FACING);
-        helper.startSequence()
-                .thenExecute(() -> start(helper, 1))
-                .thenWaitUntil(() -> {
-                    if (helper.getBlockEntity(turbine, SteamTurbineBlockEntity.class).energy().getAmountAsLong() <= 0L) {
-                        helper.fail("the turbine on the top centre has made nothing yet", turbine);
                     }
                 })
                 .thenSucceed();
@@ -261,18 +249,16 @@ final class ReactorTests {
 
     /**
      * Once the steam tank has no room for a tick, the cell's ticks and the water hold still; a pipe
-     * drawing steam from the top centre starts it again.
+     * drawing steam from the steam port starts it again. The tank is loaded nearly full rather than
+     * filled, which would take as long as the water lasts.
      */
     private static void stopsWithoutRoom(GameTestHelper helper) {
         place(helper);
         int[] held = new int[2];
         helper.startSequence()
                 .thenExecute(() -> start(helper, 1))
-                .thenWaitUntil(() -> {
-                    if (reactor(helper).steam() <= STEAM_CAPACITY - MILLIBUCKETS_PER_TICK) {
-                        helper.fail("the steam tank has not filled yet", ANCHOR);
-                    }
-                })
+                .thenIdle(1)
+                .thenExecute(() -> loadSaved(helper, "Steam", TANK_CAPACITY - MILLIBUCKETS_PER_TICK + 1))
                 .thenExecute(() -> {
                     held[0] = reactor(helper).cellTicksLeft();
                     held[1] = reactor(helper).water();
@@ -285,7 +271,7 @@ final class ReactorTests {
                     if (reactor(helper).water() != held[1]) {
                         helper.fail("a reactor with no room spent water", ANCHOR);
                     }
-                    if (extract(fluidAt(helper, STEAM_PORT, Direction.UP), superheated(), 100) != 100) {
+                    if (extract(fluidAt(helper, STEAM_PORT, STEAM_SIDE), superheated(), 100) != 100) {
                         helper.fail("a pipe could not draw 100 mB from the full steam tank", ANCHOR);
                     }
                 })
@@ -318,6 +304,40 @@ final class ReactorTests {
                     if (left <= CELL_TICKS - WINDOW || left >= CELL_TICKS) {
                         helper.fail("the second cell has " + left + " ticks left", ANCHOR);
                     }
+                })
+                .thenSucceed();
+    }
+
+    /**
+     * A Fission Fuel other than the Fuel Cell leaves its own crafting remainder, a lava bucket its
+     * bucket, and one with none, a blaze rod, leaves nothing; neither leaves a Depleted Fuel Cell. The
+     * game-test pack adds both to the tag.
+     */
+    private static void otherFuelLeavesItsRemainder(GameTestHelper helper) {
+        place(helper);
+        helper.startSequence()
+                .thenExecute(() -> {
+                    reactor(helper).setItem(ReactorSlots.FUEL, new ItemStack(Items.LAVA_BUCKET));
+                    fillWater(helper);
+                })
+                .thenIdle(1)
+                .thenExecute(() -> setCellTicksLeft(helper, 2))
+                .thenIdle(WINDOW)
+                .thenExecute(() -> {
+                    ItemStack left = reactor(helper).getItem(ReactorSlots.DEPLETED);
+                    helper.assertTrue(left.is(Items.BUCKET) && left.getCount() == 1, "a burnt lava bucket left " + left + ", not its bucket");
+                    reactor(helper).setItem(ReactorSlots.FUEL, new ItemStack(Items.BLAZE_ROD));
+                })
+                .thenIdle(1)
+                .thenExecute(() -> {
+                    helper.assertTrue(reactor(helper).getItem(ReactorSlots.FUEL).isEmpty(), "the reactor did not load the blaze rod");
+                    setCellTicksLeft(helper, 2);
+                })
+                .thenIdle(WINDOW)
+                .thenExecute(() -> {
+                    ItemStack left = reactor(helper).getItem(ReactorSlots.DEPLETED);
+                    helper.assertTrue(left.is(Items.BUCKET) && left.getCount() == 1, "a burnt blaze rod left something: " + left);
+                    helper.assertValueEqual(reactor(helper).cellTicksLeft(), 0, "ticks left once the blaze rod burnt out");
                 })
                 .thenSucceed();
     }
@@ -435,8 +455,9 @@ final class ReactorTests {
     }
 
     /**
-     * Each water port opens outward from its side of the bottom layer and the steam port upward; every
-     * other block, the anchor included, opens onto nothing. The null side answers the port blocks only.
+     * Each water port opens outward from its side of the bottom layer and the steam port backward from
+     * the back middle of the middle layer; every other block, the top centre and the anchor included,
+     * opens onto nothing. The null side answers the port blocks only.
      * Worked out from where each block stands, not from its part number.
      */
     private static void portsOpenOutward(GameTestHelper helper) {
@@ -449,8 +470,8 @@ final class ReactorTests {
                 Direction open = null;
                 if (d.getY() == 0 && Math.abs(d.getX()) + Math.abs(d.getZ()) == 1) {
                     open = Direction.getApproximateNearest(d.getX(), 0, d.getZ());
-                } else if (d.equals(new BlockPos(0, 2, 0))) {
-                    open = Direction.UP;
+                } else if (d.equals(BlockPos.ZERO.above().relative(facing.getOpposite()))) {
+                    open = facing.getOpposite();
                 }
                 for (Direction side : sides) {
                     boolean answers = helper.getLevel().getCapability(Capabilities.Fluid.BLOCK, pos, side) != null;
@@ -470,16 +491,16 @@ final class ReactorTests {
     }
 
     /**
-     * The four water ports are one 800 mB tank that takes water and nothing else; the steam port is a
-     * 200 mB tank that takes nothing in.
+     * The four water ports are one 10,000 mB tank that takes water and nothing else; the steam port is a
+     * 10,000 mB tank that takes nothing in.
      */
     private static void portsTakeAndGive(GameTestHelper helper) {
         place(helper);
         ResourceHandler<FluidResource> west = fluidAt(helper, WEST_WATER, Direction.WEST);
         ResourceHandler<FluidResource> east = fluidAt(helper, ANCHOR.east(), Direction.EAST);
-        ResourceHandler<FluidResource> top = fluidAt(helper, STEAM_PORT, Direction.UP);
-        helper.assertValueEqual(west.getCapacityAsInt(0, water()), 800, "the water tank's capacity");
-        helper.assertValueEqual(top.getCapacityAsInt(0, superheated()), STEAM_CAPACITY, "the steam tank's capacity");
+        ResourceHandler<FluidResource> top = fluidAt(helper, STEAM_PORT, STEAM_SIDE);
+        helper.assertValueEqual(west.getCapacityAsInt(0, water()), TANK_CAPACITY, "the water tank's capacity");
+        helper.assertValueEqual(top.getCapacityAsInt(0, superheated()), TANK_CAPACITY, "the steam tank's capacity");
         helper.assertValueEqual(insert(west, steam(), 100), 0, "steam taken by a water port");
         helper.assertValueEqual(insert(west, superheated(), 100), 0, "superheated steam taken by a water port");
         helper.assertValueEqual(insert(west, water(), 100), 100, "water taken by a water port");

@@ -12,6 +12,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
@@ -28,19 +29,21 @@ import org.jspecify.annotations.Nullable;
  * The Reactor running: Fission Fuel and water in, Superheated Steam out, at {@link ReactorSpec}'s one
  * rate and {@link ReactorCycle}'s stop. It has no heat (ADR 0012).
  *
- * <p>It keeps a water tank of the four water ports and a steam tank of the top centre port. Each port
- * block's fluid face reaches its tank (see {@link WireworksRegistries}), and the Reactor hands its
- * steam on to whatever stands on its top centre, a pipe or a Turbine. Water is consumed, never created.
+ * <p>It keeps a water tank of the four water ports and a steam tank of the steam port, the back
+ * middle of the middle layer. Each port block's fluid face reaches its tank (see
+ * {@link WireworksRegistries}), and the Reactor hands its steam on to whatever stands against its steam
+ * port, a pipe or the end of a Turbine row. Water is consumed, never created.
  *
- * <p>A loaded cell lasts {@link ReactorSpec#CELL_TICKS} ticks of running, and burnt out it leaves a
- * Depleted Fuel Cell in the depleted slot, whichever Fission Fuel it was. The Reactor stops while that
- * slot has no room for another.
+ * <p>A loaded cell lasts {@link ReactorSpec#CELL_TICKS} ticks of running, and burnt out it leaves what
+ * {@link #remainderOf} says in the depleted slot: a Depleted Fuel Cell for a Fuel Cell. The Reactor stops
+ * while that slot has no room for what the cell it burns, or would load, leaves.
  */
 public class ReactorBlockEntity extends BlockEntity implements Container {
 
     private static final String WATER = "Water";
     private static final String STEAM = "Steam";
     private static final String CELL_TICKS = "CellTicks";
+    private static final String CELL_REMAINDER = "CellRemainder";
 
     private final NonNullList<ItemStack> items = NonNullList.withSize(ReactorSlots.SIZE, ItemStack.EMPTY);
     private final SingleFluidTank water = new SingleFluidTank(Fluids.WATER, ReactorSpec.WATER_CAPACITY, this::setChanged);
@@ -50,6 +53,8 @@ public class ReactorBlockEntity extends BlockEntity implements Container {
     private final ResourceHandler<FluidResource> steamFace = new FluidFace(steam, false, true);
     private final ResourceHandler<ItemResource> itemFace = new ReactorItemHandler(this);
     private int cellTicks;
+    /** What the loaded cell leaves once burnt, empty when none is loaded or it leaves nothing. */
+    private ItemStack cellRemainder = ItemStack.EMPTY;
 
     public ReactorBlockEntity(BlockPos pos, BlockState state) {
         super(WireworksRegistries.REACTOR_ENTITY.get(), pos, state);
@@ -91,7 +96,8 @@ public class ReactorBlockEntity extends BlockEntity implements Container {
         if (!(level instanceof ServerLevel)) {
             return;
         }
-        ReactorCycle.Tick tick = ReactorCycle.tick(water.amount(), steam.room(), hasDepletedRoom(),
+        ItemStack leaves = cellTicks > 0 ? cellRemainder : remainderOf(items.get(ReactorSlots.FUEL));
+        ReactorCycle.Tick tick = ReactorCycle.tick(water.amount(), steam.room(), hasDepletedRoomFor(leaves),
                 ReactorSpec.MILLIBUCKETS_PER_TICK, cellTicks, ReactorSpec.CELL_TICKS, this::loadCell);
         if (tick.converted() > 0) {
             // Unit for unit, as the Boiler: the heat exchange Factorio's reactor feeds is a temperature change.
@@ -99,7 +105,8 @@ public class ReactorBlockEntity extends BlockEntity implements Container {
             steam.fill(steam.amount() + tick.converted());
             cellTicks = tick.ticksLeft();
             if (tick.burntOut()) {
-                leaveDepletedCell();
+                leave(cellRemainder);
+                cellRemainder = ItemStack.EMPTY;
             }
             setChanged();
         }
@@ -111,33 +118,55 @@ public class ReactorBlockEntity extends BlockEntity implements Container {
         if (!isFissionFuel(fuel)) {
             return false;
         }
+        cellRemainder = remainderOf(fuel);
         fuel.shrink(1);
         return true;
     }
 
-    private boolean hasDepletedRoom() {
-        ItemStack depleted = items.get(ReactorSlots.DEPLETED);
-        return depleted.isEmpty()
-                || depleted.is(WireworksRegistries.DEPLETED_FUEL_CELL.get()) && depleted.getCount() < depleted.getMaxStackSize();
+    /**
+     * What one burnt cell of this Fission Fuel leaves: the Fuel Cell a Depleted Fuel Cell, any other its
+     * crafting remainder, as the Boiler treats fuel, or nothing.
+     */
+    static ItemStack remainderOf(ItemStack fuel) {
+        if (fuel.isEmpty()) {
+            return ItemStack.EMPTY;
+        }
+        if (fuel.is(WireworksRegistries.FUEL_CELL.get())) {
+            return new ItemStack(WireworksRegistries.DEPLETED_FUEL_CELL.get());
+        }
+        ItemStackTemplate remainder = fuel.getCraftingRemainder();
+        return remainder == null ? ItemStack.EMPTY : remainder.create();
     }
 
-    private void leaveDepletedCell() {
+    /** Whether the depleted slot takes {@code leaves} whole; a cell that leaves nothing always has room. */
+    private boolean hasDepletedRoomFor(ItemStack leaves) {
+        ItemStack depleted = items.get(ReactorSlots.DEPLETED);
+        return leaves.isEmpty() || depleted.isEmpty()
+                || ItemStack.isSameItemSameComponents(depleted, leaves)
+                && depleted.getCount() + leaves.getCount() <= depleted.getMaxStackSize();
+    }
+
+    private void leave(ItemStack leaves) {
+        if (leaves.isEmpty()) {
+            return;
+        }
         ItemStack depleted = items.get(ReactorSlots.DEPLETED);
         if (depleted.isEmpty()) {
-            items.set(ReactorSlots.DEPLETED, new ItemStack(WireworksRegistries.DEPLETED_FUEL_CELL.get()));
+            items.set(ReactorSlots.DEPLETED, leaves.copy());
         } else {
-            depleted.grow(1);
+            depleted.grow(leaves.getCount());
         }
     }
 
-    /** Offers the steam to whatever stands on the top centre. */
+    /** Offers the steam to whatever stands against the steam port. */
     private void passSteamOn() {
         if (steam.amount() <= 0) {
             return;
         }
         Direction facing = getBlockState().getValue(Footprint.FACING);
+        Direction side = SteamFootprints.reactorSteamSide(facing);
         BlockPos port = WireworksRegistries.REACTOR_FOOTPRINT.positions(worldPosition, facing).get(SteamFootprints.REACTOR_STEAM_PART);
-        ResourceHandler<FluidResource> next = level.getCapability(Capabilities.Fluid.BLOCK, port.above(), Direction.DOWN);
+        ResourceHandler<FluidResource> next = level.getCapability(Capabilities.Fluid.BLOCK, port.relative(side), side.getOpposite());
         if (next != null) {
             ResourceHandlerUtil.move(steam, next, resource -> true, steam.amount(), null);
         }
@@ -216,6 +245,7 @@ public class ReactorBlockEntity extends BlockEntity implements Container {
         water.fill(input.getIntOr(WATER, 0));
         steam.fill(input.getIntOr(STEAM, 0));
         cellTicks = Math.max(0, input.getIntOr(CELL_TICKS, 0));
+        cellRemainder = input.read(CELL_REMAINDER, ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);
     }
 
     @Override
@@ -225,5 +255,6 @@ public class ReactorBlockEntity extends BlockEntity implements Container {
         output.putInt(WATER, water.amount());
         output.putInt(STEAM, steam.amount());
         output.putInt(CELL_TICKS, cellTicks);
+        output.store(CELL_REMAINDER, ItemStack.OPTIONAL_CODEC, cellRemainder);
     }
 }

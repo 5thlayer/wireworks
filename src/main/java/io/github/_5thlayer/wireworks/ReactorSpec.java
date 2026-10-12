@@ -26,14 +26,12 @@ public final class ReactorSpec {
 
     public static final int CELL_TICKS = CELL_SECONDS * MINECRAFT_TICKS_PER_SECOND;
 
-    /** One of the Reactor's four water ports, and its steam port: Factorio's 200-unit fluid boxes. */
-    public static final int PORT_VOLUME = 200;
-
-    /** The middle of each side of the bottom layer is a water port, and the four are one tank. */
-    public static final int WATER_PORTS = 4;
-
-    public static final int WATER_CAPACITY = WATER_PORTS * PORT_VOLUME;
-    public static final int STEAM_CAPACITY = PORT_VOLUME;
+    /**
+     * Each tank, in mB: the Boiler's 2,000 on its 6 blocks scaled to the Reactor's 27 and rounded to
+     * whole buckets. The four water ports are one tank. A full one runs the Reactor about 24 seconds.
+     */
+    public static final int WATER_CAPACITY = 10_000;
+    public static final int STEAM_CAPACITY = 10_000;
 
     /** How many Turbines the Reactor fills. */
     public static final int TURBINES = turbinesFor(FACTORIO_POWER, SteamTurbineSpec.FACTORIO);

@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 
-/** The middle of each side of the Reactor's bottom layer is water, its top centre steam, and nothing else a port. */
+/** The middle of each side of the Reactor's bottom layer is water, the back middle of its middle layer steam, and nothing else a port. */
 class ReactorPortTest {
 
     @Test
@@ -20,7 +20,7 @@ class ReactorPortTest {
     }
 
     @Test
-    void theTopCentreIsTheOnlySteamPort() {
+    void theBackMiddleOfTheMiddleLayerIsTheOnlySteamPort() {
         int steam = 0;
         for (int x = -1; x <= 1; x++) {
             for (int y = 0; y <= 2; y++) {
@@ -32,15 +32,16 @@ class ReactorPortTest {
             }
         }
         assertEquals(1, steam);
-        assertEquals(ReactorPort.STEAM, ReactorPort.at(0, 2, 0));
+        assertEquals(ReactorPort.STEAM, ReactorPort.at(1, 1, 0));
     }
 
     @Test
-    void theCornersTheCentreAndTheUpperLayersAreNoPort() {
+    void theCornersTheCentreAndTheTopCentreAreNoPort() {
         assertNull(ReactorPort.at(0, 0, 0));
+        assertNull(ReactorPort.at(0, 2, 0));
+        assertNull(ReactorPort.at(-1, 1, 0));
         assertNull(ReactorPort.at(1, 0, 1));
         assertNull(ReactorPort.at(-1, 0, -1));
-        assertNull(ReactorPort.at(1, 1, 0));
         assertNull(ReactorPort.at(1, 2, 0));
     }
 }

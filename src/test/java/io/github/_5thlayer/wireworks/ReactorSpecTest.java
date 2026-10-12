@@ -51,9 +51,9 @@ class ReactorSpecTest {
     }
 
     @Test
-    @DisplayName("the water tank holds four ports of 200 mB and the steam tank one")
+    @DisplayName("each tank holds 10,000 mB, the Boiler's 2,000 scaled to the larger footprint")
     void tanks() {
-        assertEquals(800, ReactorSpec.WATER_CAPACITY);
-        assertEquals(200, ReactorSpec.STEAM_CAPACITY);
+        assertEquals(10_000, ReactorSpec.WATER_CAPACITY);
+        assertEquals(10_000, ReactorSpec.STEAM_CAPACITY);
     }
 }
