@@ -141,8 +141,12 @@ _Avoid_: fission fuel (what the **Reactor** burns), enriched uranium
 Any item in `c:tar`, a **Plastic Resin**. Wireworks makes none: Fieldworks does, where its crude oil meets lava, and without it the tag is empty.
 _Avoid_: bitumen, asphalt
 
+**Bioresin**:
+Wireworks' own **Plastic Resin**, made from plants: brewed from a water bottle and sugar cane, or crafted from honeycomb and kelp. No route is a pairing vanilla already brews.
+_Avoid_: bioplastic (what plastic made from it would be)
+
 **Plastic Resin**:
-An item in `wireworks:plastic_resins`, which plastic is made from: vanilla's resin clump, and **Tar** when a mod fills `c:tar`.
+An item in `wireworks:plastic_resins`, which plastic is made from: vanilla's resin clump, **Bioresin**, and **Tar** when a mod fills `c:tar`.
 _Avoid_: resin (vanilla's resin clump alone)
 
 ### Drawing

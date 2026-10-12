@@ -20,6 +20,7 @@
   "config.jade.plugin_wireworks.supply_area_pole": "Pole network",
   "fluid_type.wireworks.steam": "Steam",
   "item.wireworks.accumulator": "Accumulator",
+  "item.wireworks.bioresin": "Bioresin",
   "item.wireworks.boiler": "Boiler",
   "item.wireworks.creative_pole": "Creative Pole",
   "item.wireworks.large_pole": "Large Pole",

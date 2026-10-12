@@ -1,6 +1,7 @@
 {
   "values": [
     "minecraft:resin_clump",
+    "wireworks:bioresin",
     {
       "id": "#c:tar",
       "required": false

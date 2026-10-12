@@ -139,6 +139,9 @@ public final class WireworksRegistries {
             STEAM_ENGINE_ENTITY = BLOCK_ENTITIES.register("steam_engine",
                     () -> new BlockEntityType<>(SteamEngineBlockEntity::new, STEAM_ENGINE.get()));
 
+    /** Bioresin, a Plastic Resin made from plants: brewed from a water bottle and sugar cane, or crafted from honeycomb and kelp. */
+    public static final DeferredItem<Item> BIORESIN = ITEMS.registerSimpleItem("bioresin");
+
     /** The first end of a wire a tool is holding, on the stack so it survives a relog and the client can draw it. */
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<GlobalPos>>
             PENDING_WIRE = DATA_COMPONENTS.register("pending_wire",
@@ -164,9 +167,9 @@ public final class WireworksRegistries {
                 .map(DeferredItem::get);
     }
 
-    /** Every item the Library adds, the poles first. */
+    /** Every item the Library adds, the poles first and bioresin last. */
     private static Stream<Item> items() {
-        return Stream.concat(poleItems(), Stream.of(SOLAR_PANEL_ITEM, ACCUMULATOR_ITEM, BOILER_ITEM, STEAM_ENGINE_ITEM).map(DeferredItem::get));
+        return Stream.concat(poleItems(), Stream.of(SOLAR_PANEL_ITEM, ACCUMULATOR_ITEM, BOILER_ITEM, STEAM_ENGINE_ITEM, BIORESIN).map(DeferredItem::get));
     }
 
     private static Set<Block> poleBlocks() {

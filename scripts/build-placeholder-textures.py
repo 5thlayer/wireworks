@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2026 5thlayer
 # SPDX-License-Identifier: MIT
 
-"""Draws the stand-in textures of the Solar Panel, the Accumulator, the Transmission Pole and the Transformer.
+"""Draws the stand-in textures of the Solar Panel, the Accumulator, the Transmission Pole, the Transformer and bioresin.
 
 Each wears this placeholder art until real art is drawn (docs/placeholder-art.md). Each
 texture is sized to the model face it covers, so a face of 48 by 16 units is a 48 by 16 pixel
@@ -36,6 +36,12 @@ PANEL_LINE = (58, 92, 168, 255)
 CASING_CELL = (52, 58, 66, 255)
 CASING_CELL_LIGHT = (74, 82, 92, 255)
 CASING_TERMINAL = (200, 168, 70, 255)
+
+CLEAR = (0, 0, 0, 0)
+RESIN = (176, 128, 40, 255)
+RESIN_DARK = (120, 82, 22, 255)
+RESIN_LIGHT = (232, 190, 92, 255)
+RESIN_LEAF = (86, 140, 54, 255)
 
 
 def blank(width, height, colour):
@@ -136,7 +142,26 @@ def transformer():
     return image
 
 
+def bioresin():
+    """An amber lump of resin with a dark rim, a light glint and a green fleck of the plant it came from."""
+    size = 16
+    image = blank(size, size, CLEAR)
+    for y in range(size):
+        for x in range(size):
+            dx, dy = x - 7.5, (y - 8.5) * 1.25
+            if dx * dx + dy * dy <= 36:
+                image[y][x] = RESIN
+            if 25 < dx * dx + dy * dy <= 36:
+                image[y][x] = RESIN_DARK
+    put_rect(image, 5, 5, 7, 6, RESIN_LIGHT)
+    put_rect(image, 4, 6, 5, 8, RESIN_LIGHT)
+    put_rect(image, 9, 9, 11, 10, RESIN_LEAF)
+    put_rect(image, 10, 8, 11, 9, RESIN_LEAF)
+    return image
+
+
 TEXTURE_NAMES = {
+    "item/bioresin.png": bioresin,
     "block/transformer.png": transformer,
     "block/transmission_pole.png": transmission_pole,
     "block/solar_panel_frame.png": lambda: framed(16, 16),

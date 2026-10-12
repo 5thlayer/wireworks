@@ -21,7 +21,7 @@ public final class WireworksTags {
     /** Blocks a network discharges to cover a shortfall and charges from a generator surplus. */
     public static final TagKey<Block> ACCUMULATORS = TagKey.create(Registries.BLOCK, id("accumulators"));
 
-    /** Plastic Resins, the items plastic is made from: vanilla's resin clump, and tar from {@code c:tar} when a mod fills it. */
+    /** Plastic Resins, the items plastic is made from: vanilla's resin clump, bioresin, and tar from {@code c:tar} when a mod fills it. */
     public static final TagKey<Item> PLASTIC_RESINS = TagKey.create(Registries.ITEM, id("plastic_resins"));
 
     private WireworksTags() {
