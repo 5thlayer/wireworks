@@ -28,7 +28,7 @@ Wireworks is also a library, carved out of the [FactoryWorks](https://github.com
 
 ## Dependencies
 
-[Groundworks](https://github.com/5thlayer/groundworks) `0.5.4` or later in the 0.5 series, which is a separate download. Wireworks is needed on both the client and the server.
+[Groundworks](https://github.com/5thlayer/groundworks) `0.5.11` or later in the 0.5 series, which is a separate download. Wireworks is needed on both the client and the server.
 
 ## License
 

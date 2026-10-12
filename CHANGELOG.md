@@ -7,6 +7,7 @@ Each version has two sections: Players, what a player or pack developer sees, an
 ### Players
 
 - The Accumulator, the Solar Panel and the Boiler wear textures by Malcolm Riley, from unused-textures, under CC-BY-4.0, in place of their stand-ins: the Accumulator a battery casing, the Solar Panel blue cells on riveted plating, and the Boiler plating round a smelter's firebox. (#45)
+- Wireworks requires Groundworks 0.5.11 or later in the 0.5 series, where it accepted 0.5.4: the Groundworks the other 5thlayer mods' current releases load beside, which Wireworks now builds and tests against.
 - The Steam Turbine and the Reactor wear textures by Malcolm Riley, from unused-textures, under CC-BY-4.0, in place of their vanilla stand-ins: the Turbine a copper coil with a duct fan front and back, which spins while it burns and for a second after, and the Reactor dark steel with a yellow hazard band round its middle and a vent on top. The Fuel Cell is a full fuel can and the Depleted Fuel Cell an empty one. (#46)
 - The Boiler's firebox is lit, and every block of the Boiler gives off a lit furnace's light, while it boils and for a second after, so one feeding a single Engine does not flicker; it shows cold while it waits on water, fuel, room for its steam or its output. (#45)
 
