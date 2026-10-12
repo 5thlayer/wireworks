@@ -80,6 +80,8 @@ dependencies {
     // 26.1.11, the least Craftworks accepts, since it shares the dev client.
     compileOnly 'maven.modrinth:jade:26.1.11+neoforge'
     clientMods 'maven.modrinth:jade:26.1.11+neoforge'
+    // EMI finds bioresin's brewing plugin by its annotation, so the Library runs without it too.
+    compileOnly 'curse.maven:emi-unofficial-port-1544558:8630349'
     clientMods 'curse.maven:emi-unofficial-port-1544558:8630349'
     // Craftworks' Assembler draws FE, so a pole has a machine to feed. Wireworks names none of its code.
     clientMods 'curse.maven:craftworks-1715876:9078919'

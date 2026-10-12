@@ -12,7 +12,7 @@ Each version has two sections: Players, what a player or pack developer sees, an
 - `boiler.joules_per_burn_tick` in `wireworks-server.toml` sets what a tick of a fuel's vanilla burn time is worth to the Boiler: 2500 J by default, which makes coal Factorio's 4 MJ.
 - The Boiler and the Steam Engine are mined with a pickaxe, and drop nothing from a bare hand.
 - Both craft from vanilla materials: the Boiler from a furnace, a bucket and seven iron ingots; the Engine from a piston, an iron block, two copper ingots and five iron ingots.
-- Bioresin, a plastic resin made from plants: a brewing stand turns a water bottle and sugar cane into bioresin, and honeycomb and kelp craft one. No vanilla brew changes. (#28)
+- Bioresin, a plastic resin made from plants: a brewing stand turns a water bottle and sugar cane into bioresin, and honeycomb and kelp craft one. No vanilla brew changes. EMI shows the brew with its water bottle. (#28)
 - Wireworks' items are in the suite's shared Works tab, beside every other -works mod's, and in no other tab: the Wireworks tab is gone, and the blocks leave Functional Blocks. (#23)
 
 ### Consumers
