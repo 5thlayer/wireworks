@@ -53,6 +53,11 @@ public final class BoilerSpec {
     private BoilerSpec() {
     }
 
+    /** How long {@code joules} of banked fuel boils for, in seconds to one decimal, for a gauge to name. */
+    public static String secondsOfFuel(long joules) {
+        return String.format("%.1f", joules / (JOULES_PER_TICK * (float) MINECRAFT_TICKS_PER_SECOND));
+    }
+
     /**
      * What one tick of boiling costs, in joules: 1.8 MW over twenty ticks is 90,000 J.
      *

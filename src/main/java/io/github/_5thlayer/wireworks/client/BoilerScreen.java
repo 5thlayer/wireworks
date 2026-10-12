@@ -123,12 +123,11 @@ public class BoilerScreen extends AbstractContainerScreen<BoilerMenu> {
             return List.of(Component.translatable("tooltip.wireworks.boiler.fuel.out")
                     .withStyle(ChatFormatting.GRAY));
         }
-        long perTick = BoilerSpec.JOULES_PER_TICK;
         return List.of(
                 Component.translatable("tooltip.wireworks.boiler.fuel", joules,
                         menu.fuelCapacity()),
                 Component.translatable("tooltip.wireworks.boiler.fuel.seconds",
-                                String.format("%.1f", joules / (perTick * 20F)), perTick)
+                                BoilerSpec.secondsOfFuel(joules), BoilerSpec.JOULES_PER_TICK)
                         .withStyle(ChatFormatting.GRAY));
     }
 }

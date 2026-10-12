@@ -27,8 +27,9 @@ import org.jspecify.annotations.Nullable;
 /**
  * The two steams, each one fluid type with a still and a flowing fluid and a liquid block. Steam is
  * what the Boiler makes and the Steam Engine eats, Factorio's 165 degree steam, and has a bucket the
- * Boiler fills (#42); Superheated Steam has none and stays in tanks and pipes. Superheated Steam is what the Reactor makes and only the Steam
- * Turbine eats, Factorio's 500 degree steam, a second fluid rather than a temperature (ADR 0012).
+ * Boiler fills (#42). Superheated Steam is what the Reactor makes and only the Steam Turbine eats,
+ * Factorio's 500 degree steam, a second fluid rather than a temperature (ADR 0012); it has no bucket
+ * and stays in tanks and pipes.
  */
 public final class SteamFluids {
 

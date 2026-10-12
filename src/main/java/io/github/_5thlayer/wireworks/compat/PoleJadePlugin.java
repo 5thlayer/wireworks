@@ -100,6 +100,7 @@ public class PoleJadePlugin implements IWailaPlugin {
     private static final String BOILER_WATER = "BoilerWater";
     private static final String BOILER_STEAM = "BoilerSteam";
     private static final String BOILER_FUEL = "BoilerFuel";
+    private static final String BOILER_FUEL_GAUGE = "BoilerFuelGauge";
 
     private static final Identifier SOLAR_UID =
             Identifier.fromNamespaceAndPath(Wireworks.MOD_ID, "solar_panel");
@@ -399,9 +400,10 @@ public class PoleJadePlugin implements IWailaPlugin {
         @Override
         public void appendServerData(CompoundTag tag, BlockAccessor accessor) {
             if (accessor.getBlockEntity() instanceof BoilerBlockEntity boiler) {
-                tag.putInt(BOILER_WATER, boiler.data().get(BoilerBlockEntity.DATA_WATER));
-                tag.putInt(BOILER_STEAM, boiler.data().get(BoilerBlockEntity.DATA_STEAM));
-                tag.putInt(BOILER_FUEL, boiler.data().get(BoilerBlockEntity.DATA_FUEL));
+                tag.putInt(BOILER_WATER, boiler.water());
+                tag.putInt(BOILER_STEAM, boiler.steam());
+                tag.putLong(BOILER_FUEL, boiler.fuelJoules());
+                tag.putLong(BOILER_FUEL_GAUGE, boiler.fuelGaugeJoules());
             }
         }
 
@@ -412,8 +414,8 @@ public class PoleJadePlugin implements IWailaPlugin {
     };
 
     /**
-     * Its two tanks, which answer on no face of the anchor Jade reads, and the fuel it has banked,
-     * as the screen's gauges show them. Its slots are Jade's own item row.
+     * Its two tanks, which answer on no face of the anchor Jade reads, and the fuel it has banked in
+     * joules and in seconds, in the screen's own words. Its slots are Jade's own item row.
      */
     private static final IBlockComponentProvider BOILER_TOOLTIP = new IBlockComponentProvider() {
         @Override
@@ -426,11 +428,14 @@ public class PoleJadePlugin implements IWailaPlugin {
                     data.getIntOr(BOILER_WATER, 0), BoilerSpec.WATER_CAPACITY));
             tooltip.add(Component.translatable("tooltip.wireworks.boiler.steam",
                     data.getIntOr(BOILER_STEAM, 0), BoilerSpec.STEAM_CAPACITY));
-            int joules = data.getIntOr(BOILER_FUEL, 0);
-            tooltip.add(joules > 0
-                    ? Component.translatable("tooltip.wireworks.boiler.jade.fuel",
-                            String.format("%.1f", joules / (BoilerSpec.JOULES_PER_TICK * 20F))).withStyle(ChatFormatting.GREEN)
-                    : Component.translatable("tooltip.wireworks.boiler.fuel.out").withStyle(ChatFormatting.GRAY));
+            long joules = data.getLongOr(BOILER_FUEL, 0L);
+            if (joules <= 0L) {
+                tooltip.add(Component.translatable("tooltip.wireworks.boiler.fuel.out").withStyle(ChatFormatting.GRAY));
+                return;
+            }
+            tooltip.add(Component.translatable("tooltip.wireworks.boiler.fuel", joules, data.getLongOr(BOILER_FUEL_GAUGE, 0L)));
+            tooltip.add(Component.translatable("tooltip.wireworks.boiler.fuel.seconds",
+                    BoilerSpec.secondsOfFuel(joules), BoilerSpec.JOULES_PER_TICK).withStyle(ChatFormatting.GRAY));
         }
 
         @Override

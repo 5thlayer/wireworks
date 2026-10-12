@@ -11,8 +11,10 @@ Wireworks and let no Module require another but Groundworks.
 
 ## Decision
 
+*Amended by #42: the Boiler's tanks hold 2,000 mB each, and Steam has a bucket. See the amendment below.*
+
 **The two machines own their tanks and meet pipes only through `Capabilities.Fluid.BLOCK`.** The
-Boiler keeps a 2,000 mB water tank and a 2,000 mB steam tank, the Engine a 200 mB steam tank, and a port
+Boiler keeps a 600 mB water tank and a 200 mB steam tank, the Engine a 200 mB steam tank, and a port
 block hands out a face on the sides its port opens onto. Wireworks names no pipe mod. Two things the
 segments gave for free are rebuilt by hand:
 
@@ -54,7 +56,7 @@ Library.
   jar (5thlayer/libworks#8).
 - The art is Core's, unmodified, with the Boiler on vanilla textures until its 3x2 model is drawn.
 
-## Amendment: the Boiler's tanks hold two buckets (#42)
+## Amended by #42, on the Boiler's buckets
 
 The Boiler first kept Factorio's boxes, 600 mB of water across its three ports and 200 mB of steam.
 Both are now 2,000 mB, so that a bucket can empty into the water tank or fill from the steam tank whole

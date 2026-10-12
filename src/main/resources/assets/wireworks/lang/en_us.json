@@ -56,7 +56,6 @@
   "tooltip.wireworks.boiler.fuel": "%s / %s J",
   "tooltip.wireworks.boiler.fuel.out": "Out of fuel",
   "tooltip.wireworks.boiler.fuel.seconds": "%s s at %s J/t",
-  "tooltip.wireworks.boiler.jade.fuel": "Fuel: %s s left",
   "tooltip.wireworks.boiler.makes_steam": "Makes %s mB/s of steam",
   "tooltip.wireworks.boiler.steam": "Steam: %s / %s mB",
   "tooltip.wireworks.boiler.water": "Water: %s / %s mB",

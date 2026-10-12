@@ -112,6 +112,23 @@ public class BoilerBlockEntity extends BlockEntity implements Container, MenuPro
         return data;
     }
 
+    public int water() {
+        return water.amount();
+    }
+
+    public int steam() {
+        return steam.amount();
+    }
+
+    /** The fuel banked, in joules, and what the gauge reads it against: the last item lit. */
+    public long fuelJoules() {
+        return fuel.storedJoules();
+    }
+
+    public long fuelGaugeJoules() {
+        return fuel.gaugeCapacity();
+    }
+
     /**
      * The fluid face of the footprint block numbered {@code part}, or null where its port does not
      * open onto {@code side}: the anchor and the back corners open onto nothing. The null side
@@ -164,11 +181,14 @@ public class BoilerBlockEntity extends BlockEntity implements Container, MenuPro
         if (container == null) {
             return;
         }
+        boolean emptying = slot == BoilerSlots.WATER;
+        // A bucket moves all or nothing by itself; a larger container must too.
+        long whole = emptying ? held(container) : room(container, steam.fluid());
         try (Transaction transaction = Transaction.openRoot()) {
-            int moved = slot == BoilerSlots.WATER
+            int moved = emptying
                     ? ResourceHandlerUtil.move(container, water, resource -> true, Integer.MAX_VALUE, transaction)
                     : ResourceHandlerUtil.move(steam, container, resource -> true, Integer.MAX_VALUE, transaction);
-            if (moved <= 0 || swap.getAmountAsInt(0) != 0) {
+            if (moved <= 0 || moved != whole) {
                 return;
             }
             transaction.commit();
@@ -176,6 +196,22 @@ public class BoilerBlockEntity extends BlockEntity implements Container, MenuPro
         stack.shrink(1);
         items.set(BoilerSlots.OUTPUT, swap.getResource(1).toStack(swap.getAmountAsInt(1)));
         setChanged();
+    }
+
+    private static long held(ResourceHandler<FluidResource> container) {
+        long held = 0;
+        for (int index = 0; index < container.size(); index++) {
+            held += container.getAmountAsLong(index);
+        }
+        return held;
+    }
+
+    private static long room(ResourceHandler<FluidResource> container, FluidResource fluid) {
+        long room = 0;
+        for (int index = 0; index < container.size(); index++) {
+            room += container.getCapacityAsLong(index, fluid) - container.getAmountAsLong(index);
+        }
+        return room;
     }
 
     /** The container being swapped, at index 0 of a copy, and the output it goes to, at index 1. */
