@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 import io.github._5thlayer.libworks.ghost.Ghost;
+import io.github._5thlayer.libworks.ghost.GhostScreen;
 import io.github._5thlayer.libworks.ghost.Ghosts;
 import io.github._5thlayer.libworks.ghost.client.GhostDraw;
 import io.github._5thlayer.libworks.machine.client.MachineDraw;
@@ -31,7 +32,7 @@ import net.neoforged.neoforge.fluids.FluidStack;
  * them, and EMI's recipe and usage keys work on those. The panel, bars and gauges are libworks-runtime's
  * {@link MachineDraw}, shared with the other machines' screens.
  */
-public class BoilerScreen extends AbstractContainerScreen<BoilerMenu> {
+public class BoilerScreen extends AbstractContainerScreen<BoilerMenu> implements GhostScreen {
 
     private static final int BURN = 0xFFD9822B;
 
@@ -71,9 +72,10 @@ public class BoilerScreen extends AbstractContainerScreen<BoilerMenu> {
                 MachineDraw.TEXT, false);
     }
 
-    /** The ghost stack under the mouse, with the top-left of its slot on screen, for EMI's recipe and usage keys. */
-    public Optional<Ghost> ghostAt(double mouseX, double mouseY) {
-        return ghosts.at(mouseX, mouseY, Util.getMillis());
+    /** The slots' ghosts, which libworks-runtime offers to EMI as the hovered stack, not clickable. */
+    @Override
+    public Ghosts ghosts() {
+        return ghosts;
     }
 
     @Override

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 import io.github._5thlayer.libworks.ghost.Ghost;
+import io.github._5thlayer.libworks.ghost.GhostScreen;
 import io.github._5thlayer.libworks.ghost.Ghosts;
 import io.github._5thlayer.libworks.ghost.client.GhostDraw;
 import io.github._5thlayer.libworks.machine.client.MachineDraw;
@@ -32,7 +33,7 @@ import net.neoforged.neoforge.fluids.FluidStack;
  * why a stopped Reactor stopped. Its empty fuel, water and depleted slots show ghosts of what goes in or
  * comes out, and EMI's recipe and usage keys work on those.
  */
-public class ReactorScreen extends AbstractContainerScreen<ReactorMenu> {
+public class ReactorScreen extends AbstractContainerScreen<ReactorMenu> implements GhostScreen {
 
     private static final int CELL = 0xFF5FBF3A;
 
@@ -73,9 +74,10 @@ public class ReactorScreen extends AbstractContainerScreen<ReactorMenu> {
                 MachineDraw.TEXT, false);
     }
 
-    /** The ghost stack under the mouse, with the top-left of its slot on screen, for EMI's recipe and usage keys. */
-    public Optional<Ghost> ghostAt(double mouseX, double mouseY) {
-        return ghosts.at(mouseX, mouseY, Util.getMillis());
+    /** The slots' ghosts, which libworks-runtime offers to EMI as the hovered stack, not clickable. */
+    @Override
+    public Ghosts ghosts() {
+        return ghosts;
     }
 
     @Override

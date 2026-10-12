@@ -4,6 +4,10 @@ Each version has two sections: Players, what a player or pack developer sees, an
 
 ## Unreleased
 
+### Consumers
+
+- Wireworks nests libworks-runtime 0.1.7, which offers the Boiler's and the Reactor's ghosts to EMI in place of Wireworks' own stack provider: the recipe and usage keys still work on a ghost and a click still reaches its empty slot (libworks#23).
+
 ## 0.6.1
 
 ### Players
