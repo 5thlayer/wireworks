@@ -1,9 +1,10 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "casing": "wireworks:block/accumulator_casing",
-    "side": "wireworks:block/accumulator_side",
-    "particle": "wireworks:block/accumulator_casing"
+    "top": "wireworks:block/accumulator/top",
+    "side": "wireworks:block/accumulator/sides",
+    "bottom": "wireworks:block/accumulator/bottom",
+    "particle": "wireworks:block/accumulator/sides"
   },
   "elements": [
     {
@@ -13,13 +14,13 @@
         -8
       ],
       "to": [
-        24,
+        8,
         16,
-        24
+        8
       ],
       "faces": {
         "up": {
-          "texture": "#casing",
+          "texture": "#top",
           "uv": [
             0,
             0,
@@ -28,7 +29,7 @@
           ]
         },
         "down": {
-          "texture": "#casing",
+          "texture": "#bottom",
           "uv": [
             0,
             0,
@@ -38,6 +39,147 @@
         },
         "north": {
           "texture": "#side",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#side",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        -8,
+        0,
+        8
+      ],
+      "to": [
+        8,
+        16,
+        24
+      ],
+      "faces": {
+        "up": {
+          "texture": "#top",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "down": {
+          "texture": "#bottom",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#side",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#side",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        8,
+        0,
+        -8
+      ],
+      "to": [
+        24,
+        16,
+        8
+      ],
+      "faces": {
+        "up": {
+          "texture": "#top",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "down": {
+          "texture": "#bottom",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "north": {
+          "texture": "#side",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#side",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        8,
+        0,
+        8
+      ],
+      "to": [
+        24,
+        16,
+        24
+      ],
+      "faces": {
+        "up": {
+          "texture": "#top",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "down": {
+          "texture": "#bottom",
           "uv": [
             0,
             0,
@@ -55,15 +197,6 @@
           ]
         },
         "east": {
-          "texture": "#side",
-          "uv": [
-            0,
-            0,
-            16,
-            16
-          ]
-        },
-        "west": {
           "texture": "#side",
           "uv": [
             0,

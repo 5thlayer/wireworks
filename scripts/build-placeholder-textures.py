@@ -2,11 +2,10 @@
 # SPDX-FileCopyrightText: 2026 5thlayer
 # SPDX-License-Identifier: MIT
 
-"""Draws the stand-in textures of the Solar Panel, the Accumulator, the Transmission Pole and the Transformer.
+"""Draws the stand-in textures of the Transmission Pole and the Transformer.
 
 Each wears this placeholder art until real art is drawn (docs/placeholder-art.md). Each
-texture is sized to the model face it covers, so a face of 48 by 16 units is a 48 by 16 pixel
-image and is never stretched.
+texture is sized to the model face it covers, so none is stretched.
 
 Run it after changing a drawing here:
 
@@ -29,12 +28,7 @@ FRAME_EDGE = (66, 70, 77, 255)
 FRAME_LIGHT = (156, 161, 168, 255)
 FRAME_RIVET = (190, 194, 199, 255)
 
-PANEL = (14, 26, 66, 255)
-PANEL_CELL = (22, 42, 96, 255)
-PANEL_LINE = (58, 92, 168, 255)
-
 CASING_CELL = (52, 58, 66, 255)
-CASING_CELL_LIGHT = (74, 82, 92, 255)
 CASING_TERMINAL = (200, 168, 70, 255)
 
 
@@ -71,53 +65,6 @@ def framed(width, height):
     return image
 
 
-def solar_panel_top():
-    """Dark blue cells in a 3 by 3 grid of plates, a light line round each cell, inside a frame rim."""
-    size = 48
-    image = blank(size, size, PANEL)
-    for y in range(size):
-        for x in range(size):
-            if x % 8 == 0 or y % 8 == 0:
-                image[y][x] = PANEL_LINE
-            elif (x // 8 + y // 8) % 2 == 0:
-                image[y][x] = PANEL_CELL
-    for i in range(size):
-        for width in range(2):
-            for edge in (width, size - 1 - width):
-                image[edge][i] = FRAME_EDGE
-                image[i][edge] = FRAME_EDGE
-    return image
-
-
-def accumulator_casing():
-    """Top and bottom: a grey plate over the whole 2 by 2."""
-    size = 32
-    image = blank(size, size, FRAME)
-    for ty in range(2):
-        for tx in range(2):
-            frame_tile(image, tx * 16, ty * 16)
-    return image
-
-
-def accumulator_side():
-    """A 2 by 1 side: grey casing with a row of seven battery cells and their gold terminals."""
-    width, height = 32, 16
-    image = blank(width, height, FRAME)
-    for i in range(width):
-        image[0][i] = FRAME_EDGE
-        image[height - 1][i] = FRAME_EDGE
-        image[1][i] = FRAME_LIGHT
-    for i in range(height):
-        image[i][0] = FRAME_EDGE
-        image[i][width - 1] = FRAME_EDGE
-    for cell in range(7):
-        x0 = 2 + cell * 4
-        put_rect(image, x0, 4, x0 + 2, 13, CASING_CELL)
-        put_rect(image, x0, 4, x0 + 1, 13, CASING_CELL_LIGHT)
-        put_rect(image, x0, 3, x0 + 2, 4, CASING_TERMINAL)
-    return image
-
-
 def transmission_pole():
     """A grey steel lattice: a plate with a dark rim and a diagonal brace, for the post and its crossarm."""
     image = framed(16, 16)
@@ -140,12 +87,6 @@ def transformer():
 TEXTURE_NAMES = {
     "block/transformer.png": transformer,
     "block/transmission_pole.png": transmission_pole,
-    "block/solar_panel_frame.png": lambda: framed(16, 16),
-    "block/solar_panel_edge.png": lambda: framed(48, 16),
-    "block/solar_panel_underside.png": lambda: framed(48, 48),
-    "block/solar_panel_top.png": solar_panel_top,
-    "block/accumulator_casing.png": accumulator_casing,
-    "block/accumulator_side.png": accumulator_side,
 }
 
 

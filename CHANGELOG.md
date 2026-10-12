@@ -4,6 +4,10 @@ Each version has two sections: Players, what a player or pack developer sees, an
 
 ## Unreleased
 
+### Players
+
+- The Accumulator, the Solar Panel and the Boiler wear textures by Malcolm Riley, from unused-textures, under CC-BY-4.0, in place of their stand-ins: the Accumulator a battery casing, the Solar Panel blue cells on riveted plating, and the Boiler plating round a lit firebox. (#45)
+
 ## 0.6.0
 
 ### Players

@@ -1,6 +1,6 @@
 # Placeholder art
 
-The Solar Panel, the Accumulator, the Transmission Pole and the Transformer wear stand-in textures until real art is drawn. They are Wireworks' own, MIT. The machines' models draw the whole footprint from the anchor's block model.
+The Transmission Pole and the Transformer wear stand-in textures until real art is drawn. They are Wireworks' own, MIT.
 
 `scripts/build-placeholder-textures.py` draws every file below, and `--check` fails when a committed one is stale. Redraw a texture in that script and re-run it; never edit the PNGs.
 
@@ -8,20 +8,12 @@ All files are under `src/main/resources/assets/wireworks/textures/`. A texture i
 
 | Texture | Size | Where it is used |
 |---|---|---|
-| `block/solar_panel_frame.png` | 16x16 | The Solar Panel's pillar, on every face but the top, which the top layer covers. |
-| `block/solar_panel_edge.png` | 48x16 | The sides of the Solar Panel's 3x3 top layer. |
-| `block/solar_panel_underside.png` | 48x48 | The underside of the top layer. |
-| `block/solar_panel_top.png` | 48x48 | The top layer's dark blue panel face. |
-| `block/accumulator_casing.png` | 32x32 | The Accumulator's top and bottom. |
-| `block/accumulator_side.png` | 32x16 | The Accumulator's four sides, a battery-cell pattern. |
 | `block/transmission_pole.png` | 16x16 | The Transmission Pole's post and crossarm, a braced grey plate. |
 | `block/transformer.png` | 16x16 | Every face of the Transformer's cube, a grey casing with two gold coil windings. |
 
-The models are `models/block/solar_panel.json` and `models/block/accumulator.json`, with an item model of each recentred for the inventory slot. The Solar Panel's spans x and z -16 to 32 and y 0 to 32 from its pillar. The Accumulator's spans x and z 0 to 32 from a corner anchor and is turned by `facing`.
-
 ## Carried over from FactoryWorks Core
 
-The Boiler and the Steam Engine arrive with art drawn for FactoryWorks Core, 5thlayer's own and unmodified, under `textures/block/`: `steam_engine/steam_engine.png`, the model's texture, `kit/status_light_working.png`, its green light, `fluid_port_input.png` and `fluid_port_output.png`, the rings on the Boiler's port blocks, and `fluid/steam.png` with its animation, which Steam draws tinted a cool grey (`STEAM_TINT` in `client/SteamClient.java`) so a gauge's white label reads over it. They are hand-drawn, so `build-placeholder-textures.py` does not draw them and leaves them alone. The Boiler's body is vanilla's furnace and iron block textures, and its model a stand-in until a 3x2 model is drawn: the anchor is a furnace-faced cube, and each part block draws itself (`DrawnPartBlock`), iron with the port rings on the water and steam ports, picked by part and facing in `blockstates/boiler_part.json`. The Engine's model was exported from a Blockbench file that stays in the FactoryWorks Showcase. The Engine's `credit` line naming that export is dropped.
+The Boiler and the Steam Engine arrive with art drawn for FactoryWorks Core, 5thlayer's own and unmodified, under `textures/block/`: `steam_engine/steam_engine.png`, the model's texture, `kit/status_light_working.png`, its green light, `fluid_port_input.png` and `fluid_port_output.png`, the rings on the Boiler's port blocks, and `fluid/steam.png` with its animation, which Steam draws tinted a cool grey (`STEAM_TINT` in `client/SteamClient.java`) so a gauge's white label reads over it. They are hand-drawn, so `build-placeholder-textures.py` does not draw them and leaves them alone. The Boiler's body wears unused-textures art, below. The Engine's model was exported from a Blockbench file that stays in the FactoryWorks Showcase. The Engine's `credit` line naming that export is dropped.
 
 ## Vanilla stand-ins
 
@@ -31,12 +23,25 @@ The Reactor has no art of its own yet either. A block model reaches only one blo
 
 ## From unused-textures
 
-Three item textures are Malcolm Riley's, from [unused-textures](https://github.com/malcolmriley/unused-textures), under [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/) (`LICENSES/CC-BY-4.0.txt`). Each is copied unmodified, and `REUSE.toml` annotates it. `build-placeholder-textures.py` does not draw them.
+These textures are Malcolm Riley's, from [unused-textures](https://github.com/malcolmriley/unused-textures) at commit `9218cb8997bf1dc83617bd7748acf44a16c19c42`, under [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/) (`LICENSES/CC-BY-4.0.txt`), and `REUSE.toml` annotates them. Every one is copied unmodified but the Boiler's front, which is adapted. The placeholder script draws none of them.
 
-| Texture | Source file | Item |
+| Texture | Source file | Where it is used |
 |---|---|---|
 | `item/bioresin.png` | `items/blob_green_resin_spheres.png` | Bioresin |
 | `item/plastic.png` | `items/material_plastic_sheet.png` | Plastic |
 | `item/battery.png` | `items/part_electronic_battery_galvanic.png` | The battery |
+| `block/accumulator/top.png` | `blocks/battery_top.png` | The Accumulator's top |
+| `block/accumulator/sides.png` | `blocks/battery_sides.png` | The Accumulator's four sides |
+| `block/accumulator/bottom.png` | `blocks/battery_bottom.png` | The Accumulator's bottom |
+| `block/solar_panel/cell.png` | `blocks/blue_cement_center.png` | The top of the Solar Panel's 3x3 layer |
+| `block/plating/brace.png` | `blocks/space-plating-square.png` | The Solar Panel's pillar |
+| `block/plating/rivets.png` | `blocks/space-plating-rivets-horizontal.png` | The sides of the Solar Panel's top layer |
+| `block/plating/plain.png` | `blocks/space-plating-plain.png` | The underside of the Solar Panel's top layer; the top and bottom of every Boiler block |
+| `block/plating/convex_rivets.png` | `blocks/space-plating-convex-rivets-horizontal.png` | The sides of the Boiler's blocks, under the port rings |
+| `block/boiler/front.png` | adapted from `blocks/device_smelter_front_lit.png` with its `.mcmeta`, `device_smelter_front.png` and `space-plating-plain.png` | The Boiler's firebox, on the anchor's front |
+
+The Boiler's front is the lit smelter's let into the plating, as Craftworks' Refiner front is: `scripts/build-boiler-front.py` paints the brick showing round the smelter's rim with the plain plating, on every frame of its animation, and copies the animation beside the sprite. Its sources are kept unmodified under `data/art/`, it needs Pillow, and `--check` fails when the committed front is stale.
+
+Each texture covers one block's face. The Accumulator's and the Solar Panel's models, `models/block/accumulator.json` and `models/block/solar_panel.json`, draw the whole footprint from the anchor's block model, one element per block with only its outer faces, each face showing the whole 16x16 texture, so nothing is tiled into a larger file. The Solar Panel's spans x and z -16 to 32 and y 0 to 32 from its pillar. The Accumulator's spans x and z 0 to 32 from a corner anchor and is turned by `facing`. Each has an item model recentred for the inventory slot. The Boiler's model is per block already: the anchor is an `orientable_with_bottom` cube, and each part block draws itself (`DrawnPartBlock`), plating with the port rings on the water and steam ports, picked by part and facing in `blockstates/boiler_part.json`.
 
 The credit also stands in the README's License section, which the mod pages carry, and in `neoforge.mods.toml`'s `credits`, which the game's mod list shows.

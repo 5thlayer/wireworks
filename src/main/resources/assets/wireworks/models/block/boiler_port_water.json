@@ -1,9 +1,10 @@
 {
   "render_type": "minecraft:cutout",
   "textures": {
-    "casing": "minecraft:block/iron_block",
+    "casing": "wireworks:block/plating/convex_rivets",
+    "cap": "wireworks:block/plating/plain",
     "ring": "wireworks:block/fluid_port_input",
-    "particle": "minecraft:block/iron_block"
+    "particle": "wireworks:block/plating/convex_rivets"
   },
   "elements": [
     {
@@ -19,11 +20,11 @@
       ],
       "faces": {
         "down": {
-          "texture": "#casing",
+          "texture": "#cap",
           "cullface": "down"
         },
         "up": {
-          "texture": "#casing",
+          "texture": "#cap",
           "cullface": "up"
         },
         "north": {
