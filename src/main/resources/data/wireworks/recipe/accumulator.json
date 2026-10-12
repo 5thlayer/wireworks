@@ -3,13 +3,13 @@
   "category": "redstone",
   "key": {
     "I": "#c:storage_blocks/iron",
-    "R": "#c:storage_blocks/redstone",
-    "C": "#c:ingots/copper"
+    "C": "#c:ingots/copper",
+    "B": "wireworks:battery"
   },
   "pattern": [
-    "IRI",
-    "RCR",
-    "IRI"
+    "IBI",
+    "BCB",
+    "IBI"
   ],
   "result": {
     "id": "wireworks:accumulator",

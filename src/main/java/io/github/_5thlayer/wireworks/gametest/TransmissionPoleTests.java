@@ -61,12 +61,12 @@ final class TransmissionPoleTests {
     private static void crafted(GameTestHelper helper) {
         List<Item> grid = List.of(
                 Items.COPPER_INGOT, Items.IRON_BARS, Items.COPPER_INGOT,
-                Items.AIR, Items.IRON_INGOT, Items.AIR,
+                WireworksRegistries.PLASTIC.get(), Items.IRON_INGOT, WireworksRegistries.PLASTIC.get(),
                 Items.AIR, Items.IRON_INGOT, Items.AIR);
         CraftingInput input = CraftingInput.of(3, 3, grid.stream().map(ItemStack::new).toList());
         var recipe = helper.getLevel().recipeAccess().getRecipeFor(RecipeType.CRAFTING, input, helper.getLevel());
         if (recipe.isEmpty()) {
-            helper.fail("no crafting recipe matches CBC / _I_ / _I_");
+            helper.fail("no crafting recipe matches CBC / PIP / _I_");
             return;
         }
         ItemStack result = recipe.get().value().assemble(input);

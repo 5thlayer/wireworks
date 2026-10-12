@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2026 5thlayer
 # SPDX-License-Identifier: MIT
 
-"""Draws the stand-in textures of the Solar Panel, the Accumulator, the Transmission Pole, the Transformer and bioresin.
+"""Draws the stand-in textures of the Solar Panel, the Accumulator, the Transmission Pole, the Transformer, bioresin, plastic and the battery.
 
 Each wears this placeholder art until real art is drawn (docs/placeholder-art.md). Each
 texture is sized to the model face it covers, so a face of 48 by 16 units is a 48 by 16 pixel
@@ -42,6 +42,14 @@ RESIN = (176, 128, 40, 255)
 RESIN_DARK = (120, 82, 22, 255)
 RESIN_LIGHT = (232, 190, 92, 255)
 RESIN_LEAF = (86, 140, 54, 255)
+
+PLASTIC = (222, 226, 230, 255)
+PLASTIC_DARK = (150, 158, 168, 255)
+PLASTIC_LIGHT = (250, 251, 252, 255)
+
+BATTERY_BODY = (40, 44, 52, 255)
+BATTERY_BAND = (200, 168, 70, 255)
+BATTERY_CAP = (190, 194, 199, 255)
 
 
 def blank(width, height, colour):
@@ -160,8 +168,34 @@ def bioresin():
     return image
 
 
+def plastic():
+    """A pale grey sheet seen at an angle, a dark edge below and a light one along the top."""
+    size = 16
+    image = blank(size, size, CLEAR)
+    for row, y in enumerate(range(4, 12)):
+        x0 = 2 + (7 - row) // 2
+        put_rect(image, x0, y, x0 + 10, y + 1, PLASTIC)
+        image[y][x0] = PLASTIC_DARK
+    put_rect(image, 6, 4, 15, 5, PLASTIC_LIGHT)
+    put_rect(image, 2, 11, 12, 13, PLASTIC_DARK)
+    return image
+
+
+def battery():
+    """An upright dark cell with a gold band and a grey terminal cap."""
+    size = 16
+    image = blank(size, size, CLEAR)
+    put_rect(image, 5, 3, 11, 15, BATTERY_BODY)
+    put_rect(image, 5, 3, 6, 15, FRAME_EDGE)
+    put_rect(image, 5, 6, 11, 8, BATTERY_BAND)
+    put_rect(image, 7, 1, 9, 3, BATTERY_CAP)
+    return image
+
+
 TEXTURE_NAMES = {
     "item/bioresin.png": bioresin,
+    "item/plastic.png": plastic,
+    "item/battery.png": battery,
     "block/transformer.png": transformer,
     "block/transmission_pole.png": transmission_pole,
     "block/solar_panel_frame.png": lambda: framed(16, 16),

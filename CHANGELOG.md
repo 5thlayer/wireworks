@@ -13,6 +13,9 @@ Each version has two sections: Players, what a player or pack developer sees, an
 - The Boiler and the Steam Engine are mined with a pickaxe, and drop nothing from a bare hand.
 - Both craft from vanilla materials: the Boiler from a furnace, a bucket and seven iron ingots; the Engine from a piston, an iron block, two copper ingots and five iron ingots.
 - Bioresin, a plastic resin made from plants: a brewing stand turns a water bottle and sugar cane into bioresin, and honeycomb and kelp craft one. No vanilla brew changes. EMI shows the brew with its water bottle. (#28)
+- Plastic, blasted one for one from any plastic resin: vanilla's resin clump, bioresin, or tar when a mod makes it. (#27)
+- The battery, crafted from a copper ingot, an iron ingot and redstone. (#27)
+- Recipes change. The Solar Panel takes plastic where it took redstone; the large pole takes plastic where it took redstone; the Transformer takes one plastic in its bottom row; the Transmission Pole takes two plastic beside its post; and the Accumulator takes four batteries where it took four redstone blocks. The small and medium poles are unchanged. (#27)
 - Wireworks' items are in the suite's shared Works tab, beside every other -works mod's, and in no other tab: the Wireworks tab is gone, and the blocks leave Functional Blocks. (#23)
 
 ### Consumers
@@ -20,6 +23,8 @@ Each version has two sections: Players, what a player or pack developer sees, an
 - `wireworks:steam_engine` is in `wireworks:generators`. Its fluid face is on every block of its footprint, insert-only, and steam taken in at either end of its row is offered on out of the other, and the Boiler's water and steam faces are on the port blocks, through NeoForge's `Capabilities.Fluid.BLOCK`. Wireworks names no pipe mod.
 - The new item tag `wireworks:plastic_resins`, the items plastic is made from, holds `minecraft:resin_clump` and, optionally, `#c:tar`, which Fieldworks fills. Wireworks makes no tar of its own. (#26, #34)
 - The new item `wireworks:bioresin` is in `wireworks:plastic_resins`. Its brewing is a NeoForge brewing recipe, registered on `RegisterBrewingRecipesEvent`, on a water bottle with sugar cane. (#28)
+- Breaking: the Solar Panel and the large pole no longer read `#c:dusts/redstone`, and the Accumulator no longer reads `#c:storage_blocks/redstone`: a pack that filled those tags to feed these recipes now feeds them plastic or batteries. (#27)
+- The new items `wireworks:plastic` and `wireworks:battery`. Plastic is a `minecraft:blasting` recipe on `#wireworks:plastic_resins`. The battery takes one of each of the new item tags `wireworks:cathodes` (`minecraft:copper_ingot`), `wireworks:anodes` (`minecraft:iron_ingot`) and `wireworks:electrolytes` (`minecraft:redstone` and, optionally, `#c:dusts/sulfur`), which a Consumer may add to. (#27)
 - The Boiler and the Steam Engine ported from FactoryWorks Core, without Oritech or Pipeworks. The Core's `SteamEngineBlock` and `BoilerBlock` ids move from `factoryworks:` to `wireworks:`; a world made with them loses them. (#22)
 - Wireworks nests libworks-runtime 0.1.1 by jar-in-jar, up to but not including 0.2: its mod id is `libworks`, it rides inside the jar, and players install nothing more. The Boiler's item and fluid faces extend its `GuardedResourceHandler`. (#33)
 - Breaking: the creative tab `wireworks:items` and its lang key `itemGroup.wireworks.items` are removed, with `WireworksRegistries.CREATIVE_TAB`: the items are in libworks' `WorksTab.KEY` and in no vanilla tab (FactoryWorks ADR-0128). (#23)

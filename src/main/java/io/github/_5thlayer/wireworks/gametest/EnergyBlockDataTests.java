@@ -27,12 +27,12 @@ final class EnergyBlockDataTests {
         tests.test("solar_panel_is_a_generator_and_the_accumulator_an_accumulator", 1, EnergyBlockDataTests::tagged);
         tests.test("solar_panel_is_crafted_from_its_recipe", 1, helper -> crafted(helper, 3, List.of(
                 Items.GLASS, Items.DAYLIGHT_DETECTOR, Items.GLASS,
-                Items.COPPER_INGOT, Items.REDSTONE, Items.COPPER_INGOT,
+                Items.COPPER_INGOT, WireworksRegistries.PLASTIC.get(), Items.COPPER_INGOT,
                 Items.AIR, Items.IRON_BLOCK, Items.AIR), WireworksRegistries.SOLAR_PANEL_ITEM.get()));
         tests.test("accumulator_is_crafted_from_its_recipe", 1, helper -> crafted(helper, 3, List.of(
-                Items.IRON_BLOCK, Items.REDSTONE_BLOCK, Items.IRON_BLOCK,
-                Items.REDSTONE_BLOCK, Items.COPPER_INGOT, Items.REDSTONE_BLOCK,
-                Items.IRON_BLOCK, Items.REDSTONE_BLOCK, Items.IRON_BLOCK), WireworksRegistries.ACCUMULATOR_ITEM.get()));
+                Items.IRON_BLOCK, WireworksRegistries.BATTERY.get(), Items.IRON_BLOCK,
+                WireworksRegistries.BATTERY.get(), Items.COPPER_INGOT, WireworksRegistries.BATTERY.get(),
+                Items.IRON_BLOCK, WireworksRegistries.BATTERY.get(), Items.IRON_BLOCK), WireworksRegistries.ACCUMULATOR_ITEM.get()));
         tests.test("boiler_is_crafted_from_its_recipe", 1, helper -> crafted(helper, 3, List.of(
                 Items.IRON_INGOT, Items.BUCKET, Items.IRON_INGOT,
                 Items.IRON_INGOT, Items.FURNACE, Items.IRON_INGOT,

@@ -76,11 +76,11 @@ final class TransformerTests {
         List<Item> grid = List.of(
                 Items.IRON_INGOT, Items.COPPER_INGOT, Items.IRON_INGOT,
                 Items.COPPER_INGOT, Items.IRON_BLOCK, Items.COPPER_INGOT,
-                Items.IRON_INGOT, Items.COPPER_INGOT, Items.IRON_INGOT);
+                Items.IRON_INGOT, WireworksRegistries.PLASTIC.get(), Items.IRON_INGOT);
         CraftingInput input = CraftingInput.of(3, 3, grid.stream().map(ItemStack::new).toList());
         var recipe = helper.getLevel().recipeAccess().getRecipeFor(RecipeType.CRAFTING, input, helper.getLevel());
         if (recipe.isEmpty()) {
-            helper.fail("no crafting recipe matches ICI / CBC / ICI");
+            helper.fail("no crafting recipe matches ICI / CBC / IPI");
             return;
         }
         ItemStack result = recipe.get().value().assemble(input);

@@ -1,0 +1,9 @@
+{
+  "values": [
+    "minecraft:redstone",
+    {
+      "id": "#c:dusts/sulfur",
+      "required": false
+    }
+  ]
+}

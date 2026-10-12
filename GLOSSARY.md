@@ -79,7 +79,7 @@ _Avoid_: source, producer
 
 **Accumulator**:
 A block tagged `wireworks:accumulators`, which a network charges from a generator surplus and draws on to cover a shortfall. Wireworks ships one of its own, and any mod's block can play the part.
-_Avoid_: battery, storage
+_Avoid_: battery (the **Battery** is the item it is crafted from), storage
 
 **Solar Panel**:
 The **Generator** Wireworks ships: its output follows **Daylight**, and it makes nothing while a roof hides the sky above it.
@@ -148,6 +148,23 @@ _Avoid_: bioplastic (what plastic made from it would be)
 **Plastic Resin**:
 An item in `wireworks:plastic_resins`, which plastic is made from: vanilla's resin clump, **Bioresin**, and **Tar** when a mod fills `c:tar`.
 _Avoid_: resin (vanilla's resin clump alone)
+
+**Plastic**:
+What a blast furnace makes from any **Plastic Resin**, one for one. The Solar Panel, the Transformer and the large and transmission poles take it.
+_Avoid_: plastic bar (Factorio's name)
+
+**Battery**:
+Crafted from one **Cathode**, one **Anode** and one **Electrolyte**. The Accumulator takes it.
+
+**Cathode**:
+Any item in `wireworks:cathodes`, one of a **Battery**'s three parts: a copper ingot by default.
+
+**Anode**:
+Any item in `wireworks:anodes`, one of a **Battery**'s three parts: an iron ingot by default.
+
+**Electrolyte**:
+Any item in `wireworks:electrolytes`, one of a **Battery**'s three parts: redstone by default, and sulfur when a mod fills `c:dusts/sulfur`.
+_Avoid_: acid (Factorio's sulfuric acid)
 
 ### Drawing
 

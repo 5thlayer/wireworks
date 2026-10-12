@@ -4,12 +4,13 @@
   "key": {
     "I": "#c:ingots/iron",
     "C": "#c:ingots/copper",
-    "B": "#c:storage_blocks/iron"
+    "B": "#c:storage_blocks/iron",
+    "P": "wireworks:plastic"
   },
   "pattern": [
     "ICI",
     "CBC",
-    "ICI"
+    "IPI"
   ],
   "result": {
     "id": "wireworks:transformer",

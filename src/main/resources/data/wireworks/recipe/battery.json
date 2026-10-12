@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "redstone",
+  "ingredients": [
+    "#wireworks:cathodes",
+    "#wireworks:anodes",
+    "#wireworks:electrolytes"
+  ],
+  "result": {
+    "id": "wireworks:battery",
+    "count": 1
+  }
+}

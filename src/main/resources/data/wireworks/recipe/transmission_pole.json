@@ -4,11 +4,12 @@
   "key": {
     "C": "#c:ingots/copper",
     "B": "minecraft:iron_bars",
-    "I": "#c:ingots/iron"
+    "I": "#c:ingots/iron",
+    "P": "wireworks:plastic"
   },
   "pattern": [
     "CBC",
-    " I ",
+    "PIP",
     " I "
   ],
   "result": {

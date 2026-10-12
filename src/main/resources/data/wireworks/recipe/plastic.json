@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:blasting",
+  "category": "misc",
+  "cookingtime": 100,
+  "experience": 0.1,
+  "ingredient": "#wireworks:plastic_resins",
+  "result": {
+    "id": "wireworks:plastic"
+  }
+}

@@ -5,12 +5,12 @@
     "G": "#c:glass_blocks",
     "D": "minecraft:daylight_detector",
     "C": "#c:ingots/copper",
-    "R": "#c:dusts/redstone",
-    "I": "#c:storage_blocks/iron"
+    "I": "#c:storage_blocks/iron",
+    "P": "wireworks:plastic"
   },
   "pattern": [
     "GDG",
-    "CRC",
+    "CPC",
     " I "
   ],
   "result": {

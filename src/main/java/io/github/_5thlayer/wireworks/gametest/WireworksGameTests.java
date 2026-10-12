@@ -83,6 +83,7 @@ public final class WireworksGameTests {
         SteamEngineTests.register(tests);
         EnergyBlockDataTests.register(tests);
         BioresinTests.register(tests);
+        PlasticAndBatteryTests.register(tests);
     }
 
     private static Identifier id(String path) {
