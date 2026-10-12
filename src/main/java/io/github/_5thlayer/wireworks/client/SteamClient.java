@@ -23,6 +23,8 @@ public final class SteamClient {
     private static final Material STEAM_SPRITE =
             new Material(Identifier.fromNamespaceAndPath(Wireworks.MOD_ID, "block/fluid/steam"));
 
+    /** Steam's sprite is near white; this greys it so a gauge's white label reads over it. */
+    private static final int STEAM_TINT = 0xFF8C96A0;
     private static final int SUPERHEATED_TINT = 0xFFFFD8B0;
 
     private SteamClient() {
@@ -39,7 +41,7 @@ public final class SteamClient {
 
     private static void registerFluidModels(RegisterFluidModelsEvent event) {
         FluidModel.Unbaked model =
-                new FluidModel.Unbaked(STEAM_SPRITE, STEAM_SPRITE, null, FluidTintSources.constant(0xFFFFFFFF));
+                new FluidModel.Unbaked(STEAM_SPRITE, STEAM_SPRITE, null, FluidTintSources.constant(STEAM_TINT));
         event.register(model, SteamFluids.STEAM_SOURCE, SteamFluids.STEAM_FLOWING);
         FluidModel.Unbaked superheated =
                 new FluidModel.Unbaked(STEAM_SPRITE, STEAM_SPRITE, null, FluidTintSources.constant(SUPERHEATED_TINT));
