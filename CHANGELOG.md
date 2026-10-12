@@ -4,6 +4,8 @@ Each version has two sections: Players, what a player or pack developer sees, an
 
 ## Unreleased
 
+## 0.6.2
+
 ### Players
 
 - The Steam Engine is built as the Steam Turbine is, a cube for each block, in place of its model from FactoryWorks Core. Its front and back draw one engine across its four blocks, a copper cylinder driving a flywheel, which turns while it burns and for a second after, set into an iron duct casing with intakes down its narrow sides and a vent on top. Its textures are Malcolm Riley's, from unused-textures, under CC-BY-4.0: the casing copied, the engine drawn in shades adapted from his duct and copper tank. (#47)
