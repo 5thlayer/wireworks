@@ -60,6 +60,7 @@ final class BoilerTests {
 
     static void register(WireworksGameTests.Registrar tests) {
         tests.test("boiler_boils", 100, BoilerTests::boils);
+        tests.test("boiler_draws_every_block_of_its_footprint", 20, BoilerTests::drawsEveryBlock);
         tests.test("boiler_stalls_when_the_steam_backs_up_and_burns_nothing", 200, BoilerTests::stalls);
         tests.test("boiler_ports_open_onto_the_faces_adr_says", 20, BoilerTests::portsOpenWhereTheyShould);
         tests.test("boiler_ports_follow_the_facing", 20, BoilerTests::portsFollowTheFacing);
@@ -117,6 +118,17 @@ final class BoilerTests {
 
     private static FluidResource steam() {
         return FluidResource.of(SteamFluids.STEAM_SOURCE.get());
+    }
+
+    private static void drawsEveryBlock(GameTestHelper helper) {
+        for (Direction facing : Direction.Plane.HORIZONTAL) {
+            List<BlockPos> blocks = Network.footprint(helper, WireworksRegistries.BOILER_FOOTPRINT, ANCHOR, facing);
+            Network.expectDrawn(helper, "a Boiler facing " + facing, blocks);
+            for (BlockPos block : blocks) {
+                helper.getLevel().setBlock(block, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+            }
+        }
+        helper.succeed();
     }
 
     /** Water in, fuel in, room for steam: it boils, and the water falls to match unit for unit. */

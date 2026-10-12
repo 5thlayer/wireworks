@@ -70,6 +70,11 @@ final class ReactorTests {
         tests.test("reactor_full_depleted_slot_stops_it_until_one_is_taken", 40, ReactorTests::fullDepletedSlotStops);
         tests.test("reactor_slots_are_reached_from_every_block_and_depleted_only_lets_out", 20, ReactorTests::slotsFromEveryBlock);
         tests.test("reactor_hoppers_feed_fuel_and_take_only_depleted_cells", 60, ReactorTests::hoppers);
+        tests.test("reactor_draws_every_block_of_its_footprint", 20, helper -> {
+            Network.expectDrawn(helper, "a Reactor",
+                    Network.footprint(helper, WireworksRegistries.REACTOR_FOOTPRINT, ANCHOR, FACING));
+            helper.succeed();
+        });
         tests.test("reactor_ports_open_onto_their_outer_faces_whatever_its_facing", 20, ReactorTests::portsOpenOutward);
         tests.test("reactor_water_ports_take_water_only_and_the_steam_port_gives_only", 20, ReactorTests::portsTakeAndGive);
     }

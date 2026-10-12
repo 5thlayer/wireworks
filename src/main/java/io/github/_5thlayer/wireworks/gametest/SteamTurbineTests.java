@@ -43,6 +43,11 @@ final class SteamTurbineTests {
 
     static void register(WireworksGameTests.Registrar tests) {
         tests.test("fed_steam_turbine_makes_its_rate", 100, SteamTurbineTests::fed);
+        tests.test("steam_turbine_draws_every_block_of_its_footprint", 20, helper -> {
+            Network.expectDrawn(helper, "a Steam Turbine",
+                    Network.footprint(helper, WireworksRegistries.STEAM_TURBINE_FOOTPRINT, ANCHOR, Direction.NORTH));
+            helper.succeed();
+        });
         tests.test("steam_turbine_row_on_fed_superheated_steam_makes_its_rate_per_turbine", 100,
                 SteamTurbineTests::fedRow);
         tests.test("steam_turbine_refuses_steam_and_gives_none_back", 20, SteamTurbineTests::refusesSteam);

@@ -115,8 +115,8 @@ public final class WireworksRegistries {
                     () -> new BlockEntityType<>(AccumulatorBlockEntity::new, ACCUMULATOR.get()));
 
     public static final DeferredBlock<BoilerBlock> BOILER = BLOCKS.registerBlock(BoilerBlock.BLOCK_NAME, BoilerBlock::new);
-    public static final DeferredBlock<FootprintPartBlock> BOILER_PART =
-            part("boiler_part", () -> WireworksRegistries.BOILER_FOOTPRINT);
+    public static final DeferredBlock<DrawnPartBlock> BOILER_PART =
+            drawnPart("boiler_part", () -> WireworksRegistries.BOILER_FOOTPRINT);
     public static final DeferredItem<BoilerItem> BOILER_ITEM =
             ITEMS.registerItem(BoilerBlock.BLOCK_NAME, BoilerItem::new);
     public static final Footprint BOILER_FOOTPRINT = Footprint.declare(
@@ -142,8 +142,8 @@ public final class WireworksRegistries {
 
     public static final DeferredBlock<SteamTurbineBlock> STEAM_TURBINE =
             BLOCKS.registerBlock(SteamTurbineBlock.BLOCK_NAME, SteamTurbineBlock::new);
-    public static final DeferredBlock<FootprintPartBlock> STEAM_TURBINE_PART =
-            part("steam_turbine_part", () -> WireworksRegistries.STEAM_TURBINE_FOOTPRINT);
+    public static final DeferredBlock<DrawnPartBlock> STEAM_TURBINE_PART =
+            drawnPart("steam_turbine_part", () -> WireworksRegistries.STEAM_TURBINE_FOOTPRINT);
     public static final DeferredItem<SteamGeneratorItem> STEAM_TURBINE_ITEM =
             ITEMS.registerItem(SteamTurbineBlock.BLOCK_NAME, props -> new SteamGeneratorItem(
                     WireworksRegistries.STEAM_TURBINE_FOOTPRINT, SteamTurbineBlockEntity.spec(), SteamTurbineBlock.BLOCK_NAME, props));
@@ -154,8 +154,8 @@ public final class WireworksRegistries {
                     () -> new BlockEntityType<>(SteamTurbineBlockEntity::new, STEAM_TURBINE.get()));
 
     public static final DeferredBlock<ReactorBlock> REACTOR = BLOCKS.registerBlock(ReactorBlock.BLOCK_NAME, ReactorBlock::new);
-    public static final DeferredBlock<ReactorPartBlock> REACTOR_PART = BLOCKS.registerBlock("reactor_part",
-            props -> new ReactorPartBlock(props.noLootTable(), () -> WireworksRegistries.REACTOR_FOOTPRINT));
+    public static final DeferredBlock<DrawnPartBlock> REACTOR_PART =
+            drawnPart("reactor_part", () -> WireworksRegistries.REACTOR_FOOTPRINT);
     public static final DeferredItem<ReactorItem> REACTOR_ITEM =
             ITEMS.registerItem(ReactorBlock.BLOCK_NAME, ReactorItem::new);
     public static final Footprint REACTOR_FOOTPRINT = Footprint.declare(
@@ -268,6 +268,11 @@ public final class WireworksRegistries {
      */
     private static DeferredBlock<FootprintPartBlock> part(String name, Supplier<Footprint> footprint) {
         return BLOCKS.registerBlock(name, props -> new FootprintPartBlock(props.noLootTable(), footprint));
+    }
+
+    /** A part drawn from its own model, for a machine whose anchor model does not reach it. */
+    private static DeferredBlock<DrawnPartBlock> drawnPart(String name, Supplier<Footprint> footprint) {
+        return BLOCKS.registerBlock(name, props -> new DrawnPartBlock(props.noLootTable(), footprint));
     }
 
     private static <E extends BlockEntity> void energyOnAnchor(RegisterCapabilitiesEvent event,

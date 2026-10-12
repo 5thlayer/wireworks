@@ -13,17 +13,18 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.util.function.Supplier;
 
 /**
- * The Reactor's part block, drawn block by block. Groundworks draws no part, leaving the origin's model
- * to draw the whole, but a block model reaches only a block past its own, and the Reactor stands three
- * tall over a bottom centre anchor. Until its model is drawn, each part wears its own vanilla stand-in.
+ * A part block drawn from its own model. Groundworks draws no part, leaving the origin's model to draw
+ * the whole, but a block model reaches only a block past its own: the Reactor stands three tall over a
+ * bottom centre anchor, and the Boiler and the Steam Turbine have one-block stand-ins for anchor models.
+ * Until their models are drawn, each part wears its own vanilla stand-in.
  */
-final class ReactorPartBlock extends FootprintPartBlock {
+final class DrawnPartBlock extends FootprintPartBlock {
 
-    private final MapCodec<ReactorPartBlock> codec;
+    private final MapCodec<DrawnPartBlock> codec;
 
-    ReactorPartBlock(Properties properties, Supplier<Footprint> footprint) {
+    DrawnPartBlock(Properties properties, Supplier<Footprint> footprint) {
         super(properties, footprint);
-        this.codec = simpleCodec(props -> new ReactorPartBlock(props, footprint));
+        this.codec = simpleCodec(props -> new DrawnPartBlock(props, footprint));
     }
 
     @Override

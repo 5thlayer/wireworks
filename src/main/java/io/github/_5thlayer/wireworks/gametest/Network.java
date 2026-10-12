@@ -10,6 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RenderShape;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.transfer.energy.EnergyHandler;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
@@ -52,6 +53,19 @@ final class Network {
             helper.getLevel().setBlock(positions.get(i), footprint.stateAt(i, facing), Block.UPDATE_ALL);
         }
         return positions;
+    }
+
+    /**
+     * Fails unless every block at {@code positions} is drawn from its own model. A Groundworks part
+     * draws nothing, leaving the anchor's model to draw the whole, so a machine whose anchor model is
+     * one block wide must draw its parts itself.
+     */
+    static void expectDrawn(GameTestHelper helper, String machine, List<BlockPos> positions) {
+        for (BlockPos pos : positions) {
+            if (helper.getLevel().getBlockState(pos).getRenderShape() != RenderShape.MODEL) {
+                helper.fail(machine + "'s block at " + helper.relativePos(pos) + " is not drawn", helper.relativePos(pos));
+            }
+        }
     }
 
     static EnergyHandler energy(GameTestHelper helper, BlockPos pos) {
