@@ -43,7 +43,6 @@ public class BoilerScreen extends AbstractContainerScreen<BoilerMenu> {
     private static final int BURN = 0xFFD9822B;
     private static final int TEXT = 0xFF404040;
     private static final int WHITE = 0xFFFFFFFF;
-    private static final int OUTLINE = 0xFF000000;
 
     private static final int SLOT_SIZE = 16;
     private static final int BAR_HEIGHT = 12;
@@ -165,7 +164,7 @@ public class BoilerScreen extends AbstractContainerScreen<BoilerMenu> {
         recess(graphics, left, top, GAUGE_WIDTH, BAR_HEIGHT);
         graphics.fill(left, top, left + Math.round(GAUGE_WIDTH * fraction), top + BAR_HEIGHT, colour);
         if (font.width(label) <= GAUGE_WIDTH - BAR_PADDING) {
-            outlined(graphics, label, left + (GAUGE_WIDTH - font.width(label)) / 2, top + 2);
+            graphics.text(font, label, left + (GAUGE_WIDTH - font.width(label)) / 2, top + 2, WHITE, true);
         }
     }
 
@@ -185,17 +184,6 @@ public class BoilerScreen extends AbstractContainerScreen<BoilerMenu> {
             graphics.disableScissor();
         }
         Component label = Component.literal(NumberFormat.getIntegerInstance().format(amount) + " mB");
-        outlined(graphics, label, left + 2, top + 2);
-    }
-
-    /**
-     * White text ringed in black, as glow-ink sign text is drawn, so it reads over whatever the gauge
-     * is filled with: a shadow alone is lost on pale steam. The fluid keeps its own colour.
-     */
-    private void outlined(GuiGraphicsExtractor graphics, Component label, int x, int y) {
-        for (int[] offset : new int[][] {{-1, 0}, {1, 0}, {0, -1}, {0, 1}}) {
-            graphics.text(font, label, x + offset[0], y + offset[1], OUTLINE, false);
-        }
-        graphics.text(font, label, x, y, WHITE, false);
+        graphics.text(font, label, left + 2, top + 2, WHITE, true);
     }
 }
