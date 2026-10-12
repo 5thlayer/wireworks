@@ -7,10 +7,15 @@ import io.github._5thlayer.groundworks.Footprint;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -37,8 +42,19 @@ import org.jspecify.annotations.Nullable;
  * <p>Each item of Fission Fuel loaded lasts {@link ReactorSpec#CELL_TICKS} ticks of running, and burnt out it leaves what
  * {@link #remainderOf} says in the depleted slot: a Depleted Fuel Cell for a Fuel Cell. The Reactor stops
  * while that slot has no room for what the Fission Fuel it burns, or would load, leaves.
+ *
+ * <p>A water container in the water slot empties into the water tank, whole, and goes to the bucket
+ * output, as the Boiler's does (see {@link FluidContainers}). Its screen is {@link ReactorMenu}.
  */
-public class ReactorBlockEntity extends BlockEntity implements Container {
+public class ReactorBlockEntity extends BlockEntity implements Container, MenuProvider {
+
+    public static final int DATA_WATER = 0;
+    public static final int DATA_STEAM = 1;
+    public static final int DATA_WATER_CAPACITY = 2;
+    public static final int DATA_STEAM_CAPACITY = 3;
+    public static final int DATA_CELL_TICKS = 4;
+    public static final int DATA_STATUS = 5;
+    public static final int DATA_COUNT = 6;
 
     private static final String WATER = "Water";
     private static final String STEAM = "Steam";
@@ -55,6 +71,33 @@ public class ReactorBlockEntity extends BlockEntity implements Container {
     private int cellTicks;
     /** What the loaded Fission Fuel leaves once burnt, empty when none is loaded or it leaves nothing. */
     private ItemStack leftByBurning = ItemStack.EMPTY;
+
+    /** What the last tick did, for the screen and Jade; worked out again every tick, so never saved. */
+    private ReactorStatus status = ReactorStatus.NO_FUEL;
+
+    private final ContainerData data = new ContainerData() {
+        @Override
+        public int get(int index) {
+            return switch (index) {
+                case DATA_WATER -> water.amount();
+                case DATA_STEAM -> steam.amount();
+                case DATA_WATER_CAPACITY -> water.capacity();
+                case DATA_STEAM_CAPACITY -> steam.capacity();
+                case DATA_CELL_TICKS -> cellTicks;
+                case DATA_STATUS -> status.ordinal();
+                default -> 0;
+            };
+        }
+
+        @Override
+        public void set(int index, int value) {
+        }
+
+        @Override
+        public int getCount() {
+            return DATA_COUNT;
+        }
+    };
 
     public ReactorBlockEntity(BlockPos pos, BlockState state) {
         super(WireworksRegistries.REACTOR_ENTITY.get(), pos, state);
@@ -77,6 +120,10 @@ public class ReactorBlockEntity extends BlockEntity implements Container {
         return itemFace;
     }
 
+    public ContainerData data() {
+        return data;
+    }
+
     /** The water in its tank, in mB, which Jade shows. */
     public int water() {
         return water.amount();
@@ -92,10 +139,16 @@ public class ReactorBlockEntity extends BlockEntity implements Container {
         return cellTicks;
     }
 
+    /** Whether the Reactor ran on its last tick, and if not, why not. */
+    public ReactorStatus status() {
+        return status;
+    }
+
     void serverTick() {
         if (!(level instanceof ServerLevel)) {
             return;
         }
+        emptyWaterContainer();
         ItemStack leaves = cellTicks > 0 ? leftByBurning : remainderOf(items.get(ReactorSlots.FUEL));
         ReactorCycle.Tick tick = ReactorCycle.tick(water.amount(), steam.room(), hasDepletedRoomFor(leaves),
                 ReactorSpec.MILLIBUCKETS_PER_TICK, cellTicks, ReactorSpec.CELL_TICKS, this::loadCell);
@@ -110,7 +163,35 @@ public class ReactorBlockEntity extends BlockEntity implements Container {
             }
             setChanged();
         }
+        status = statusAfter(tick.converted(), leaves);
         passSteamOn();
+    }
+
+    /** Why a tick that converted nothing did not, asked in {@link ReactorCycle}'s order. */
+    private ReactorStatus statusAfter(int converted, ItemStack leaves) {
+        if (converted > 0) {
+            return ReactorStatus.RUNNING;
+        }
+        if (water.amount() < ReactorSpec.MILLIBUCKETS_PER_TICK) {
+            // A water container still in its slot with the tank this low is waiting on the bucket output.
+            return items.get(ReactorSlots.WATER).isEmpty() ? ReactorStatus.NO_WATER : ReactorStatus.BUCKETS_FULL;
+        }
+        if (steam.room() < ReactorSpec.MILLIBUCKETS_PER_TICK) {
+            return ReactorStatus.STEAM_BACKED_UP;
+        }
+        return hasDepletedRoomFor(leaves) ? ReactorStatus.NO_FUEL : ReactorStatus.DEPLETED_FULL;
+    }
+
+    /** Empties one container in the water slot into the water tank and sends it to the bucket output. */
+    private void emptyWaterContainer() {
+        ItemStack stack = items.get(ReactorSlots.WATER);
+        ItemStack after = FluidContainers.emptyInto(stack, items.get(ReactorSlots.BUCKETS), water);
+        if (after == null) {
+            return;
+        }
+        stack.shrink(1);
+        items.set(ReactorSlots.BUCKETS, after);
+        setChanged();
     }
 
     private boolean loadCell() {
@@ -176,6 +257,19 @@ public class ReactorBlockEntity extends BlockEntity implements Container {
         return !stack.isEmpty() && stack.is(WireworksTags.FISSION_FUEL);
     }
 
+    /**
+     * Whether {@code slot} takes {@code stack}: Fission Fuel in the fuel slot, a water container in the
+     * water slot, and nothing in the depleted slot or the bucket output, which only the Reactor fills.
+     * The menu asks this too, on either side.
+     */
+    public static boolean accepts(int slot, ItemStack stack) {
+        return switch (slot) {
+            case ReactorSlots.FUEL -> isFissionFuel(stack);
+            case ReactorSlots.WATER -> FluidContainers.holdsWater(stack);
+            default -> false;
+        };
+    }
+
     @Override
     public int getContainerSize() {
         return ReactorSlots.SIZE;
@@ -217,24 +311,34 @@ public class ReactorBlockEntity extends BlockEntity implements Container {
         return Container.stillValidBlockEntity(this, player);
     }
 
-    /** Fuel goes in its slot; nothing is ever placed in the depleted slot, which only the Reactor fills. */
     @Override
     public boolean canPlaceItem(int slot, ItemStack stack) {
-        return slot == ReactorSlots.FUEL && isFissionFuel(stack);
+        return accepts(slot, stack);
     }
 
     /**
-     * Only depleted cells come out. A hopper under the anchor reaches this container itself rather
-     * than the item face, and would otherwise pull the fuel the Reactor is about to burn.
+     * Only the depleted slot and the bucket output come out. A hopper under the anchor reaches this
+     * container itself rather than the item face, and would otherwise pull the fuel the Reactor is about
+     * to burn.
      */
     @Override
     public boolean canTakeItem(Container target, int slot, ItemStack stack) {
-        return slot == ReactorSlots.DEPLETED;
+        return !ReactorSlots.isInput(slot);
     }
 
     @Override
     public void clearContent() {
         items.clear();
+    }
+
+    @Override
+    public Component getDisplayName() {
+        return Component.translatable(getBlockState().getBlock().getDescriptionId());
+    }
+
+    @Override
+    public @Nullable AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
+        return new ReactorMenu(containerId, playerInventory, this, data);
     }
 
     @Override

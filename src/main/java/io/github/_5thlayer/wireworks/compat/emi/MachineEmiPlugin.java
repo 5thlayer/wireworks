@@ -9,9 +9,10 @@ import dev.emi.emi.api.EmiRegistry;
 import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.stack.EmiStackInteraction;
 import io.github._5thlayer.wireworks.client.BoilerScreen;
+import io.github._5thlayer.wireworks.client.ReactorScreen;
 
 /**
- * The Boiler screen's ghosts in EMI: the recipe and usage keys work on the faded stack in an empty
+ * The Boiler's and the Reactor's screens' ghosts in EMI: the recipe and usage keys work on the faded stack in an empty
  * input slot, as on a real one, as on Fieldworks' Harvester's. A ghost is not clickable, so a click
  * on its slot reaches the slot: EMI otherwise takes the left click to show recipes, and a stack in
  * hand could never be put in an empty slot.
@@ -20,11 +21,14 @@ import io.github._5thlayer.wireworks.client.BoilerScreen;
  * package names an EMI type, so the Library loads without it.
  */
 @EmiEntrypoint
-public final class BoilerEmiPlugin implements EmiPlugin {
+public final class MachineEmiPlugin implements EmiPlugin {
 
     @Override
     public void register(EmiRegistry registry) {
         registry.addStackProvider(BoilerScreen.class, (screen, x, y) -> screen.ghostAt(x, y)
+                .map(ghost -> new EmiStackInteraction(EmiStack.of(ghost.stack()), null, false))
+                .orElse(EmiStackInteraction.EMPTY));
+        registry.addStackProvider(ReactorScreen.class, (screen, x, y) -> screen.ghostAt(x, y)
                 .map(ghost -> new EmiStackInteraction(EmiStack.of(ghost.stack()), null, false))
                 .orElse(EmiStackInteraction.EMPTY));
     }

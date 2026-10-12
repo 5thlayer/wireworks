@@ -15,7 +15,7 @@ import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.fluid.FluidTintSources;
 
 /**
- * The client half of the Boiler and the steams: the Boiler's screen and how each steam draws in a tank
+ * The client half of the Boiler, the Reactor and the steams: their screens and how each steam draws in a tank
  * or a pipe. Superheated Steam wears Steam's sprite, tinted warm, until it has its own.
  */
 public final class SteamClient {
@@ -37,6 +37,7 @@ public final class SteamClient {
 
     private static void registerScreens(RegisterMenuScreensEvent event) {
         event.register(WireworksRegistries.BOILER_MENU.get(), BoilerScreen::new);
+        event.register(WireworksRegistries.REACTOR_MENU.get(), ReactorScreen::new);
     }
 
     private static void registerFluidModels(RegisterFluidModelsEvent event) {

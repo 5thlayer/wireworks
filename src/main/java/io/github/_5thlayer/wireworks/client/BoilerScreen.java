@@ -60,10 +60,8 @@ public class BoilerScreen extends AbstractContainerScreen<BoilerMenu> {
         int left = leftPos + GAUGE_X;
         MachineDraw.bar(graphics, font, left, topPos + gaugeY(BoilerMenu.FUEL_Y), GAUGE_WIDTH, MachineDraw.BAR_HEIGHT,
                 menu.fuelLevel(), BURN, burnLabel());
-        MachineDraw.gauge(graphics, font, left, topPos + gaugeY(BoilerMenu.WATER_Y), GAUGE_WIDTH,
-                new FluidStack(Fluids.WATER, menu.water()), menu.waterCapacity());
-        MachineDraw.gauge(graphics, font, left, topPos + gaugeY(BoilerMenu.STEAM_Y), GAUGE_WIDTH,
-                new FluidStack(SteamFluids.STEAM_SOURCE.get(), menu.steam()), menu.steamCapacity());
+        MachineDraw.gauge(graphics, font, left, topPos + gaugeY(BoilerMenu.WATER_Y), GAUGE_WIDTH, water(), menu.waterCapacity());
+        MachineDraw.gauge(graphics, font, left, topPos + gaugeY(BoilerMenu.STEAM_Y), GAUGE_WIDTH, steam(), menu.steamCapacity());
     }
 
     @Override
@@ -87,14 +85,22 @@ public class BoilerScreen extends AbstractContainerScreen<BoilerMenu> {
         } else if (overGauge(BoilerMenu.FUEL_Y, mouseX, mouseY)) {
             graphics.setComponentTooltipForNextFrame(font, fuelTooltip(), mouseX, mouseY);
         } else if (overGauge(BoilerMenu.WATER_Y, mouseX, mouseY)) {
-            graphics.setComponentTooltipForNextFrame(font, List.of(Component.translatable(
-                    "tooltip.wireworks.boiler.water", menu.water(), menu.waterCapacity())), mouseX, mouseY);
+            MachineDraw.fluidTooltip(graphics, font, Component.translatable("tooltip.wireworks.boiler.jade.tank.water"),
+                    water(), menu.waterCapacity(), mouseX, mouseY);
         } else if (overGauge(BoilerMenu.STEAM_Y, mouseX, mouseY)) {
-            graphics.setComponentTooltipForNextFrame(font, List.of(Component.translatable(
-                    "tooltip.wireworks.boiler.steam", menu.steam(), menu.steamCapacity())), mouseX, mouseY);
+            MachineDraw.fluidTooltip(graphics, font, Component.translatable("tooltip.wireworks.boiler.jade.tank.steam"),
+                    steam(), menu.steamCapacity(), mouseX, mouseY);
         } else if (MachineDraw.over(leftPos + MachineDraw.MARGIN, topPos + STATUS_Y, statusWidth(), font.lineHeight, mouseX, mouseY)) {
             MachineDraw.wholeOnHover(graphics, font, menu.status().line(), statusWidth(), mouseX, mouseY);
         }
+    }
+
+    private FluidStack water() {
+        return new FluidStack(Fluids.WATER, menu.water());
+    }
+
+    private FluidStack steam() {
+        return new FluidStack(SteamFluids.STEAM_SOURCE.get(), menu.steam());
     }
 
     private static int gaugeY(int slotY) {

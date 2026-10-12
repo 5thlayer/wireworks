@@ -175,6 +175,9 @@ public final class WireworksRegistries {
             REACTOR_ENTITY = BLOCK_ENTITIES.register("reactor",
                     () -> new BlockEntityType<>(ReactorBlockEntity::new, REACTOR.get()));
 
+    public static final Supplier<MenuType<ReactorMenu>> REACTOR_MENU =
+            MENUS.register("reactor", () -> new MenuType<>(ReactorMenu::new, FeatureFlags.DEFAULT_FLAGS));
+
     /** The Fuel Cell, the Fission Fuel Wireworks ships: crafted from a Fissile, it runs a Reactor for 4,000 ticks. */
     public static final DeferredItem<Item> FUEL_CELL = ITEMS.registerSimpleItem("fuel_cell");
 

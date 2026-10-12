@@ -14,9 +14,6 @@ import io.github._5thlayer.wireworks.TransmissionPoleBlockEntity;
 import io.github._5thlayer.wireworks.Wireworks;
 import io.github._5thlayer.wireworks.NetworkReading;
 import io.github._5thlayer.wireworks.PoleColumn;
-import io.github._5thlayer.wireworks.ReactorBlock;
-import io.github._5thlayer.wireworks.ReactorBlockEntity;
-import io.github._5thlayer.wireworks.ReactorSpec;
 import io.github._5thlayer.wireworks.SolarPanelBlock;
 import io.github._5thlayer.wireworks.SteamEngineBlock;
 import io.github._5thlayer.wireworks.SteamEngineBlockEntity;
@@ -44,7 +41,7 @@ import snownee.jade.api.config.IPluginConfig;
 
 /**
  * What a pole is doing right now, on the HUD, and the same for the Solar Panel, the Accumulator,
- * the Steam Engine, the Steam Turbine and the Reactor the Library ships.
+ * the Steam Engine and the Steam Turbine the Library ships. The Boiler and the Reactor have plugins of their own.
  *
  * <p>The item tooltip states what a pole <em>is</em> -- its footprint, that it is wireless, that the
  * area is measured at the base. This is the other half: the two numbers that can only be read from
@@ -91,9 +88,6 @@ public class PoleJadePlugin implements IWailaPlugin {
     private static final String ACCUMULATOR_STATUS = "AccumulatorStatus";
     private static final String STEAM_GENERATOR_STATUS = "SteamEngineStatus";
     private static final String STEAM_GENERATOR_OUTPUT = "SteamGeneratorOutput";
-    private static final String REACTOR_WATER = "ReactorWater";
-    private static final String REACTOR_STEAM = "ReactorSteam";
-    private static final String REACTOR_CELL_TICKS = "ReactorCellTicks";
 
     private static final Identifier SOLAR_UID =
             Identifier.fromNamespaceAndPath(Wireworks.MOD_ID, "solar_panel");
@@ -103,8 +97,6 @@ public class PoleJadePlugin implements IWailaPlugin {
             Identifier.fromNamespaceAndPath(Wireworks.MOD_ID, "steam_engine");
     private static final Identifier STEAM_TURBINE_UID =
             Identifier.fromNamespaceAndPath(Wireworks.MOD_ID, "steam_turbine");
-    private static final Identifier REACTOR_UID =
-            Identifier.fromNamespaceAndPath(Wireworks.MOD_ID, "reactor");
 
     /**
      * The numbers live on the server, so they have to be asked for.
@@ -344,49 +336,6 @@ public class PoleJadePlugin implements IWailaPlugin {
     /** As the Engine's, and what the Turbine made last tick. */
     private static final IBlockComponentProvider STEAM_TURBINE_TOOLTIP = steamGeneratorTooltip(STEAM_TURBINE_UID, true);
 
-    private static final IServerDataProvider<BlockAccessor> REACTOR_DATA = new IServerDataProvider<>() {
-        @Override
-        public void appendServerData(CompoundTag tag, BlockAccessor accessor) {
-            if (accessor.getBlockEntity() instanceof ReactorBlockEntity reactor) {
-                tag.putInt(REACTOR_WATER, reactor.water());
-                tag.putInt(REACTOR_STEAM, reactor.steam());
-                tag.putInt(REACTOR_CELL_TICKS, reactor.cellTicksLeft());
-            }
-        }
-
-        @Override
-        public Identifier getUid() {
-            return REACTOR_UID;
-        }
-    };
-
-    /**
-     * Its two tanks, which answer on no face of the anchor Jade reads, and the loaded cell's ticks of
-     * running left. The fuel and depleted slots are Jade's own item row.
-     */
-    private static final IBlockComponentProvider REACTOR_TOOLTIP = new IBlockComponentProvider() {
-        @Override
-        public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
-            CompoundTag data = accessor.getServerData();
-            if (!data.contains(REACTOR_CELL_TICKS)) {
-                return;
-            }
-            tooltip.add(Component.translatable("tooltip.wireworks.reactor.jade.water",
-                    data.getIntOr(REACTOR_WATER, 0), ReactorSpec.WATER_CAPACITY));
-            tooltip.add(Component.translatable("tooltip.wireworks.reactor.jade.steam",
-                    data.getIntOr(REACTOR_STEAM, 0), ReactorSpec.STEAM_CAPACITY));
-            int ticks = data.getIntOr(REACTOR_CELL_TICKS, 0);
-            tooltip.add(ticks > 0
-                    ? Component.translatable("tooltip.wireworks.reactor.jade.cell", ticks).withStyle(ChatFormatting.GREEN)
-                    : Component.translatable("tooltip.wireworks.reactor.jade.no_cell").withStyle(ChatFormatting.GRAY));
-        }
-
-        @Override
-        public Identifier getUid() {
-            return REACTOR_UID;
-        }
-    };
-
     private static IServerDataProvider<BlockAccessor> steamGeneratorData(Identifier uid) {
         return new IServerDataProvider<>() {
             @Override
@@ -435,7 +384,6 @@ public class PoleJadePlugin implements IWailaPlugin {
         registration.registerBlockDataProvider(ACCUMULATOR_DATA, AccumulatorBlockEntity.class);
         registration.registerBlockDataProvider(STEAM_ENGINE_DATA, SteamEngineBlockEntity.class);
         registration.registerBlockDataProvider(STEAM_TURBINE_DATA, SteamTurbineBlockEntity.class);
-        registration.registerBlockDataProvider(REACTOR_DATA, ReactorBlockEntity.class);
     }
 
     @Override
@@ -447,6 +395,5 @@ public class PoleJadePlugin implements IWailaPlugin {
         registration.registerBlockComponent(ACCUMULATOR_TOOLTIP, AccumulatorBlock.class);
         registration.registerBlockComponent(STEAM_ENGINE_TOOLTIP, SteamEngineBlock.class);
         registration.registerBlockComponent(STEAM_TURBINE_TOOLTIP, SteamTurbineBlock.class);
-        registration.registerBlockComponent(REACTOR_TOOLTIP, ReactorBlock.class);
     }
 }

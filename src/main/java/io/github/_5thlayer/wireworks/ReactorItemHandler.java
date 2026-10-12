@@ -9,8 +9,9 @@ import net.neoforged.neoforge.transfer.item.VanillaContainerWrapper;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 /**
- * The Reactor's item face, for every side: Fission Fuel in, Depleted Fuel Cells out, and nothing the
- * other way. The guarded base keeps a slot-less call from walking past either refusal.
+ * The Reactor's item face, for every side: Fission Fuel and water containers in, depleted cells and
+ * emptied containers out, and nothing the other way. The guarded base keeps a slot-less call from
+ * walking past either refusal; which slot an item may go in is the Reactor's {@code canPlaceItem}.
  */
 final class ReactorItemHandler extends GuardedResourceHandler<ItemResource> {
 
@@ -20,11 +21,11 @@ final class ReactorItemHandler extends GuardedResourceHandler<ItemResource> {
 
     @Override
     public int insert(int index, ItemResource resource, int amount, TransactionContext transaction) {
-        return index == ReactorSlots.FUEL ? super.insert(index, resource, amount, transaction) : 0;
+        return ReactorSlots.isInput(index) ? super.insert(index, resource, amount, transaction) : 0;
     }
 
     @Override
     public int extract(int index, ItemResource resource, int amount, TransactionContext transaction) {
-        return index == ReactorSlots.DEPLETED ? super.extract(index, resource, amount, transaction) : 0;
+        return ReactorSlots.isInput(index) ? 0 : super.extract(index, resource, amount, transaction);
     }
 }

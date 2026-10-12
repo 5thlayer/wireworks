@@ -5,8 +5,11 @@ package io.github._5thlayer.wireworks.gametest;
 
 import java.util.List;
 
+import io.github._5thlayer.libworks.ghost.Ghosts;
 import io.github._5thlayer.wireworks.ReactorBlockEntity;
+import io.github._5thlayer.wireworks.ReactorMenu;
 import io.github._5thlayer.wireworks.ReactorSlots;
+import io.github._5thlayer.wireworks.ReactorStatus;
 import io.github._5thlayer.wireworks.SteamFluids;
 import io.github._5thlayer.wireworks.SteamTurbineBlockEntity;
 import io.github._5thlayer.wireworks.WireworksRegistries;
@@ -15,6 +18,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
@@ -76,6 +80,14 @@ final class ReactorTests {
                     Network.footprint(helper, WireworksRegistries.REACTOR_FOOTPRINT, ANCHOR, FACING));
             helper.succeed();
         });
+        tests.test("reactor_hoppers_feed_a_water_bucket_and_take_the_empty_one", 60, ReactorTests::hoppersRouteBuckets);
+        tests.test("reactor_slots_take_only_what_they_are_for", 20, ReactorTests::slotsTakeWhatTheyAreFor);
+        tests.test("reactor_menu_shift_click_sends_fuel_and_water_home_and_nothing_to_an_output", 20, ReactorTests::shiftClick);
+        tests.test("reactor_menu_ghosts_show_what_each_slot_takes", 20, ReactorTests::ghosts);
+        tests.test("reactor_item_face_puts_a_water_bucket_in_its_slot_and_gives_the_empty_one", 20, ReactorTests::itemFaceRoutesBuckets);
+        tests.test("reactor_empties_a_water_bucket_into_its_tank_and_the_bucket_to_the_bucket_output", 20, ReactorTests::emptiesAWaterBucket);
+        tests.test("reactor_holds_a_water_bucket_while_its_bucket_output_has_no_room", 20, ReactorTests::holdsAWaterBucket);
+        tests.test("reactor_says_why_it_is_not_running", 20, ReactorTests::saysWhy);
         tests.test("reactor_ports_open_onto_their_outer_faces_whatever_its_facing", 20, ReactorTests::portsOpenOutward);
         tests.test("reactor_water_ports_take_water_only_and_the_steam_port_gives_only", 20, ReactorTests::portsTakeAndGive);
     }
@@ -271,6 +283,7 @@ final class ReactorTests {
                     if (reactor(helper).water() != held[1]) {
                         helper.fail("a reactor with no room spent water", ANCHOR);
                     }
+                    expectStatus(helper, ReactorStatus.STEAM_BACKED_UP);
                     if (extract(fluidAt(helper, STEAM_PORT, STEAM_SIDE), superheated(), 100) != 100) {
                         helper.fail("a pipe could not draw 100 mB from the full steam tank", ANCHOR);
                     }
@@ -359,6 +372,7 @@ final class ReactorTests {
                     if (reactor(helper).cellTicksLeft() != held[0]) {
                         helper.fail("a reactor with a full depleted slot kept burning", ANCHOR);
                     }
+                    expectStatus(helper, ReactorStatus.DEPLETED_FULL);
                     ResourceHandler<ItemResource> face =
                             helper.getLevel().getCapability(Capabilities.Item.BLOCK, helper.absolutePos(STEAM_PORT), Direction.UP);
                     try (Transaction transaction = Transaction.openRoot()) {
@@ -453,6 +467,165 @@ final class ReactorTests {
                     }
                 })
                 .thenSucceed();
+    }
+
+    /**
+     * Real hoppers on a Reactor raised a block, with no fuel so it never runs: one above the top centre
+     * pushes a water bucket in, which empties into the tank, and the one under the anchor pulls the empty
+     * bucket out of the bucket output.
+     */
+    private static void hoppersRouteBuckets(GameTestHelper helper) {
+        BlockPos raised = ANCHOR.above();
+        Network.footprint(helper, WireworksRegistries.REACTOR_FOOTPRINT, raised, FACING);
+        BlockPos above = raised.above(3);
+        BlockPos underAnchor = ANCHOR;
+        helper.setBlock(above, Blocks.HOPPER.defaultBlockState());
+        helper.setBlock(underAnchor, Blocks.HOPPER.defaultBlockState());
+        helper.getBlockEntity(above, HopperBlockEntity.class).setItem(0, new ItemStack(Items.WATER_BUCKET));
+        ReactorBlockEntity reactor = helper.getBlockEntity(raised, ReactorBlockEntity.class);
+        helper.startSequence()
+                .thenWaitUntil(() -> {
+                    helper.assertValueEqual(reactor.water(), 1_000, "water in the tank");
+                    helper.assertTrue(helper.getBlockEntity(underAnchor, HopperBlockEntity.class).getItem(0).is(Items.BUCKET),
+                            "the hopper under the anchor has not pulled the empty bucket yet");
+                })
+                .thenExecute(() -> {
+                    helper.assertTrue(reactor.getItem(ReactorSlots.WATER).isEmpty(), "the water slot still holds a bucket");
+                    helper.assertTrue(reactor.getItem(ReactorSlots.BUCKETS).isEmpty(), "the bucket output still holds a bucket");
+                })
+                .thenSucceed();
+    }
+
+    /** Fission Fuel in the fuel slot, a water container in the water slot, and nothing in either output. */
+    private static void slotsTakeWhatTheyAreFor(GameTestHelper helper) {
+        place(helper);
+        Object[][] cases = {
+                {WireworksRegistries.FUEL_CELL.get(), ReactorSlots.FUEL},
+                {Items.WATER_BUCKET, ReactorSlots.WATER},
+                {Items.BUCKET, -1},
+                {WireworksRegistries.DEPLETED_FUEL_CELL.get(), -1},
+                {Items.GLOWSTONE_DUST, -1},
+        };
+        for (Object[] each : cases) {
+            ItemStack stack = new ItemStack((Item) each[0]);
+            for (int slot = 0; slot < ReactorSlots.SIZE; slot++) {
+                boolean expected = slot == (int) each[1];
+                helper.assertValueEqual(reactor(helper).canPlaceItem(slot, stack), expected, "slot " + slot + " taking " + stack);
+            }
+        }
+        helper.succeed();
+    }
+
+    private static ReactorMenu menu(GameTestHelper helper, ListeningPlayer player) {
+        return new ReactorMenu(0, player.getInventory(), reactor(helper), reactor(helper).data());
+    }
+
+    /** Shift-click sends a Fuel Cell to the fuel slot and a water bucket to the water slot, and an empty bucket nowhere. */
+    private static void shiftClick(GameTestHelper helper) {
+        place(helper);
+        reactor(helper).setItem(ReactorSlots.BUCKETS, new ItemStack(Items.BUCKET));
+        ListeningPlayer player = new ListeningPlayer(helper, ANCHOR.above(3));
+        player.getInventory().setItem(0, cells(3));
+        player.getInventory().setItem(1, new ItemStack(Items.WATER_BUCKET));
+        player.getInventory().setItem(2, new ItemStack(Items.BUCKET, 15));
+        ReactorMenu menu = menu(helper, player);
+        int hotbarFirst = ReactorSlots.SIZE + 27;
+        for (int i = 0; i < 3; i++) {
+            menu.quickMoveStack(player, hotbarFirst + i);
+        }
+        helper.assertValueEqual(reactor(helper).getItem(ReactorSlots.FUEL).getCount(), 3, "fuel cells in the fuel slot");
+        helper.assertTrue(reactor(helper).getItem(ReactorSlots.WATER).is(Items.WATER_BUCKET), "the water bucket is not in the water slot");
+        helper.assertValueEqual(reactor(helper).getItem(ReactorSlots.BUCKETS).getCount(), 1, "buckets in the bucket output");
+        helper.assertTrue(reactor(helper).getItem(ReactorSlots.DEPLETED).isEmpty(), "something reached the depleted slot");
+        helper.succeed();
+    }
+
+    /** The fuel and water slots' ghosts are what each takes; the depleted slot's is the Depleted Fuel Cell the screen adds. */
+    private static void ghosts(GameTestHelper helper) {
+        place(helper);
+        ReactorMenu menu = menu(helper, new ListeningPlayer(helper, ANCHOR.above(3)));
+        List<ItemStack> fuel = Ghosts.accepted(menu.slots.get(ReactorSlots.FUEL));
+        helper.assertTrue(fuel.stream().anyMatch(stack -> stack.is(WireworksRegistries.FUEL_CELL.get())), "the fuel slot's ghosts lack the fuel cell");
+        helper.assertFalse(fuel.stream().anyMatch(stack -> stack.is(Items.WATER_BUCKET)), "the fuel slot's ghosts show a water bucket");
+        List<ItemStack> water = Ghosts.accepted(menu.slots.get(ReactorSlots.WATER));
+        helper.assertTrue(water.stream().anyMatch(stack -> stack.is(Items.WATER_BUCKET)), "the water slot's ghosts lack the water bucket");
+        helper.assertTrue(Ghosts.accepted(menu.slots.get(ReactorSlots.DEPLETED)).isEmpty(), "the depleted slot takes something");
+        helper.assertTrue(Ghosts.accepted(menu.slots.get(ReactorSlots.BUCKETS)).isEmpty(), "the bucket output takes something");
+        helper.succeed();
+    }
+
+    /** A pipe that names no slot puts a water bucket in the water slot, takes the empty one out, and never the full one. */
+    private static void itemFaceRoutesBuckets(GameTestHelper helper) {
+        place(helper);
+        reactor(helper).setItem(ReactorSlots.BUCKETS, new ItemStack(Items.BUCKET));
+        ResourceHandler<ItemResource> face = helper.getLevel().getCapability(Capabilities.Item.BLOCK, helper.absolutePos(STEAM_PORT), null);
+        ItemResource waterBucket = ItemResource.of(new ItemStack(Items.WATER_BUCKET));
+        ItemResource bucket = ItemResource.of(new ItemStack(Items.BUCKET));
+        try (Transaction transaction = Transaction.openRoot()) {
+            helper.assertValueEqual(face.insert(waterBucket, 1, transaction), 1, "water buckets put in");
+            helper.assertValueEqual(face.insert(bucket, 1, transaction), 0, "empty buckets put in");
+            helper.assertValueEqual(face.extract(bucket, 1, transaction), 1, "empty buckets drawn slot-less");
+            helper.assertValueEqual(face.extract(waterBucket, 1, transaction), 0, "water buckets drawn back out");
+            transaction.commit();
+        }
+        helper.assertTrue(reactor(helper).getItem(ReactorSlots.WATER).is(Items.WATER_BUCKET), "the water bucket is not in the water slot");
+        helper.succeed();
+    }
+
+    private static void emptiesAWaterBucket(GameTestHelper helper) {
+        place(helper);
+        reactor(helper).setItem(ReactorSlots.WATER, new ItemStack(Items.WATER_BUCKET));
+        helper.startSequence()
+                .thenWaitUntil(() -> helper.assertValueEqual(reactor(helper).water(), 1_000, "water in the tank"))
+                .thenExecute(() -> {
+                    helper.assertTrue(reactor(helper).getItem(ReactorSlots.WATER).isEmpty(), "the water slot still holds a bucket");
+                    helper.assertTrue(reactor(helper).getItem(ReactorSlots.BUCKETS).is(Items.BUCKET), "the empty bucket is not in the bucket output");
+                    helper.assertTrue(reactor(helper).getItem(ReactorSlots.DEPLETED).isEmpty(), "a bucket reached the depleted slot");
+                })
+                .thenSucceed();
+    }
+
+    /** With something else in the bucket output, the water bucket waits, and the Reactor says why. */
+    private static void holdsAWaterBucket(GameTestHelper helper) {
+        place(helper);
+        reactor(helper).setItem(ReactorSlots.WATER, new ItemStack(Items.WATER_BUCKET));
+        reactor(helper).setItem(ReactorSlots.BUCKETS, new ItemStack(Items.STONE));
+        helper.startSequence()
+                .thenIdle(WINDOW)
+                .thenExecute(() -> {
+                    helper.assertValueEqual(reactor(helper).water(), 0, "water in the tank");
+                    helper.assertTrue(reactor(helper).getItem(ReactorSlots.WATER).is(Items.WATER_BUCKET), "the water bucket left its slot");
+                    // Not "no water": the water is there, waiting on the bucket output.
+                    expectStatus(helper, ReactorStatus.BUCKETS_FULL);
+                })
+                .thenSucceed();
+    }
+
+    /**
+     * The status the screen and Jade name: no water, then no fuel, then running. Steam backed up and
+     * a full depleted slot are asserted where those stops are set up, and a full bucket output above.
+     */
+    private static void saysWhy(GameTestHelper helper) {
+        place(helper);
+        helper.startSequence()
+                .thenIdle(1)
+                .thenExecute(() -> {
+                    expectStatus(helper, ReactorStatus.NO_WATER);
+                    fillWater(helper);
+                })
+                .thenIdle(1)
+                .thenExecute(() -> {
+                    expectStatus(helper, ReactorStatus.NO_FUEL);
+                    reactor(helper).setItem(ReactorSlots.FUEL, cells(1));
+                })
+                .thenIdle(1)
+                .thenExecute(() -> expectStatus(helper, ReactorStatus.RUNNING))
+                .thenSucceed();
+    }
+
+    private static void expectStatus(GameTestHelper helper, ReactorStatus expected) {
+        helper.assertValueEqual(reactor(helper).status(), expected, "the Reactor's status");
+        helper.assertValueEqual(reactor(helper).data().get(ReactorBlockEntity.DATA_STATUS), expected.ordinal(), "the status sent to the menu");
     }
 
     /**

@@ -5,16 +5,20 @@ package io.github._5thlayer.wireworks;
 
 import io.github._5thlayer.groundworks.Footprint;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 import org.jspecify.annotations.Nullable;
 
 /**
  * The Reactor's anchor: the bottom centre of its 3x3x3, walled in by its parts. Fuel reaches it, and
- * its depleted cells leave it, through every block of the footprint.
+ * its depleted cells leave it, through every block of the footprint, and a click on any of them opens
+ * its screen.
  */
 public class ReactorBlock extends EnergyAnchorBlock {
 
@@ -45,5 +49,18 @@ public class ReactorBlock extends EnergyAnchorBlock {
                 reactor.serverTick();
             }
         };
+    }
+
+    /** A plain right-click opens the Reactor, since it has slots. */
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player,
+                                               BlockHitResult hit) {
+        if (level.isClientSide()) {
+            return InteractionResult.SUCCESS;
+        }
+        if (level.getBlockEntity(pos) instanceof ReactorBlockEntity reactor) {
+            player.openMenu(reactor);
+        }
+        return InteractionResult.CONSUME;
     }
 }
