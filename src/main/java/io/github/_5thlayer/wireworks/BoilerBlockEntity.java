@@ -18,6 +18,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
@@ -26,8 +27,12 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.ResourceHandlerUtil;
+import net.neoforged.neoforge.transfer.access.ItemAccess;
 import net.neoforged.neoforge.transfer.fluid.FluidResource;
 import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -128,6 +133,7 @@ public class BoilerBlockEntity extends BlockEntity implements Container, MenuPro
         if (!(level instanceof ServerLevel)) {
             return;
         }
+        exchange(BoilerSlots.WATER);
         int converted = BoilerCycle.tick(water.amount(), steam.room(), BoilerSpec.MILLIBUCKETS_PER_TICK,
                 BoilerSpec.JOULES_PER_TICK, fuel, this::light);
         if (converted > 0) {
@@ -136,7 +142,64 @@ public class BoilerBlockEntity extends BlockEntity implements Container, MenuPro
             steam.fill(steam.amount() + converted);
             setChanged();
         }
+        exchange(BoilerSlots.STEAM);
         passSteamOn();
+    }
+
+    /**
+     * Empties one container in the water slot into the water tank, or fills one in the steam slot from
+     * the steam tank, and sends it to the output. It goes whole or not at all: a bucket waits while
+     * the tank has too little room or too little steam for all of it, or while the output has no room
+     * for what it becomes. The swap runs on a copy of the two slots inside a transaction, as the
+     * Boiler's own slots are not transactional, and lands only once it has committed.
+     */
+    private void exchange(int slot) {
+        ItemStack stack = items.get(slot);
+        if (stack.isEmpty()) {
+            return;
+        }
+        ItemStacksResourceHandler swap = new ItemStacksResourceHandler(
+                NonNullList.of(ItemStack.EMPTY, stack.copyWithCount(1), items.get(BoilerSlots.OUTPUT).copy()));
+        ResourceHandler<FluidResource> container = new SwapAccess(swap).getCapability(Capabilities.Fluid.ITEM);
+        if (container == null) {
+            return;
+        }
+        try (Transaction transaction = Transaction.openRoot()) {
+            int moved = slot == BoilerSlots.WATER
+                    ? ResourceHandlerUtil.move(container, water, resource -> true, Integer.MAX_VALUE, transaction)
+                    : ResourceHandlerUtil.move(steam, container, resource -> true, Integer.MAX_VALUE, transaction);
+            if (moved <= 0 || swap.getAmountAsInt(0) != 0) {
+                return;
+            }
+            transaction.commit();
+        }
+        stack.shrink(1);
+        items.set(BoilerSlots.OUTPUT, swap.getResource(1).toStack(swap.getAmountAsInt(1)));
+        setChanged();
+    }
+
+    /** The container being swapped, at index 0 of a copy, and the output it goes to, at index 1. */
+    private record SwapAccess(ItemStacksResourceHandler swap) implements ItemAccess {
+
+        @Override
+        public ItemResource getResource() {
+            return swap.getResource(0);
+        }
+
+        @Override
+        public int getAmount() {
+            return swap.getAmountAsInt(0);
+        }
+
+        @Override
+        public int insert(ItemResource resource, int amount, TransactionContext transaction) {
+            return swap.insert(1, resource, amount, transaction);
+        }
+
+        @Override
+        public int extract(ItemResource resource, int amount, TransactionContext transaction) {
+            return swap.extract(0, resource, amount, transaction);
+        }
     }
 
     /** Offers the steam to whatever stands against the steam port. */
@@ -191,11 +254,56 @@ public class BoilerBlockEntity extends BlockEntity implements Container, MenuPro
     }
 
     private long fuelValue(ItemStack stack) {
+        return fuelValue(level, stack);
+    }
+
+    private static long fuelValue(@Nullable Level level, ItemStack stack) {
         return level == null || stack.isEmpty() ? 0L : BoilerFuel.joules(stack.getBurnTime(null, level.fuelValues()));
     }
 
-    public boolean isFuel(ItemStack stack) {
-        return fuelValue(stack) > 0L;
+    /**
+     * Whether {@code slot} takes {@code stack}: fuel in the fuel slot, a container of water in the water
+     * slot, an empty container steam can go into in the steam slot, and nothing in the output, which only
+     * the Boiler fills. The menu asks this too, on either side.
+     */
+    public static boolean accepts(@Nullable Level level, int slot, ItemStack stack) {
+        return switch (slot) {
+            case BoilerSlots.FUEL -> fuelValue(level, stack) > 0L;
+            case BoilerSlots.WATER -> holdsWater(stack);
+            case BoilerSlots.STEAM -> takesSteam(stack);
+            default -> false;
+        };
+    }
+
+    private static @Nullable ResourceHandler<FluidResource> fluidsIn(ItemStack stack) {
+        return stack.isEmpty() ? null : ItemAccess.forStack(stack.copyWithCount(1)).getCapability(Capabilities.Fluid.ITEM);
+    }
+
+    private static boolean holdsWater(ItemStack stack) {
+        ResourceHandler<FluidResource> container = fluidsIn(stack);
+        if (container == null) {
+            return false;
+        }
+        for (int index = 0; index < container.size(); index++) {
+            if (container.getAmountAsLong(index) > 0 && container.getResource(index).getFluid() == Fluids.WATER) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean takesSteam(ItemStack stack) {
+        ResourceHandler<FluidResource> container = fluidsIn(stack);
+        if (container == null || !ResourceHandlerUtil.isEmpty(container)) {
+            return false;
+        }
+        FluidResource steam = FluidResource.of(SteamFluids.STEAM_SOURCE.get());
+        for (int index = 0; index < container.size(); index++) {
+            if (container.getCapacityAsLong(index, steam) > 0 && container.isValid(index, steam)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -239,10 +347,9 @@ public class BoilerBlockEntity extends BlockEntity implements Container, MenuPro
         return Container.stillValidBlockEntity(this, player);
     }
 
-    /** Fuel goes in its slot; nothing is ever placed in the output, which only the Boiler fills. */
     @Override
     public boolean canPlaceItem(int slot, ItemStack stack) {
-        return slot == BoilerSlots.FUEL && isFuel(stack);
+        return accepts(level, slot, stack);
     }
 
     /**

@@ -25,7 +25,7 @@ The Boiler and the Steam Engine arrive with art drawn for FactoryWorks Core, 5th
 
 ## Vanilla stand-ins
 
-The Steam Turbine has no art of its own yet. Its anchor wears vanilla's piston top on its front and copper block on every other face, and each part block draws itself as a plain copper block (`DrawnPartBlock`), so the 3x1x2 shows block by block. Superheated Steam draws with `fluid/steam.png`, tinted warm in `client/SteamClient.java`, and its liquid block with vanilla's water model.
+The Steam Turbine has no art of its own yet. Its anchor wears vanilla's piston top on its front and copper block on every other face, and each part block draws itself as a plain copper block (`DrawnPartBlock`), so the 3x1x2 shows block by block. The Steam Bucket is NeoForge's fluid container model over vanilla's bucket, `items/steam_bucket.json`, its fluid layer `fluid/steam.png` and the whole flipped upside down by `flip_gas`, so it needs no texture of its own. Superheated Steam draws with `fluid/steam.png`, tinted warm in `client/SteamClient.java`, and its liquid block with vanilla's water model.
 
 The Reactor has no art of its own yet either. A block model reaches only one block past its own and the Reactor's anchor is the bottom centre of a 3x3x3, so until a model is drawn each part block draws itself (`DrawnPartBlock`): vanilla's iron block for the casing, prismarine bricks for the four water ports, and the blast furnace's top on the steam port. `blockstates/reactor_part.json` picks the model by part number, water at parts 2, 4, 5 and 7 and steam at 22, the order `FootprintShape.standing(3, 3)` numbers them. Its item is a blast furnace face on iron. The Fuel Cell wears vanilla's bottle o' enchanting and the Depleted Fuel Cell the glass bottle.
 

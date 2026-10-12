@@ -14,7 +14,9 @@ import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -124,6 +126,15 @@ public final class WireworksRegistries {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BoilerBlockEntity>>
             BOILER_ENTITY = BLOCK_ENTITIES.register("boiler",
                     () -> new BlockEntityType<>(BoilerBlockEntity::new, BOILER.get()));
+    /**
+     * Steam's bucket, which the Boiler fills from its steam tank. A plain {@link BucketItem}, not a
+     * subclass: NeoForge gives the fluid item capability only to that exact class. It draws upside
+     * down, as mods draw a gas (#42).
+     */
+    public static final DeferredItem<BucketItem> STEAM_BUCKET = ITEMS.registerItem("steam_bucket",
+            props -> new BucketItem(SteamFluids.STEAM_SOURCE.get(), props),
+            props -> props.craftRemainder(Items.BUCKET).stacksTo(1));
+
     public static final Supplier<MenuType<BoilerMenu>> BOILER_MENU =
             MENUS.register("boiler", () -> new MenuType<>(BoilerMenu::new, FeatureFlags.DEFAULT_FLAGS));
 
@@ -206,7 +217,7 @@ public final class WireworksRegistries {
 
     /** Every item the Library adds, the poles first and the intermediates last. */
     private static Stream<Item> items() {
-        return Stream.concat(poleItems(), Stream.of(SOLAR_PANEL_ITEM, ACCUMULATOR_ITEM, BOILER_ITEM, STEAM_ENGINE_ITEM, STEAM_TURBINE_ITEM, REACTOR_ITEM, BIORESIN, PLASTIC, BATTERY, FUEL_CELL, DEPLETED_FUEL_CELL).map(DeferredItem::get));
+        return Stream.concat(poleItems(), Stream.of(SOLAR_PANEL_ITEM, ACCUMULATOR_ITEM, BOILER_ITEM, STEAM_ENGINE_ITEM, STEAM_TURBINE_ITEM, REACTOR_ITEM, STEAM_BUCKET, BIORESIN, PLASTIC, BATTERY, FUEL_CELL, DEPLETED_FUEL_CELL).map(DeferredItem::get));
     }
 
     private static Set<Block> poleBlocks() {

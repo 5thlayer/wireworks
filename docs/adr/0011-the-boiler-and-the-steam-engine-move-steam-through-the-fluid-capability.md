@@ -60,3 +60,9 @@ The Boiler first kept Factorio's boxes, 600 mB of water across its three ports a
 Both are now 2,000 mB, so that a bucket can empty into the water tank or fill from the steam tank whole
 in the Boiler's bucket slots. Its rate and its fuel are unchanged, and the Steam Engine keeps its
 200 mB box.
+
+Steam also gets a bucket, `wireworks:steam_bucket`, which reverses its having none: the Boiler's steam
+slot fills an empty bucket from the steam tank, and its water slot empties a water bucket into the water
+tank, each sending the bucket to the output slot. The bucket draws upside down, through NeoForge's
+fluid container model with `flip_gas`, since Steam is lighter than air. Superheated Steam keeps no
+bucket.

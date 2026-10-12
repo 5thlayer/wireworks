@@ -3,7 +3,10 @@
 
 package io.github._5thlayer.wireworks;
 
+import java.util.function.Supplier;
+
 import net.minecraft.core.registries.Registries;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LiquidBlock;
@@ -19,11 +22,12 @@ import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
+import org.jspecify.annotations.Nullable;
 
 /**
- * The two steams, each one fluid type with a still and a flowing fluid and a liquid block, and no
- * bucket, so steam stays in tanks and pipes. Steam is what the Boiler makes and the Steam Engine
- * eats, Factorio's 165 degree steam. Superheated Steam is what the Reactor makes and only the Steam
+ * The two steams, each one fluid type with a still and a flowing fluid and a liquid block. Steam is
+ * what the Boiler makes and the Steam Engine eats, Factorio's 165 degree steam, and has a bucket the
+ * Boiler fills (#42); Superheated Steam has none and stays in tanks and pipes. Superheated Steam is what the Reactor makes and only the Steam
  * Turbine eats, Factorio's 500 degree steam, a second fluid rather than a temperature (ADR 0012).
  */
 public final class SteamFluids {
@@ -36,8 +40,8 @@ public final class SteamFluids {
     /** Factorio's superheated steam, in degrees Celsius. */
     static final int SUPERHEATED_TEMPERATURE = 500;
 
-    private static final Steam STEAM = new Steam("steam", BoilerSpec.TARGET_TEMPERATURE);
-    private static final Steam SUPERHEATED_STEAM = new Steam("superheated_steam", SUPERHEATED_TEMPERATURE);
+    private static final Steam STEAM = new Steam("steam", BoilerSpec.TARGET_TEMPERATURE, WireworksRegistries.STEAM_BUCKET);
+    private static final Steam SUPERHEATED_STEAM = new Steam("superheated_steam", SUPERHEATED_TEMPERATURE, null);
 
     public static final DeferredHolder<FluidType, FluidType> STEAM_TYPE = STEAM.type;
     public static final DeferredHolder<Fluid, BaseFlowingFluid.Source> STEAM_SOURCE = STEAM.source;
@@ -59,15 +63,17 @@ public final class SteamFluids {
         }
     }
 
-    /** One steam's four registrations, named after it. */
+    /** One steam's four registrations, named after it, and its bucket if it has one. */
     private static final class Steam {
 
         final DeferredHolder<FluidType, FluidType> type;
         final DeferredHolder<Fluid, BaseFlowingFluid.Source> source;
         final DeferredHolder<Fluid, BaseFlowingFluid.Flowing> flowing;
         final DeferredHolder<Block, SteamBlock> block;
+        private final @Nullable Supplier<? extends Item> bucket;
 
-        Steam(String name, int celsius) {
+        Steam(String name, int celsius, @Nullable Supplier<? extends Item> bucket) {
+            this.bucket = bucket;
             type = FLUID_TYPES.register(name, () -> new FluidType(FluidType.Properties.create()
                     .descriptionId("fluid_type." + Wireworks.MOD_ID + "." + name)
                     .lightLevel(0)
@@ -82,7 +88,8 @@ public final class SteamFluids {
         }
 
         private BaseFlowingFluid.Properties properties() {
-            return new BaseFlowingFluid.Properties(type, source, flowing).block(block);
+            BaseFlowingFluid.Properties properties = new BaseFlowingFluid.Properties(type, source, flowing).block(block);
+            return bucket == null ? properties : properties.bucket(bucket);
         }
     }
 

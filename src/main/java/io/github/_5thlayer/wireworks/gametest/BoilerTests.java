@@ -12,6 +12,7 @@ import io.github._5thlayer.wireworks.WireworksRegistries;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
@@ -80,6 +81,18 @@ final class BoilerTests {
         tests.test("boiler_lights_no_fuel_while_its_output_is_a_full_stack", 40,
                 helper -> stallsOnAFullOutput(helper, new ItemStack(Items.BUCKET, Items.BUCKET.getDefaultMaxStackSize())));
         tests.test("boiler_menu_shift_click_puts_nothing_in_the_output", 20, BoilerTests::shiftClickSkipsTheOutput);
+        tests.test("boiler_menu_shift_click_sends_each_container_to_its_slot", 20, BoilerTests::shiftClickSendsContainersHome);
+        tests.test("boiler_slots_take_only_what_they_are_for", 20, BoilerTests::slotsTakeWhatTheyAreFor);
+        tests.test("boiler_item_face_puts_buckets_in_their_slots_and_takes_none_back", 20, BoilerTests::itemFaceRoutesBuckets);
+        tests.test("boiler_empties_a_water_bucket_into_its_tank", 20, BoilerTests::emptiesAWaterBucket);
+        tests.test("boiler_holds_a_water_bucket_while_its_tank_has_no_room", 20, BoilerTests::holdsAWaterBucketWithoutRoom);
+        tests.test("boiler_holds_a_water_bucket_while_its_output_has_no_room", 20, BoilerTests::holdsAWaterBucketWithoutOutputRoom);
+        tests.test("boiler_fills_an_empty_bucket_with_steam", 500, BoilerTests::fillsABucketWithSteam);
+        tests.test("steam_has_a_bucket", 20, helper -> {
+            helper.assertTrue(SteamFluids.STEAM_SOURCE.get().getBucket() == WireworksRegistries.STEAM_BUCKET.get(),
+                    "steam's bucket is " + SteamFluids.STEAM_SOURCE.get().getBucket());
+            helper.succeed();
+        });
         tests.test("boiler_feeds_a_steam_engine_against_its_steam_port", 200, BoilerTests::feedsAnEngine);
     }
 
@@ -469,6 +482,125 @@ final class BoilerTests {
         int hotbarFirst = BoilerSlots.SIZE + 27;
         menu.quickMoveStack(player, hotbarFirst);
         helper.assertValueEqual(boiler(helper).getItem(BoilerSlots.OUTPUT).getCount(), 1, "buckets in the output");
+        helper.succeed();
+    }
+
+    /** Fuel in the fuel slot, a water container in the water slot, an empty one in the steam slot, and nothing in the output. */
+    private static void slotsTakeWhatTheyAreFor(GameTestHelper helper) {
+        place(helper);
+        BoilerBlockEntity boiler = boiler(helper);
+        Object[][] cases = {
+                {Items.COAL, BoilerSlots.FUEL},
+                {Items.LAVA_BUCKET, BoilerSlots.FUEL},
+                {Items.WATER_BUCKET, BoilerSlots.WATER},
+                {Items.BUCKET, BoilerSlots.STEAM},
+                {WireworksRegistries.STEAM_BUCKET.get(), -1},
+                {Items.STONE, -1},
+        };
+        for (Object[] each : cases) {
+            ItemStack stack = new ItemStack((Item) each[0]);
+            for (int slot = 0; slot < BoilerSlots.SIZE; slot++) {
+                boolean expected = slot == (int) each[1];
+                if (boiler.canPlaceItem(slot, stack) != expected) {
+                    helper.fail("slot " + slot + (expected ? " refuses " : " takes ") + stack, ANCHOR);
+                }
+            }
+        }
+        helper.succeed();
+    }
+
+    /** A pipe that names no slot puts each bucket where it goes, and draws neither back out. */
+    private static void itemFaceRoutesBuckets(GameTestHelper helper) {
+        place(helper);
+        ResourceHandler<ItemResource> face =
+                helper.getLevel().getCapability(Capabilities.Item.BLOCK, part(helper, BACK_WEST), null);
+        ItemResource waterBucket = ItemResource.of(new ItemStack(Items.WATER_BUCKET));
+        ItemResource bucket = ItemResource.of(new ItemStack(Items.BUCKET));
+        try (Transaction transaction = Transaction.openRoot()) {
+            helper.assertValueEqual(face.insert(waterBucket, 1, transaction), 1, "water buckets put in");
+            helper.assertValueEqual(face.insert(bucket, 2, transaction), 2, "empty buckets put in");
+            transaction.commit();
+        }
+        BoilerBlockEntity boiler = boiler(helper);
+        helper.assertTrue(boiler.getItem(BoilerSlots.WATER).is(Items.WATER_BUCKET), "the water bucket is not in the water slot");
+        helper.assertValueEqual(boiler.getItem(BoilerSlots.STEAM).getCount(), 2, "empty buckets in the steam slot");
+        try (Transaction transaction = Transaction.openRoot()) {
+            helper.assertValueEqual(face.extract(BoilerSlots.WATER, waterBucket, 1, transaction), 0, "water buckets drawn by slot");
+            helper.assertValueEqual(face.extract(BoilerSlots.STEAM, bucket, 1, transaction), 0, "empty buckets drawn by slot");
+            helper.assertValueEqual(face.extract(bucket, 1, transaction), 0, "empty buckets drawn slot-less");
+        }
+        helper.succeed();
+    }
+
+    private static void emptiesAWaterBucket(GameTestHelper helper) {
+        place(helper);
+        boiler(helper).setItem(BoilerSlots.WATER, new ItemStack(Items.WATER_BUCKET));
+        helper.startSequence()
+                .thenWaitUntil(() -> helper.assertValueEqual(boiler(helper).data().get(BoilerBlockEntity.DATA_WATER), 1_000, "water in the tank"))
+                .thenExecute(() -> {
+                    helper.assertTrue(boiler(helper).getItem(BoilerSlots.WATER).isEmpty(), "the water slot still holds a bucket");
+                    helper.assertTrue(boiler(helper).getItem(BoilerSlots.OUTPUT).is(Items.BUCKET), "the empty bucket is not in the output");
+                })
+                .thenSucceed();
+    }
+
+    /** A bucket empties whole or not at all: with 1,500 mB in a 2,000 mB tank, it waits. */
+    private static void holdsAWaterBucketWithoutRoom(GameTestHelper helper) {
+        place(helper);
+        insert(fluidAt(helper, part(helper, WEST_END), null), water(), 1_500);
+        boiler(helper).setItem(BoilerSlots.WATER, new ItemStack(Items.WATER_BUCKET));
+        helper.startSequence()
+                .thenIdle(WINDOW)
+                .thenExecute(() -> {
+                    helper.assertValueEqual(boiler(helper).data().get(BoilerBlockEntity.DATA_WATER), 1_500, "water in the tank");
+                    helper.assertTrue(boiler(helper).getItem(BoilerSlots.WATER).is(Items.WATER_BUCKET), "the water bucket left its slot");
+                    helper.assertTrue(boiler(helper).getItem(BoilerSlots.OUTPUT).isEmpty(), "something reached the output");
+                })
+                .thenSucceed();
+    }
+
+    private static void holdsAWaterBucketWithoutOutputRoom(GameTestHelper helper) {
+        place(helper);
+        boiler(helper).setItem(BoilerSlots.WATER, new ItemStack(Items.WATER_BUCKET));
+        boiler(helper).setItem(BoilerSlots.OUTPUT, new ItemStack(Items.STONE));
+        helper.startSequence()
+                .thenIdle(WINDOW)
+                .thenExecute(() -> {
+                    helper.assertValueEqual(boiler(helper).data().get(BoilerBlockEntity.DATA_WATER), 0, "water in the tank");
+                    helper.assertTrue(boiler(helper).getItem(BoilerSlots.WATER).is(Items.WATER_BUCKET), "the water bucket left its slot");
+                })
+                .thenSucceed();
+    }
+
+    /** Once the steam tank holds a bucket's worth, one empty bucket fills and goes to the output; the other waits. */
+    private static void fillsABucketWithSteam(GameTestHelper helper) {
+        place(helper);
+        boiler(helper).setItem(BoilerSlots.FUEL, new ItemStack(Items.COAL, 10));
+        boiler(helper).setItem(BoilerSlots.STEAM, new ItemStack(Items.BUCKET, 2));
+        insert(fluidAt(helper, part(helper, WEST_END), null), water(), WATER_CAPACITY);
+        helper.startSequence()
+                .thenWaitUntil(() -> helper.assertTrue(boiler(helper).getItem(BoilerSlots.OUTPUT).is(WireworksRegistries.STEAM_BUCKET.get()),
+                        "no steam bucket in the output yet"))
+                .thenExecute(() -> {
+                    helper.assertValueEqual(boiler(helper).getItem(BoilerSlots.STEAM).getCount(), 1, "empty buckets left in the steam slot");
+                    helper.assertTrue(boiler(helper).data().get(BoilerBlockEntity.DATA_STEAM) < 1_000, "the steam tank kept the bucket's steam");
+                })
+                .thenSucceed();
+    }
+
+    /** Shift-click sends a water bucket to the water slot and an empty bucket to the steam slot. */
+    private static void shiftClickSendsContainersHome(GameTestHelper helper) {
+        place(helper);
+        ListeningPlayer player = new ListeningPlayer(helper, ANCHOR.above());
+        player.getInventory().setItem(0, new ItemStack(Items.WATER_BUCKET));
+        player.getInventory().setItem(1, new ItemStack(Items.BUCKET, 3));
+        BoilerMenu menu = new BoilerMenu(0, player.getInventory(), boiler(helper), boiler(helper).data());
+        int hotbarFirst = BoilerSlots.SIZE + 27;
+        menu.quickMoveStack(player, hotbarFirst);
+        menu.quickMoveStack(player, hotbarFirst + 1);
+        helper.assertTrue(boiler(helper).getItem(BoilerSlots.WATER).is(Items.WATER_BUCKET), "the water bucket is not in the water slot");
+        helper.assertValueEqual(boiler(helper).getItem(BoilerSlots.STEAM).getCount(), 3, "empty buckets in the steam slot");
+        helper.assertTrue(boiler(helper).getItem(BoilerSlots.OUTPUT).isEmpty(), "something reached the output");
         helper.succeed();
     }
 

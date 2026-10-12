@@ -12,20 +12,31 @@ import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
 /**
- * The Boiler's menu: a fuel slot, an output slot for what burnt fuel leaves, and three gauges. A
- * Boiler that has stopped is out of fuel, out of water or backed up, and those three look the same
- * from outside the block.
+ * The Boiler's menu: a fuel slot, a water bucket slot above it, an empty bucket slot for steam beside
+ * that, an output slot for what each of them leaves, and three gauges. A Boiler that has stopped is
+ * out of fuel, out of water or backed up, and those three look the same from outside the block.
  */
 public class BoilerMenu extends AbstractContainerMenu {
 
-    /** Where the output slot stands, beside the fuel slot; the screen draws its recess here. */
+    /** Where each slot stands: fuel and water on the furnace's own recesses, the screen draws the others. */
+    public static final int FUEL_X = 56;
+    public static final int FUEL_Y = 53;
+    public static final int WATER_X = 56;
+    public static final int WATER_Y = 17;
+    public static final int STEAM_X = 80;
+    public static final int STEAM_Y = 17;
     public static final int OUTPUT_X = 80;
     public static final int OUTPUT_Y = 53;
 
+    /** The container slots shift-click fills, in the order it tries them. */
+    private static final int[] INPUTS = {BoilerSlots.FUEL, BoilerSlots.WATER, BoilerSlots.STEAM};
+
     private final Container container;
     private final ContainerData data;
+    private final Level level;
 
     /** Client side: the block entity is not reachable, so the slot stands over a stub. */
     public BoilerMenu(int containerId, Inventory playerInventory) {
@@ -37,16 +48,15 @@ public class BoilerMenu extends AbstractContainerMenu {
         super(WireworksRegistries.BOILER_MENU.get(), containerId);
         this.container = container;
         this.data = data;
+        this.level = playerInventory.player.level();
         checkContainerSize(container, BoilerSlots.SIZE);
         checkContainerDataCount(data, BoilerBlockEntity.DATA_COUNT);
 
-        addSlot(new Slot(container, BoilerSlots.FUEL, 56, 53));
-        addSlot(new Slot(container, BoilerSlots.OUTPUT, OUTPUT_X, OUTPUT_Y) {
-            @Override
-            public boolean mayPlace(ItemStack stack) {
-                return false;
-            }
-        });
+        // In the container's own order, so a menu slot's index is the container slot's.
+        addSlot(new InputSlot(container, BoilerSlots.FUEL, FUEL_X, FUEL_Y));
+        addSlot(new InputSlot(container, BoilerSlots.OUTPUT, OUTPUT_X, OUTPUT_Y));
+        addSlot(new InputSlot(container, BoilerSlots.WATER, WATER_X, WATER_Y));
+        addSlot(new InputSlot(container, BoilerSlots.STEAM, STEAM_X, STEAM_Y));
 
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 9; column++) {
@@ -102,8 +112,7 @@ public class BoilerMenu extends AbstractContainerMenu {
             if (!moveItemStackTo(stack, BoilerSlots.SIZE, slots.size(), true)) {
                 return ItemStack.EMPTY;
             }
-        // To the fuel slot only: vanilla's merge pass skips mayPlace, and would top up the output.
-        } else if (!moveItemStackTo(stack, BoilerSlots.FUEL, BoilerSlots.FUEL + 1, false)) {
+        } else if (!moveToItsSlot(stack)) {
             return ItemStack.EMPTY;
         }
 
@@ -113,6 +122,32 @@ public class BoilerMenu extends AbstractContainerMenu {
             slot.setChanged();
         }
         return original;
+    }
+
+    /**
+     * To the one slot that takes the stack, and never the output: vanilla's merge pass skips
+     * {@code mayPlace}, so a range spanning the output would top up a stack already in it.
+     */
+    private boolean moveToItsSlot(ItemStack stack) {
+        for (int slot : INPUTS) {
+            if (BoilerBlockEntity.accepts(level, slot, stack)) {
+                return moveItemStackTo(stack, slot, slot + 1, false);
+            }
+        }
+        return false;
+    }
+
+    /** A slot that takes only what the Boiler's slot of the same index does: nothing, for the output. */
+    private final class InputSlot extends Slot {
+
+        InputSlot(Container container, int slot, int x, int y) {
+            super(container, slot, x, y);
+        }
+
+        @Override
+        public boolean mayPlace(ItemStack stack) {
+            return BoilerBlockEntity.accepts(level, getContainerSlot(), stack);
+        }
     }
 
     @Override

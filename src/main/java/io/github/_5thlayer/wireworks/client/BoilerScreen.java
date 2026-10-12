@@ -18,8 +18,8 @@ import net.minecraft.client.renderer.RenderPipelines;
 
 /**
  * The Boiler's screen: a fuel gauge and two tank gauges on vanilla's furnace background, with the
- * furnace's input and output recesses painted out, since the Boiler's water arrives and its steam
- * leaves through pipes, and a slot beside the fuel for what burnt fuel leaves. A stopped Boiler is
+ * furnace's output recess painted out for the gauges. The furnace's input recess holds a water bucket,
+ * and two drawn recesses beside it hold an empty bucket for steam and the output. A stopped Boiler is
  * out of fuel, out of water or backed up, and from outside the block those three are the same still
  * machine.
  */
@@ -62,10 +62,10 @@ public class BoilerScreen extends AbstractContainerScreen<BoilerMenu> {
         int top = topPos;
         graphics.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND, left, top, 0.0F, 0.0F, imageWidth, imageHeight, 256, 256);
 
-        // Vanilla's sheet draws an input recess at 55,16 and an output one at 112,30. The Boiler
-        // has neither: water arrives through a pipe and steam leaves through one.
-        graphics.fill(left + 55, top + 16, left + 73, top + 34, PANEL);
+        // Vanilla's sheet draws an output recess at 112,30, where the gauges go. Its input recess
+        // at 55,16 is the water slot's.
         graphics.fill(left + 111, top + 29, left + 137, top + 55, PANEL);
+        slot(graphics, left + BoilerMenu.STEAM_X - 1, top + BoilerMenu.STEAM_Y - 1);
         slot(graphics, left + BoilerMenu.OUTPUT_X - 1, top + BoilerMenu.OUTPUT_Y - 1);
 
         bar(graphics, FUEL_Y, menu.fuelLevel(), FUEL_FULL);

@@ -86,7 +86,7 @@ The **Generator** Wireworks ships: its output follows **Daylight**, and it makes
 _Avoid_: solar generator
 
 **Boiler**:
-The machine that burns fuel to turn water into **Steam**, at Factorio's 60 mB/s. A 3x2 **Groundworks** footprint: water goes in at the two ends of its front row, steam leaves its back middle, and fuel goes in through any block. What a burnt fuel leaves, a lava bucket's bucket, goes to its output slot, which pipes and hoppers empty. It burns no fuel while its steam, or what the fuel would leave, has nowhere to go.
+The machine that burns fuel to turn water into **Steam**, at Factorio's 60 mB/s. A 3x2 **Groundworks** footprint: water goes in at the two ends of its front row, steam leaves its back middle, and fuel goes in through any block. Its two tanks hold 2,000 mB each. A water bucket slot empties into the water tank and an empty bucket slot fills from the steam tank; the buckets, and what a burnt fuel leaves, a lava bucket's bucket, go to its output slot, which pipes and hoppers empty. It burns no fuel while its steam, or what the fuel would leave, has nowhere to go.
 _Avoid_: furnace, kettle
 
 **Steam Engine**:
@@ -94,7 +94,7 @@ The **Generator** that burns **Steam**, 30 mB/s of it for up to 450 FE/t. A 2x1x
 _Avoid_: turbine (the **Steam Turbine**)
 
 **Steam**:
-The fluid the **Boiler** makes and the **Steam Engine** burns, Factorio's 165 degree steam. It has no bucket. It crosses between blocks through NeoForge's fluid capability, so Wireworks needs no pipe mod. The **Steam Turbine** refuses it.
+The fluid the **Boiler** makes and the **Steam Engine** burns, Factorio's 165 degree steam. Its bucket, which draws upside down as a gas does, is filled by the **Boiler**. It crosses between blocks through NeoForge's fluid capability, so Wireworks needs no pipe mod. The **Steam Turbine** refuses it.
 _Avoid_: vapour
 
 **Daylight**:
