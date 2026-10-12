@@ -14,7 +14,6 @@ import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
@@ -249,10 +248,6 @@ public final class WireworksRegistries {
     private static void addToCreativeTabs(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == WorksTab.KEY) {
             items().forEach(event::accept);
-        } else if (event.getTabKey() == CreativeModeTabs.FUNCTIONAL_BLOCKS) {
-            blockItems().forEach(event::accept);
-        } else if (event.getTabKey() == CreativeModeTabs.INGREDIENTS) {
-            event.accept(TAR_ITEM.get());
         }
     }
 }

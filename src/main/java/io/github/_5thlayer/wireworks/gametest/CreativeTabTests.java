@@ -14,11 +14,15 @@ import io.github._5thlayer.wireworks.Wireworks;
 import io.github._5thlayer.wireworks.WireworksRegistries;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-/** The suite's Works tab holds every item the Library registers, the poles first and tar last, and the Library has no tab of its own. */
+/**
+ * The suite's Works tab holds every item the Library registers, the poles first and tar last, no other tab holds
+ * one, and the Library has no tab of its own (#23, FactoryWorks ADR-0128).
+ */
 final class CreativeTabTests {
 
     private CreativeTabTests() {
@@ -28,6 +32,7 @@ final class CreativeTabTests {
         tests.test("works_tab_holds_every_item_the_library_adds", 1, CreativeTabTests::holdsEveryItem);
         tests.test("works_tab_shows_the_poles_first_and_tar_last", 1, CreativeTabTests::showsItemsInOrder);
         tests.test("library_registers_no_creative_tab_of_its_own", 1, CreativeTabTests::registersNoTab);
+        tests.test("no_other_tab_holds_a_library_item", 1, CreativeTabTests::noOtherTab);
     }
 
     private static void holdsEveryItem(GameTestHelper helper) {
@@ -57,10 +62,35 @@ final class CreativeTabTests {
         helper.succeed();
     }
 
+    private static void noOtherTab(GameTestHelper helper) {
+        // An empty Works tab would let the loop below pass without the Library's items reaching any tab.
+        if (shownItems(helper).isEmpty()) {
+            helper.fail("the Works tab shows no Wireworks item, so no tab was filled");
+            return;
+        }
+        for (var entry : BuiltInRegistries.CREATIVE_MODE_TAB.entrySet()) {
+            CreativeModeTab tab = entry.getValue();
+            // The search tab lists every other tab's items.
+            if (entry.getKey() == WorksTab.KEY || tab.getType() == CreativeModeTab.Type.SEARCH) {
+                continue;
+            }
+            List<Item> own = ownItems(tab);
+            if (!own.isEmpty()) {
+                helper.fail("the tab " + entry.getKey().identifier() + " shows " + own);
+                return;
+            }
+        }
+        helper.succeed();
+    }
+
     private static List<Item> shownItems(GameTestHelper helper) {
         CreativeModeTabs.tryRebuildTabContents(helper.getLevel().enabledFeatures(), true,
                 helper.getLevel().registryAccess());
-        return BuiltInRegistries.CREATIVE_MODE_TAB.getValueOrThrow(WorksTab.KEY).getDisplayItems().stream()
+        return ownItems(BuiltInRegistries.CREATIVE_MODE_TAB.getValueOrThrow(WorksTab.KEY));
+    }
+
+    private static List<Item> ownItems(CreativeModeTab tab) {
+        return tab.getDisplayItems().stream()
                 .map(ItemStack::getItem)
                 .filter(CreativeTabTests::isOwn)
                 .toList();
