@@ -4,6 +4,8 @@ Each version has two sections: Players, what a player or pack developer sees, an
 
 ## Unreleased
 
+## 0.6.0
+
 ### Players
 
 - The Boiler: a 3x2 machine that burns a fuel item for its vanilla burn time and turns water into steam at Factorio's 60 mB/s, 3 mB a tick. Water goes in at either end of its front row, into a 2,000 mB tank; steam leaves its back middle, from a 2,000 mB tank. A Boiler with no room for steam makes none and burns no fuel. Right-click it for its fuel slot, a water bucket slot, an empty bucket slot for steam, its output slot and its gauges. A water bucket empties into the tank and an empty bucket fills with steam, each whole and only once the tank has room or steam for all of it, and goes to the output; what a burnt fuel leaves, such as a lava bucket's empty bucket, goes there too. A Boiler whose output has no room for what a slot would leave waits. Pipes and hoppers put fuel and buckets in and take the output out, and nothing the other way. Its screen and Jade say whether it is boiling, and if not, why not: no water, steam backed up, output full or out of fuel. Jade also shows its slots and each tank, and the screen shows faded stand-ins of what goes in each empty input slot, on which EMI's recipe and usage keys work. (#42)
