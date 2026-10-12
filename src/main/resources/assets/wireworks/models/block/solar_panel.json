@@ -1,5 +1,6 @@
 {
   "parent": "minecraft:block/block",
+  "ambientocclusion": false,
   "textures": {
     "frame": "wireworks:block/plating/brace",
     "edge": "wireworks:block/plating/rivets",

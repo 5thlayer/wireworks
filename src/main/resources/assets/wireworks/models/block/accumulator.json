@@ -1,5 +1,6 @@
 {
   "parent": "minecraft:block/block",
+  "ambientocclusion": false,
   "textures": {
     "top": "wireworks:block/accumulator/top",
     "side": "wireworks:block/accumulator/sides",
