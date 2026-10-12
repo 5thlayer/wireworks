@@ -21,7 +21,7 @@ import net.minecraft.world.level.material.PushReaction;
  */
 abstract class EnergyAnchorBlock extends Block implements EntityBlock {
 
-    /** The base hardness, which a machine that sets none keeps. */
+    /** The base strength, its hardness and blast resistance both, which a machine that sets none keeps. */
     private static final float STRENGTH = 2.0F;
 
     EnergyAnchorBlock(Properties properties) {
@@ -29,7 +29,7 @@ abstract class EnergyAnchorBlock extends Block implements EntityBlock {
     }
 
     /**
-     * An anchor of its own hardness. The strength is set here rather than by the subclass on the
+     * An anchor of its own strength, its hardness and blast resistance both. It is set here rather than by the subclass on the
      * properties it passes, which this constructor's own defaults would overwrite.
      */
     EnergyAnchorBlock(Properties properties, float strength) {

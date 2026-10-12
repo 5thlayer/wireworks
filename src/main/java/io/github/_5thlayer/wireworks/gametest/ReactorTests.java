@@ -62,7 +62,7 @@ final class ReactorTests {
     }
 
     static void register(WireworksGameTests.Registrar tests) {
-        tests.test("reactor_fills_seven_turbines_in_a_row_against_its_steam_port_at_their_rate", 140, ReactorTests::fillsSevenTurbines);
+        tests.test("reactor_fills_seven_steam_turbines_in_a_row_against_its_steam_port_at_their_rate", 140, ReactorTests::fillsSevenTurbines);
         tests.test("reactor_makes_21_mb_a_tick_spending_water_unit_for_unit", 40, ReactorTests::makesItsRate);
         tests.test("reactor_burns_nothing_without_water", 40, ReactorTests::stopsWithoutWater);
         tests.test("reactor_burns_nothing_without_room_for_its_steam_and_resumes_when_drawn", 100, ReactorTests::stopsWithoutRoom);
@@ -335,6 +335,7 @@ final class ReactorTests {
                 })
                 .thenIdle(WINDOW)
                 .thenExecute(() -> {
+                    // Still the lava bucket's one bucket: the blaze rod added nothing.
                     ItemStack left = reactor(helper).getItem(ReactorSlots.DEPLETED);
                     helper.assertTrue(left.is(Items.BUCKET) && left.getCount() == 1, "a burnt blaze rod left something: " + left);
                     helper.assertValueEqual(reactor(helper).cellTicksLeft(), 0, "ticks left once the blaze rod burnt out");

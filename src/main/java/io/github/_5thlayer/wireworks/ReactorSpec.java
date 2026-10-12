@@ -27,8 +27,8 @@ public final class ReactorSpec {
     public static final int CELL_TICKS = CELL_SECONDS * MINECRAFT_TICKS_PER_SECOND;
 
     /**
-     * Each tank, in mB: the Boiler's 2,000 on its 6 blocks scaled to the Reactor's 27 and rounded to
-     * whole buckets. The four water ports are one tank. A full one runs the Reactor about 24 seconds.
+     * Each tank, in mB: the Boiler's 2,000 on its 6 blocks scaled to the Reactor's 27 is 9,000, rounded up
+     * to ten buckets. The four water ports are one tank. A full one runs the Reactor about 24 seconds.
      */
     public static final int WATER_CAPACITY = 10_000;
     public static final int STEAM_CAPACITY = 10_000;

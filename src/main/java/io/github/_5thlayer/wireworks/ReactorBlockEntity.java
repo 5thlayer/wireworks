@@ -34,9 +34,9 @@ import org.jspecify.annotations.Nullable;
  * {@link WireworksRegistries}), and the Reactor hands its steam on to whatever stands against its steam
  * port, a pipe or the end of a Turbine row. Water is consumed, never created.
  *
- * <p>A loaded cell lasts {@link ReactorSpec#CELL_TICKS} ticks of running, and burnt out it leaves what
+ * <p>Each item of Fission Fuel loaded lasts {@link ReactorSpec#CELL_TICKS} ticks of running, and burnt out it leaves what
  * {@link #remainderOf} says in the depleted slot: a Depleted Fuel Cell for a Fuel Cell. The Reactor stops
- * while that slot has no room for what the cell it burns, or would load, leaves.
+ * while that slot has no room for what the Fission Fuel it burns, or would load, leaves.
  */
 public class ReactorBlockEntity extends BlockEntity implements Container {
 
@@ -53,8 +53,8 @@ public class ReactorBlockEntity extends BlockEntity implements Container {
     private final ResourceHandler<FluidResource> steamFace = new FluidFace(steam, false, true);
     private final ResourceHandler<ItemResource> itemFace = new ReactorItemHandler(this);
     private int cellTicks;
-    /** What the loaded cell leaves once burnt, empty when none is loaded or it leaves nothing. */
-    private ItemStack cellRemainder = ItemStack.EMPTY;
+    /** What the loaded Fission Fuel leaves once burnt, empty when none is loaded or it leaves nothing. */
+    private ItemStack leftByBurning = ItemStack.EMPTY;
 
     public ReactorBlockEntity(BlockPos pos, BlockState state) {
         super(WireworksRegistries.REACTOR_ENTITY.get(), pos, state);
@@ -96,7 +96,7 @@ public class ReactorBlockEntity extends BlockEntity implements Container {
         if (!(level instanceof ServerLevel)) {
             return;
         }
-        ItemStack leaves = cellTicks > 0 ? cellRemainder : remainderOf(items.get(ReactorSlots.FUEL));
+        ItemStack leaves = cellTicks > 0 ? leftByBurning : remainderOf(items.get(ReactorSlots.FUEL));
         ReactorCycle.Tick tick = ReactorCycle.tick(water.amount(), steam.room(), hasDepletedRoomFor(leaves),
                 ReactorSpec.MILLIBUCKETS_PER_TICK, cellTicks, ReactorSpec.CELL_TICKS, this::loadCell);
         if (tick.converted() > 0) {
@@ -105,8 +105,8 @@ public class ReactorBlockEntity extends BlockEntity implements Container {
             steam.fill(steam.amount() + tick.converted());
             cellTicks = tick.ticksLeft();
             if (tick.burntOut()) {
-                leave(cellRemainder);
-                cellRemainder = ItemStack.EMPTY;
+                leave(leftByBurning);
+                leftByBurning = ItemStack.EMPTY;
             }
             setChanged();
         }
@@ -118,13 +118,13 @@ public class ReactorBlockEntity extends BlockEntity implements Container {
         if (!isFissionFuel(fuel)) {
             return false;
         }
-        cellRemainder = remainderOf(fuel);
+        leftByBurning = remainderOf(fuel);
         fuel.shrink(1);
         return true;
     }
 
     /**
-     * What one burnt cell of this Fission Fuel leaves: the Fuel Cell a Depleted Fuel Cell, any other its
+     * What one burnt item of this Fission Fuel leaves: the Fuel Cell a Depleted Fuel Cell, any other its
      * crafting remainder, as the Boiler treats fuel, or nothing.
      */
     static ItemStack remainderOf(ItemStack fuel) {
@@ -138,7 +138,7 @@ public class ReactorBlockEntity extends BlockEntity implements Container {
         return remainder == null ? ItemStack.EMPTY : remainder.create();
     }
 
-    /** Whether the depleted slot takes {@code leaves} whole; a cell that leaves nothing always has room. */
+    /** Whether the depleted slot takes {@code leaves} whole; a Fission Fuel that leaves nothing always has room. */
     private boolean hasDepletedRoomFor(ItemStack leaves) {
         ItemStack depleted = items.get(ReactorSlots.DEPLETED);
         return leaves.isEmpty() || depleted.isEmpty()
@@ -245,7 +245,7 @@ public class ReactorBlockEntity extends BlockEntity implements Container {
         water.fill(input.getIntOr(WATER, 0));
         steam.fill(input.getIntOr(STEAM, 0));
         cellTicks = Math.max(0, input.getIntOr(CELL_TICKS, 0));
-        cellRemainder = input.read(CELL_REMAINDER, ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);
+        leftByBurning = input.read(CELL_REMAINDER, ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);
     }
 
     @Override
@@ -255,6 +255,6 @@ public class ReactorBlockEntity extends BlockEntity implements Container {
         output.putInt(WATER, water.amount());
         output.putInt(STEAM, steam.amount());
         output.putInt(CELL_TICKS, cellTicks);
-        output.store(CELL_REMAINDER, ItemStack.OPTIONAL_CODEC, cellRemainder);
+        output.store(CELL_REMAINDER, ItemStack.OPTIONAL_CODEC, leftByBurning);
     }
 }
