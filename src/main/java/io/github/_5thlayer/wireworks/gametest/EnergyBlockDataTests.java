@@ -4,15 +4,18 @@
 package io.github._5thlayer.wireworks.gametest;
 
 import java.util.List;
+import java.util.Map;
 
 import io.github._5thlayer.wireworks.WireworksRegistries;
 import io.github._5thlayer.wireworks.WireworksTags;
+import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.block.Block;
 
 /**
  * What the Solar Panel, the Accumulator, the Boiler, the Steam Engine, the Steam Turbine and the
@@ -65,6 +68,7 @@ final class EnergyBlockDataTests {
                     "the reactor makes no FE and must be in neither tag");
             helper.succeed();
         });
+        tests.test("each_machine_keeps_its_own_hardness", 1, EnergyBlockDataTests::hardness);
         tests.test("steam_turbine_is_a_generator", 1, helper -> {
             if (!WireworksRegistries.STEAM_TURBINE.get().defaultBlockState().is(WireworksTags.GENERATORS)) {
                 helper.fail("the steam turbine is not in wireworks:generators");
@@ -94,6 +98,22 @@ final class EnergyBlockDataTests {
         helper.assertFalse(glowstone.is(WireworksTags.FISSION_FUEL), "glowstone dust is fission fuel");
         helper.assertFalse(new ItemStack(WireworksRegistries.DEPLETED_FUEL_CELL.get()).is(WireworksTags.FISSION_FUEL),
                 "the depleted fuel cell is fission fuel");
+        helper.succeed();
+    }
+
+    /** The Reactor and the Boiler set their own hardness, and the other machines keep the base's 2. */
+    private static void hardness(GameTestHelper helper) {
+        Map<Block, Float> expected = Map.of(
+                WireworksRegistries.REACTOR.get(), 5.0F,
+                WireworksRegistries.BOILER.get(), 3.5F,
+                WireworksRegistries.SOLAR_PANEL.get(), 2.0F,
+                WireworksRegistries.ACCUMULATOR.get(), 2.0F,
+                WireworksRegistries.STEAM_ENGINE.get(), 2.0F,
+                WireworksRegistries.STEAM_TURBINE.get(), 2.0F);
+        for (var machine : expected.entrySet()) {
+            float hardness = machine.getKey().defaultBlockState().getDestroySpeed(helper.getLevel(), BlockPos.ZERO);
+            helper.assertValueEqual(hardness, machine.getValue(), machine.getKey().getDescriptionId() + "'s hardness");
+        }
         helper.succeed();
     }
 

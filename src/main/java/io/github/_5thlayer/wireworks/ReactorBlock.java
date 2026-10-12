@@ -21,7 +21,7 @@ public class ReactorBlock extends EnergyAnchorBlock {
     public static final String BLOCK_NAME = "reactor";
 
     public ReactorBlock(Properties properties) {
-        super(properties.strength(5.0F).requiresCorrectToolForDrops());
+        super(properties.requiresCorrectToolForDrops(), 5.0F);
     }
 
     @Override
