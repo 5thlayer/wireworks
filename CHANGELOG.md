@@ -12,6 +12,7 @@ Each version has two sections: Players, what a player or pack developer sees, an
 - `boiler.joules_per_burn_tick` in `wireworks-server.toml` sets what a tick of a fuel's vanilla burn time is worth to the Boiler: 2500 J by default, which makes coal Factorio's 4 MJ.
 - The Boiler and the Steam Engine are mined with a pickaxe, and drop nothing from a bare hand.
 - Both craft from vanilla materials: the Boiler from a furnace, a bucket and seven iron ingots; the Engine from a piston, an iron block, two copper ingots and five iron ingots.
+- Wireworks' items are in the suite's shared Works tab, beside every other -works mod's, and in no other tab: the Wireworks tab is gone, and the blocks leave Functional Blocks. (#23)
 
 ### Consumers
 
@@ -19,6 +20,7 @@ Each version has two sections: Players, what a player or pack developer sees, an
 - The new item tag `wireworks:plastic_resins`, the items plastic is made from, holds `minecraft:resin_clump` and, optionally, `#c:tar`, which Fieldworks fills. Wireworks makes no tar of its own. (#26, #34)
 - The Boiler and the Steam Engine ported from FactoryWorks Core, without Oritech or Pipeworks. The Core's `SteamEngineBlock` and `BoilerBlock` ids move from `factoryworks:` to `wireworks:`; a world made with them loses them. (#22)
 - Wireworks nests libworks-runtime 0.1.1 by jar-in-jar, up to but not including 0.2: its mod id is `libworks`, it rides inside the jar, and players install nothing more. The Boiler's item and fluid faces extend its `GuardedResourceHandler`. (#33)
+- Breaking: the creative tab `wireworks:items` and its lang key `itemGroup.wireworks.items` are removed, with `WireworksRegistries.CREATIVE_TAB`: the items are in libworks' `WorksTab.KEY` and in no vanilla tab (FactoryWorks ADR-0128). (#23)
 
 ## 0.5.0
 
