@@ -55,7 +55,8 @@ public class BoilerBlockEntity extends BlockEntity implements Container, MenuPro
     public static final int DATA_STEAM = 3;
     public static final int DATA_WATER_CAPACITY = 4;
     public static final int DATA_STEAM_CAPACITY = 5;
-    public static final int DATA_COUNT = 6;
+    public static final int DATA_STATE = 6;
+    public static final int DATA_COUNT = 7;
 
     private static final String WATER = "Water";
     private static final String STEAM = "Steam";
@@ -69,6 +70,9 @@ public class BoilerBlockEntity extends BlockEntity implements Container, MenuPro
     private final ResourceHandler<FluidResource> steamFace = new FluidFace(steam, false, true);
     private final ResourceHandler<ItemResource> itemFace = new BoilerItemHandler(this);
 
+    /** What the last tick did, for the screen and Jade; worked out again every tick, so never saved. */
+    private BoilerState state = BoilerState.NO_FUEL;
+
     private final ContainerData data = new ContainerData() {
         @Override
         public int get(int index) {
@@ -79,6 +83,7 @@ public class BoilerBlockEntity extends BlockEntity implements Container, MenuPro
                 case DATA_STEAM -> steam.amount();
                 case DATA_WATER_CAPACITY -> water.capacity();
                 case DATA_STEAM_CAPACITY -> steam.capacity();
+                case DATA_STATE -> state.ordinal();
                 default -> 0;
             };
         }
@@ -120,15 +125,6 @@ public class BoilerBlockEntity extends BlockEntity implements Container, MenuPro
         return steam.amount();
     }
 
-    /** The fuel banked, in joules, and what the gauge reads it against: the last item lit. */
-    public long fuelJoules() {
-        return fuel.storedJoules();
-    }
-
-    public long fuelGaugeJoules() {
-        return fuel.gaugeCapacity();
-    }
-
     /**
      * The fluid face of the footprint block numbered {@code part}, or null where its port does not
      * open onto {@code side}: the anchor and the back corners open onto nothing. The null side
@@ -159,8 +155,28 @@ public class BoilerBlockEntity extends BlockEntity implements Container, MenuPro
             steam.fill(steam.amount() + converted);
             setChanged();
         }
+        state = stateAfter(converted);
         exchange(BoilerSlots.STEAM);
         passSteamOn();
+    }
+
+    /** Why a tick that converted nothing did not, asked in {@link BoilerCycle}'s order. */
+    private BoilerState stateAfter(int converted) {
+        if (converted > 0) {
+            return BoilerState.BOILING;
+        }
+        if (water.amount() < BoilerSpec.MILLIBUCKETS_PER_TICK) {
+            return BoilerState.NO_WATER;
+        }
+        if (steam.room() < BoilerSpec.MILLIBUCKETS_PER_TICK) {
+            return BoilerState.STEAM_BACKED_UP;
+        }
+        ItemStack stack = items.get(BoilerSlots.FUEL);
+        return fuelValue(stack) > 0L && !hasOutputRoom(leftBy(stack)) ? BoilerState.OUTPUT_FULL : BoilerState.NO_FUEL;
+    }
+
+    public BoilerState state() {
+        return state;
     }
 
     /**
@@ -260,14 +276,19 @@ public class BoilerBlockEntity extends BlockEntity implements Container, MenuPro
     private long light() {
         ItemStack stack = items.get(BoilerSlots.FUEL);
         long joules = fuelValue(stack);
-        ItemStackTemplate remainder = stack.getCraftingRemainder();
-        ItemStack left = remainder == null ? ItemStack.EMPTY : remainder.create();
+        ItemStack left = leftBy(stack);
         if (joules <= 0L || !hasOutputRoom(left)) {
             return 0L;
         }
         stack.shrink(1);
         leave(left);
         return joules;
+    }
+
+    /** What burning one of {@code stack} leaves, a lava bucket's bucket, or nothing. */
+    private static ItemStack leftBy(ItemStack stack) {
+        ItemStackTemplate remainder = stack.getCraftingRemainder();
+        return remainder == null ? ItemStack.EMPTY : remainder.create();
     }
 
     private boolean hasOutputRoom(ItemStack left) {

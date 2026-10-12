@@ -6,9 +6,6 @@ package io.github._5thlayer.wireworks.compat;
 import io.github._5thlayer.wireworks.AccumulatorBlock;
 import io.github._5thlayer.wireworks.AccumulatorBlockEntity;
 import io.github._5thlayer.wireworks.AccumulatorStatus;
-import io.github._5thlayer.wireworks.BoilerBlock;
-import io.github._5thlayer.wireworks.BoilerBlockEntity;
-import io.github._5thlayer.wireworks.BoilerSpec;
 import io.github._5thlayer.wireworks.NetworkExchange;
 import io.github._5thlayer.wireworks.TransformerBlock;
 import io.github._5thlayer.wireworks.TransformerBlockEntity;
@@ -97,10 +94,6 @@ public class PoleJadePlugin implements IWailaPlugin {
     private static final String REACTOR_WATER = "ReactorWater";
     private static final String REACTOR_STEAM = "ReactorSteam";
     private static final String REACTOR_CELL_TICKS = "ReactorCellTicks";
-    private static final String BOILER_WATER = "BoilerWater";
-    private static final String BOILER_STEAM = "BoilerSteam";
-    private static final String BOILER_FUEL = "BoilerFuel";
-    private static final String BOILER_FUEL_GAUGE = "BoilerFuelGauge";
 
     private static final Identifier SOLAR_UID =
             Identifier.fromNamespaceAndPath(Wireworks.MOD_ID, "solar_panel");
@@ -112,8 +105,6 @@ public class PoleJadePlugin implements IWailaPlugin {
             Identifier.fromNamespaceAndPath(Wireworks.MOD_ID, "steam_turbine");
     private static final Identifier REACTOR_UID =
             Identifier.fromNamespaceAndPath(Wireworks.MOD_ID, "reactor");
-    private static final Identifier BOILER_UID =
-            Identifier.fromNamespaceAndPath(Wireworks.MOD_ID, "boiler");
 
     /**
      * The numbers live on the server, so they have to be asked for.
@@ -396,54 +387,6 @@ public class PoleJadePlugin implements IWailaPlugin {
         }
     };
 
-    private static final IServerDataProvider<BlockAccessor> BOILER_DATA = new IServerDataProvider<>() {
-        @Override
-        public void appendServerData(CompoundTag tag, BlockAccessor accessor) {
-            if (accessor.getBlockEntity() instanceof BoilerBlockEntity boiler) {
-                tag.putInt(BOILER_WATER, boiler.water());
-                tag.putInt(BOILER_STEAM, boiler.steam());
-                tag.putLong(BOILER_FUEL, boiler.fuelJoules());
-                tag.putLong(BOILER_FUEL_GAUGE, boiler.fuelGaugeJoules());
-            }
-        }
-
-        @Override
-        public Identifier getUid() {
-            return BOILER_UID;
-        }
-    };
-
-    /**
-     * Its two tanks, which answer on no face of the anchor Jade reads, and the fuel it has banked in
-     * joules and in seconds, in the screen's own words. Its slots are Jade's own item row.
-     */
-    private static final IBlockComponentProvider BOILER_TOOLTIP = new IBlockComponentProvider() {
-        @Override
-        public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
-            CompoundTag data = accessor.getServerData();
-            if (!data.contains(BOILER_FUEL)) {
-                return;
-            }
-            tooltip.add(Component.translatable("tooltip.wireworks.boiler.water",
-                    data.getIntOr(BOILER_WATER, 0), BoilerSpec.WATER_CAPACITY));
-            tooltip.add(Component.translatable("tooltip.wireworks.boiler.steam",
-                    data.getIntOr(BOILER_STEAM, 0), BoilerSpec.STEAM_CAPACITY));
-            long joules = data.getLongOr(BOILER_FUEL, 0L);
-            if (joules <= 0L) {
-                tooltip.add(Component.translatable("tooltip.wireworks.boiler.fuel.out").withStyle(ChatFormatting.GRAY));
-                return;
-            }
-            tooltip.add(Component.translatable("tooltip.wireworks.boiler.fuel", joules, data.getLongOr(BOILER_FUEL_GAUGE, 0L)));
-            tooltip.add(Component.translatable("tooltip.wireworks.boiler.fuel.seconds",
-                    BoilerSpec.secondsOfFuel(joules), BoilerSpec.JOULES_PER_TICK).withStyle(ChatFormatting.GRAY));
-        }
-
-        @Override
-        public Identifier getUid() {
-            return BOILER_UID;
-        }
-    };
-
     private static IServerDataProvider<BlockAccessor> steamGeneratorData(Identifier uid) {
         return new IServerDataProvider<>() {
             @Override
@@ -493,7 +436,6 @@ public class PoleJadePlugin implements IWailaPlugin {
         registration.registerBlockDataProvider(STEAM_ENGINE_DATA, SteamEngineBlockEntity.class);
         registration.registerBlockDataProvider(STEAM_TURBINE_DATA, SteamTurbineBlockEntity.class);
         registration.registerBlockDataProvider(REACTOR_DATA, ReactorBlockEntity.class);
-        registration.registerBlockDataProvider(BOILER_DATA, BoilerBlockEntity.class);
     }
 
     @Override
@@ -506,6 +448,5 @@ public class PoleJadePlugin implements IWailaPlugin {
         registration.registerBlockComponent(STEAM_ENGINE_TOOLTIP, SteamEngineBlock.class);
         registration.registerBlockComponent(STEAM_TURBINE_TOOLTIP, SteamTurbineBlock.class);
         registration.registerBlockComponent(REACTOR_TOOLTIP, ReactorBlock.class);
-        registration.registerBlockComponent(BOILER_TOOLTIP, BoilerBlock.class);
     }
 }

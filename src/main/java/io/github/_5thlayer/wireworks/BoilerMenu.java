@@ -15,21 +15,23 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 /**
- * The Boiler's menu: a fuel slot, a water bucket slot above it, an empty bucket slot for steam beside
- * that, an output slot for what each of them leaves, and three gauges. A Boiler that has stopped is
- * out of fuel, out of water or backed up, and those three look the same from outside the block.
+ * The Boiler's menu, laid out as Fieldworks' Harvester's: the three input slots down the left, fuel,
+ * then a water container, then an empty container for steam, each beside the gauge it feeds or fills;
+ * the output on the right, where all three leave what they become; and the state the Boiler is in,
+ * which says why a stopped Boiler stopped.
  */
 public class BoilerMenu extends AbstractContainerMenu {
 
-    /** Where each slot stands: fuel and water on the furnace's own recesses, the screen draws the others. */
-    public static final int FUEL_X = 56;
-    public static final int FUEL_Y = 53;
-    public static final int WATER_X = 56;
-    public static final int WATER_Y = 17;
-    public static final int STEAM_X = 80;
-    public static final int STEAM_Y = 17;
-    public static final int OUTPUT_X = 80;
-    public static final int OUTPUT_Y = 53;
+    /** The input column, one slot per row, each row's gauge beside it. */
+    public static final int INPUT_X = 8;
+    public static final int FUEL_Y = 18;
+    public static final int WATER_Y = 36;
+    public static final int STEAM_Y = 54;
+    /** The output, right of the gauges, level with the middle row. */
+    public static final int OUTPUT_X = 134;
+    public static final int OUTPUT_Y = 36;
+    /** Where the player's inventory starts, from the top of the screen: below the state line. */
+    public static final int INVENTORY_Y = 100;
 
     /** The container slots shift-click fills, in the order it tries them. */
     private static final int[] INPUTS = {BoilerSlots.FUEL, BoilerSlots.WATER, BoilerSlots.STEAM};
@@ -53,19 +55,12 @@ public class BoilerMenu extends AbstractContainerMenu {
         checkContainerDataCount(data, BoilerBlockEntity.DATA_COUNT);
 
         // In the container's own order, so a menu slot's index is the container slot's.
-        addSlot(new InputSlot(container, BoilerSlots.FUEL, FUEL_X, FUEL_Y));
+        addSlot(new InputSlot(container, BoilerSlots.FUEL, INPUT_X, FUEL_Y));
         addSlot(new InputSlot(container, BoilerSlots.OUTPUT, OUTPUT_X, OUTPUT_Y));
-        addSlot(new InputSlot(container, BoilerSlots.WATER, WATER_X, WATER_Y));
-        addSlot(new InputSlot(container, BoilerSlots.STEAM, STEAM_X, STEAM_Y));
+        addSlot(new InputSlot(container, BoilerSlots.WATER, INPUT_X, WATER_Y));
+        addSlot(new InputSlot(container, BoilerSlots.STEAM, INPUT_X, STEAM_Y));
 
-        for (int row = 0; row < 3; row++) {
-            for (int column = 0; column < 9; column++) {
-                addSlot(new Slot(playerInventory, column + row * 9 + 9, 8 + column * 18, 84 + row * 18));
-            }
-        }
-        for (int column = 0; column < 9; column++) {
-            addSlot(new Slot(playerInventory, column, 8 + column * 18, 142));
-        }
+        addStandardInventorySlots(playerInventory, 8, INVENTORY_Y);
         addDataSlots(data);
     }
 
@@ -93,6 +88,10 @@ public class BoilerMenu extends AbstractContainerMenu {
 
     public int waterCapacity() {
         return data.get(BoilerBlockEntity.DATA_WATER_CAPACITY);
+    }
+
+    public BoilerState state() {
+        return BoilerState.of(data.get(BoilerBlockEntity.DATA_STATE));
     }
 
     public int steamCapacity() {

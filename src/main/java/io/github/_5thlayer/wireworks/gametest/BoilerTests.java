@@ -3,9 +3,11 @@
 
 package io.github._5thlayer.wireworks.gametest;
 
+import io.github._5thlayer.libworks.ghost.Ghosts;
 import io.github._5thlayer.wireworks.BoilerBlockEntity;
 import io.github._5thlayer.wireworks.BoilerMenu;
 import io.github._5thlayer.wireworks.BoilerSlots;
+import io.github._5thlayer.wireworks.BoilerState;
 import io.github._5thlayer.wireworks.SteamEngineBlockEntity;
 import io.github._5thlayer.wireworks.SteamFluids;
 import io.github._5thlayer.wireworks.WireworksRegistries;
@@ -88,6 +90,8 @@ final class BoilerTests {
         tests.test("boiler_holds_a_water_bucket_while_its_tank_has_no_room", 20, BoilerTests::holdsAWaterBucketWithoutRoom);
         tests.test("boiler_holds_a_water_bucket_while_its_output_has_no_room", 20, BoilerTests::holdsAWaterBucketWithoutOutputRoom);
         tests.test("boiler_fills_an_empty_bucket_with_steam", 500, BoilerTests::fillsABucketWithSteam);
+        tests.test("boiler_says_why_it_is_not_boiling", 60, BoilerTests::saysWhy);
+        tests.test("boiler_menu_ghosts_show_what_each_input_slot_takes", 20, BoilerTests::ghostsShowWhatSlotsTake);
         tests.test("steam_has_a_bucket", 20, helper -> {
             helper.assertTrue(SteamFluids.STEAM_SOURCE.get().getBucket() == WireworksRegistries.STEAM_BUCKET.get(),
                     "steam's bucket is " + SteamFluids.STEAM_SOURCE.get().getBucket());
@@ -210,6 +214,7 @@ final class BoilerTests {
                     if (boiler.data().get(BoilerBlockEntity.DATA_WATER) != held[1]) {
                         helper.fail("a blocked Boiler spent water", ANCHOR);
                     }
+                    expectState(helper, BoilerState.STEAM_BACKED_UP);
                     if (extract(fluidAt(helper, part(helper, STEAM_PART), Direction.SOUTH), steam(), 30) != 30) {
                         helper.fail("a pipe could not draw 30 mB from the full steam tank", ANCHOR);
                     }
@@ -465,6 +470,7 @@ final class BoilerTests {
                 .thenExecute(() -> {
                     helper.assertTrue(boiler(helper).getItem(BoilerSlots.FUEL).is(Items.LAVA_BUCKET), "the lava bucket was lit");
                     helper.assertValueEqual(boiler(helper).data().get(BoilerBlockEntity.DATA_STEAM), 0, "steam made");
+                    expectState(helper, BoilerState.OUTPUT_FULL);
                     boiler(helper).setItem(BoilerSlots.OUTPUT, ItemStack.EMPTY);
                 })
                 .thenWaitUntil(() -> helper.assertTrue(boiler(helper).getItem(BoilerSlots.OUTPUT).is(Items.BUCKET),
@@ -586,6 +592,58 @@ final class BoilerTests {
                     helper.assertTrue(boiler(helper).data().get(BoilerBlockEntity.DATA_STEAM) < 1_000, "the steam tank kept the bucket's steam");
                 })
                 .thenSucceed();
+    }
+
+    /**
+     * The state the screen and Jade name: no water first, then fuel, then boiling. The backed-up and
+     * output-full states are asserted where those stalls are set up.
+     */
+    private static void saysWhy(GameTestHelper helper) {
+        place(helper);
+        helper.startSequence()
+                .thenIdle(1)
+                .thenExecute(() -> {
+                    expectState(helper, BoilerState.NO_WATER);
+                    insert(fluidAt(helper, part(helper, WEST_END), null), water(), WATER_CAPACITY);
+                })
+                .thenIdle(1)
+                .thenExecute(() -> {
+                    expectState(helper, BoilerState.NO_FUEL);
+                    boiler(helper).setItem(BoilerSlots.FUEL, new ItemStack(Items.COAL));
+                })
+                .thenIdle(1)
+                .thenExecute(() -> expectState(helper, BoilerState.BOILING))
+                .thenSucceed();
+    }
+
+    private static void expectState(GameTestHelper helper, BoilerState expected) {
+        BoilerState state = boiler(helper).state();
+        if (state != expected) {
+            helper.fail("the Boiler says " + state + ", not " + expected, ANCHOR);
+        }
+        int synced = boiler(helper).data().get(BoilerBlockEntity.DATA_STATE);
+        if (synced != expected.ordinal()) {
+            helper.fail("the menu is sent state " + synced + ", not " + expected.ordinal(), ANCHOR);
+        }
+    }
+
+    /** The ghosts the screen draws in each empty input slot are what that slot takes; the output has none. */
+    private static void ghostsShowWhatSlotsTake(GameTestHelper helper) {
+        place(helper);
+        ListeningPlayer player = new ListeningPlayer(helper, ANCHOR.above());
+        BoilerMenu menu = new BoilerMenu(0, player.getInventory(), boiler(helper), boiler(helper).data());
+        Object[][] cases = {
+                {BoilerSlots.FUEL, Items.COAL, Items.WATER_BUCKET},
+                {BoilerSlots.WATER, Items.WATER_BUCKET, Items.BUCKET},
+                {BoilerSlots.STEAM, Items.BUCKET, Items.COAL},
+        };
+        for (Object[] each : cases) {
+            List<ItemStack> ghosts = Ghosts.accepted(menu.slots.get((int) each[0]));
+            helper.assertTrue(ghosts.stream().anyMatch(stack -> stack.is((Item) each[1])), "slot " + each[0] + "'s ghosts lack " + each[1]);
+            helper.assertFalse(ghosts.stream().anyMatch(stack -> stack.is((Item) each[2])), "slot " + each[0] + "'s ghosts show " + each[2]);
+        }
+        helper.assertTrue(Ghosts.accepted(menu.slots.get(BoilerSlots.OUTPUT)).isEmpty(), "the output shows ghosts");
+        helper.succeed();
     }
 
     /** Shift-click sends a water bucket to the water slot and an empty bucket to the steam slot. */
