@@ -4,6 +4,7 @@
 package io.github._5thlayer.wireworks.gametest;
 
 import io.github._5thlayer.wireworks.SteamFluids;
+import io.github._5thlayer.wireworks.SteamTurbineBlock;
 import io.github._5thlayer.wireworks.SteamTurbineBlockEntity;
 import io.github._5thlayer.wireworks.WireworksRegistries;
 import net.minecraft.core.BlockPos;
@@ -37,6 +38,10 @@ final class SteamTurbineTests {
 
     private static final int SETTLE = Network.SETTLE;
     private static final int MEASURED = 20;
+    /** How long the fan spins on after the last burn, in ticks: a literal second. */
+    private static final int RUNNING_HOLD = 20;
+    /** One tick of the Turbine's Superheated Steam, 3 mB: a literal. */
+    private static final int MILLIBUCKETS_PER_TICK = 3;
 
     private SteamTurbineTests() {
     }
@@ -50,6 +55,7 @@ final class SteamTurbineTests {
         });
         tests.test("steam_turbine_row_on_fed_superheated_steam_makes_its_rate_per_turbine", 100,
                 SteamTurbineTests::fedRow);
+        tests.test("steam_turbine_spins_its_fan_while_it_runs_and_a_second_after", 100, SteamTurbineTests::spinsASecond);
         tests.test("steam_turbine_refuses_steam_and_gives_none_back", 20, SteamTurbineTests::refusesSteam);
         tests.test("steam_engine_refuses_superheated_steam", 20, SteamTurbineTests::engineRefusesSuperheated);
     }
@@ -137,6 +143,40 @@ final class SteamTurbineTests {
                 .thenIdle(SETTLE + MEASURED + 1)
                 .thenExecute(() -> expectEachMadeItsRate(helper, ROW, drawn))
                 .thenSucceed();
+    }
+
+    /**
+     * The fan on the anchor is still until the Turbine burns, spins while it does, and spins on for a
+     * second after the last burn, so one at part load does not flicker, and then stops.
+     */
+    private static void spinsASecond(GameTestHelper helper) {
+        Network.footprint(helper, WireworksRegistries.STEAM_TURBINE_FOOTPRINT, ANCHOR, Direction.NORTH);
+        BlockPos[] one = {ANCHOR};
+        drawEachTick(helper, one, () -> { });
+        helper.startSequence()
+                .thenIdle(1)
+                .thenExecute(() -> {
+                    expectRunning(helper, false, "a Turbine that has never burnt");
+                    // Ten ticks of steam.
+                    insertAt(helper, ANCHOR, null, superheated(), 10 * MILLIBUCKETS_PER_TICK);
+                })
+                .thenWaitUntil(() -> {
+                    if (faceAt(helper, ANCHOR, null).getAmountAsInt(0) > 0) {
+                        helper.fail("the Turbine has not burnt its steam yet", ANCHOR);
+                    }
+                })
+                .thenExecute(() -> expectRunning(helper, true, "a Turbine that burnt a tick ago"))
+                .thenIdle(RUNNING_HOLD - 3)
+                .thenExecute(() -> expectRunning(helper, true, "a Turbine that burnt under a second ago"))
+                .thenIdle(5)
+                .thenExecute(() -> expectRunning(helper, false, "a Turbine that last burnt over a second ago"))
+                .thenSucceed();
+    }
+
+    private static void expectRunning(GameTestHelper helper, boolean expected, String which) {
+        if (helper.getBlockState(ANCHOR).getValue(SteamTurbineBlock.RUNNING) != expected) {
+            helper.fail(which + (expected ? " shows its fan still" : " shows its fan spinning"), ANCHOR);
+        }
     }
 
     /** Steam, the Boiler's, goes into no Turbine, and a Turbine's superheated steam cannot be drawn back out. */

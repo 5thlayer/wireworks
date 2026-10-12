@@ -10,7 +10,7 @@ modId = "${mod_id}"
 version = "${version}"
 displayName = "${mod_name}"
 authors = "5thlayer"
-credits = "Bioresin, plastic, battery, Accumulator, Solar Panel and Boiler textures (the Boiler's front, the Accumulator's sides and the Solar Panel's cell adapted) by Malcolm Riley (github.com/malcolmriley/unused-textures), CC-BY-4.0"
+credits = "Bioresin, plastic, battery, fuel cell, Accumulator, Solar Panel, Boiler, Steam Turbine and Reactor textures (the Boiler's front, the Accumulator's sides, the Solar Panel's cell and the Steam Turbine's still fan and coil side adapted) by Malcolm Riley (github.com/malcolmriley/unused-textures), CC-BY-4.0"
 description = '''
 ${mod_description}
 '''

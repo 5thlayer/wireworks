@@ -17,6 +17,12 @@ shows where two blocks meet, and there it drew a seam down the middle of the sid
 The Solar Panel's cell is blue_cement_center set in a frame of the plain plating, its outer ring, with a
 dark line inside the frame, so each block of the 3x3 top reads as a panel of its own.
 
+The Steam Turbine's still fan is the first frame of the duct fan's animation, which the running fan
+wears whole. Its coil side is the copper coil's turned half its dark band over, so the band's darker
+half runs down the left edge, and then its left half mirrored onto its right: each block has the same
+dark half band down either edge, which meet whole where two blocks do, and the coil's shine sits in the
+middle, so a face three blocks wide reads the same from either end.
+
 Run from the repository root; it needs Pillow. `--check` builds and diffs, and fails when a committed
 texture is stale.
 """
@@ -41,6 +47,8 @@ RIM_SIDE = 2
 RIM_UPPER = 7
 # How much redder than blue a pixel is to be the smelter's brick, against the grey of its cold iron.
 BRICK_RED = 18
+# Half the width of the dark band down the copper coil side's left edge.
+COIL_BAND_HALF = 2
 # The line inside a solar cell's frame, a navy darker than the cell.
 CELL_LINE = (30, 30, 58, 255)
 
@@ -104,6 +112,20 @@ def solar_cell():
     return cell
 
 
+def still_fan():
+    return frames("industrial_metal_duct_fan")[0]
+
+
+def coil_side():
+    coil = frames("copper_coil_side")[0]
+    turned = Image.new("RGBA", (SIZE, SIZE))
+    turned.paste(coil.crop((COIL_BAND_HALF, 0, SIZE, SIZE)), (0, 0))
+    turned.paste(coil.crop((0, 0, COIL_BAND_HALF, SIZE)), (SIZE - COIL_BAND_HALF, 0))
+    left = turned.crop((0, 0, SIZE // 2, SIZE))
+    turned.paste(left.transpose(Image.Transpose.FLIP_LEFT_RIGHT), (SIZE // 2, 0))
+    return turned
+
+
 def png(image):
     out = io.BytesIO()
     image.save(out, format="PNG")
@@ -116,6 +138,8 @@ TEXTURES = {
     BLOCK / "boiler" / "front_on.png": (lambda: boiler_front("device_smelter_front_lit"), "device_smelter_front_lit.png.mcmeta"),
     BLOCK / "accumulator" / "sides.png": (accumulator_sides, None),
     BLOCK / "solar_panel" / "cell.png": (solar_cell, None),
+    BLOCK / "steam_turbine" / "fan_off.png": (still_fan, None),
+    BLOCK / "steam_turbine" / "coil_side.png": (coil_side, None),
 }
 
 

@@ -1,8 +1,67 @@
 {
-  "parent": "minecraft:block/orientable",
+  "render_type": "minecraft:cutout",
   "textures": {
-    "front": "minecraft:block/blast_furnace_top",
-    "side": "minecraft:block/iron_block",
-    "top": "minecraft:block/iron_block"
-  }
+    "casing": "wireworks:block/plating/hazard_stripe",
+    "cap": "wireworks:block/reactor/steel",
+    "ring": "wireworks:block/fluid_port_output",
+    "particle": "wireworks:block/plating/hazard_stripe"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "down": {
+          "texture": "#cap",
+          "cullface": "down"
+        },
+        "up": {
+          "texture": "#cap",
+          "cullface": "up"
+        },
+        "north": {
+          "texture": "#casing",
+          "cullface": "north"
+        },
+        "south": {
+          "texture": "#casing",
+          "cullface": "south"
+        },
+        "west": {
+          "texture": "#casing",
+          "cullface": "west"
+        },
+        "east": {
+          "texture": "#casing",
+          "cullface": "east"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        0,
+        -0.01
+      ],
+      "to": [
+        16,
+        16,
+        -0.01
+      ],
+      "faces": {
+        "north": {
+          "texture": "#ring",
+          "cullface": "north"
+        }
+      }
+    }
+  ]
 }

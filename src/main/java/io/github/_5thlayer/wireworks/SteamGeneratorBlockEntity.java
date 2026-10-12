@@ -104,7 +104,12 @@ public abstract class SteamGeneratorBlockEntity extends BlockEntity {
         if (changed) {
             setChanged();
         }
+        afterTick(burning);
         passSteamOn();
+    }
+
+    /** Called at the end of each tick with whether it burnt steam; the Steam Turbine spins its fan by it. */
+    void afterTick(boolean burning) {
     }
 
     /** Offers what the tank holds to whatever stands against the row end the steam did not come in at. */

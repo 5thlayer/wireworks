@@ -15,8 +15,8 @@ import java.util.function.Supplier;
 /**
  * A part block drawn from its own model. Groundworks draws no part, leaving the origin's model to draw
  * the whole, but a block model reaches only a block past its own: the Reactor stands three tall over a
- * bottom centre anchor, and the Boiler and the Steam Turbine have one-block stand-ins for anchor models.
- * Until their models are drawn, each part wears its own vanilla stand-in. The Boiler's parts are a
+ * bottom centre anchor, and the Boiler's and the Steam Turbine's anchors are one-block models. Each
+ * part wears its own block's textures, picked by its part number and facing. The Boiler's parts are a
  * {@link BoilerPartBlock}, which also lights with its anchor.
  */
 class DrawnPartBlock extends FootprintPartBlock {

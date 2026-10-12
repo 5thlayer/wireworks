@@ -1,9 +1,12 @@
 {
-  "parent": "minecraft:block/orientable",
+  "parent": "minecraft:block/cube",
   "textures": {
-    "front": "minecraft:block/piston_top",
-    "side": "minecraft:block/copper_block",
-    "top": "minecraft:block/copper_block",
-    "particle": "minecraft:block/copper_block"
+    "north": "wireworks:block/steam_turbine/fan_off",
+    "south": "wireworks:block/steam_turbine/fan_off",
+    "east": "wireworks:block/steam_turbine/coil_end",
+    "west": "wireworks:block/steam_turbine/coil_end",
+    "up": "wireworks:block/steam_turbine/coil_side",
+    "down": "wireworks:block/steam_turbine/coil_side",
+    "particle": "wireworks:block/steam_turbine/coil_side"
   }
 }

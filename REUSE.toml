@@ -39,9 +39,10 @@ path = ["publish/*.png"]
 SPDX-FileCopyrightText = ["Mojang AB", "2026 5thlayer"]
 SPDX-License-Identifier = "LicenseRef-Mojang"
 
-# Bioresin's, plastic's and the battery's item textures, the Accumulator's top and bottom, the
-# plating the Solar Panel and the Boiler share, the lit smelter's animation beside the Boiler's
-# front, and the unmodified copies under data/art/ that the adapted textures are built from, are
+# Bioresin's, plastic's, the battery's and the fuel cells' item textures, the Accumulator's top and
+# bottom, the plating the Solar Panel, the Boiler and the Reactor share, the lit smelter's animation
+# beside the Boiler's front, the Steam Turbine's coil and running fan, the Reactor's steel and vent,
+# and the unmodified copies under data/art/ that the adapted textures are built from, are
 # Malcolm Riley's, from
 # https://github.com/malcolmriley/unused-textures, unmodified; see docs/placeholder-art.md.
 [[annotations]]
@@ -49,10 +50,16 @@ path = [
     "src/main/resources/assets/wireworks/textures/item/bioresin.png",
     "src/main/resources/assets/wireworks/textures/item/plastic.png",
     "src/main/resources/assets/wireworks/textures/item/battery.png",
+    "src/main/resources/assets/wireworks/textures/item/fuel_cell.png",
+    "src/main/resources/assets/wireworks/textures/item/depleted_fuel_cell.png",
     "src/main/resources/assets/wireworks/textures/block/accumulator/top.png",
     "src/main/resources/assets/wireworks/textures/block/accumulator/bottom.png",
     "src/main/resources/assets/wireworks/textures/block/plating/*.png",
     "src/main/resources/assets/wireworks/textures/block/boiler/front_on.png.mcmeta",
+    "src/main/resources/assets/wireworks/textures/block/steam_turbine/coil_end.png",
+    "src/main/resources/assets/wireworks/textures/block/steam_turbine/fan_on.png",
+    "src/main/resources/assets/wireworks/textures/block/steam_turbine/fan_on.png.mcmeta",
+    "src/main/resources/assets/wireworks/textures/block/reactor/*.png",
     "data/art/*.png",
     "data/art/*.png.mcmeta",
 ]
@@ -60,13 +67,17 @@ precedence = "override"
 SPDX-FileCopyrightText = "Malcolm Riley"
 SPDX-License-Identifier = "CC-BY-4.0"
 
-# The Boiler's front, the Accumulator's sides and the Solar Panel's cell, adapted from Malcolm Riley's
-# smelter, battery block and blue cement by scripts/build-textures.py; see docs/placeholder-art.md.
+# The Boiler's front, the Accumulator's sides, the Solar Panel's cell and the Steam Turbine's still
+# fan and coil side, adapted from Malcolm Riley's smelter, battery block, blue cement, duct fan and
+# copper coil by
+# scripts/build-textures.py; see docs/placeholder-art.md.
 [[annotations]]
 path = [
     "src/main/resources/assets/wireworks/textures/block/boiler/front_*.png",
     "src/main/resources/assets/wireworks/textures/block/accumulator/sides.png",
     "src/main/resources/assets/wireworks/textures/block/solar_panel/cell.png",
+    "src/main/resources/assets/wireworks/textures/block/steam_turbine/fan_off.png",
+    "src/main/resources/assets/wireworks/textures/block/steam_turbine/coil_side.png",
 ]
 precedence = "override"
 SPDX-FileCopyrightText = ["Malcolm Riley", "2026 5thlayer"]

@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "north": "wireworks:block/steam_turbine/fan_on",
+    "south": "wireworks:block/steam_turbine/fan_on",
+    "east": "wireworks:block/steam_turbine/coil_end",
+    "west": "wireworks:block/steam_turbine/coil_end",
+    "up": "wireworks:block/steam_turbine/coil_side",
+    "down": "wireworks:block/steam_turbine/coil_side",
+    "particle": "wireworks:block/steam_turbine/coil_side"
+  }
+}
