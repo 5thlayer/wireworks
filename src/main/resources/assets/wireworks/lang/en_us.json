@@ -30,6 +30,8 @@
   "config.jade.plugin_wireworks.steam_engine": "Steam Engine status",
   "config.jade.plugin_wireworks.steam_turbine": "Steam Turbine output",
   "config.jade.plugin_wireworks.supply_area_pole": "Pole network",
+  "config.jade.plugin_wireworks.transformer": "Transformer exchange",
+  "config.jade.plugin_wireworks.transmission_pole": "Transmission Pole network",
   "fluid_type.wireworks.steam": "Steam",
   "fluid_type.wireworks.superheated_steam": "Superheated Steam",
   "item.wireworks.accumulator": "Accumulator",

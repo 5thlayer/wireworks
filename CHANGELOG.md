@@ -25,6 +25,7 @@ Each version has two sections: Players, what a player or pack developer sees, an
 - Wireworks' items are in the suite's shared Works tab, beside every other -works mod's, and in no other tab: the Wireworks tab is gone, and the blocks leave Functional Blocks. (#23)
 - The Boiler's screen looks as it did, but a status line too long for the panel is cut short and shown whole on hover, and an empty tank's gauge reads no amount where it read 0 mB. (#44)
 - The Boiler's water and steam gauges say on hover which tank they are, then the fluid in it or "Empty", then how much it holds, in the words every machine's tanks use.
+- A Distribution Pole's Jade lines show again. The Transmission Pole's and the Transformer's lines had taken its Jade id, which left the pole's lines empty; each now has a toggle of its own in Jade's settings, "Transmission Pole network" and "Transformer exchange".
 
 ### Consumers
 

@@ -69,6 +69,16 @@ public class PoleJadePlugin implements IWailaPlugin {
     private static final Identifier UID =
             Identifier.fromNamespaceAndPath(Wireworks.MOD_ID, "supply_area_pole");
 
+    /**
+     * The Transmission Pole's and the Transformer's own ids, each for one data provider and one tooltip.
+     * Jade keeps one provider for each id, so a provider sharing the Distribution Pole's id stood in for
+     * the pole's own, which then sent nothing.
+     */
+    private static final Identifier TRANSMISSION_UID =
+            Identifier.fromNamespaceAndPath(Wireworks.MOD_ID, "transmission_pole");
+    private static final Identifier TRANSFORMER_UID =
+            Identifier.fromNamespaceAndPath(Wireworks.MOD_ID, "transformer");
+
     private static final String MACHINES = "PoleMachines";
     private static final String DELIVERED = "PoleDelivered";
     private static final String DEMANDED = "PoleDemanded";
@@ -181,27 +191,35 @@ public class PoleJadePlugin implements IWailaPlugin {
         tag.putLong(LINE_SHORTFALL, exchange.shortfall());
     }
 
-    /** Transmission Poles and Transformers answer under the same id, so the "Pole network" toggle covers them. */
-    private static final IServerDataProvider<BlockAccessor> LINE_DATA = new IServerDataProvider<>() {
-        @Override
-        public void appendServerData(CompoundTag tag, BlockAccessor accessor) {
-            BlockPos base = PoleColumn.baseOf(accessor.getLevel(), accessor.getPosition());
-            if (base == null) {
-                return;
-            }
-            var entity = accessor.getLevel().getBlockEntity(base);
-            if (entity instanceof TransmissionPoleBlockEntity pole) {
-                putExchange(tag, pole.networkExchange());
-            } else if (entity instanceof TransformerBlockEntity transformer) {
-                putExchange(tag, transformer.networkExchange());
-            }
-        }
+    /** What a Transmission Pole carries. */
+    private static final IServerDataProvider<BlockAccessor> TRANSMISSION_DATA = lineData(TRANSMISSION_UID);
 
-        @Override
-        public Identifier getUid() {
-            return UID;
-        }
-    };
+    /** What a Transformer carries across, and its network's balance. */
+    private static final IServerDataProvider<BlockAccessor> TRANSFORMER_DATA = lineData(TRANSFORMER_UID);
+
+    /** What the column's base carries, a Transmission Pole's or a Transformer's, under its own id. */
+    private static IServerDataProvider<BlockAccessor> lineData(Identifier uid) {
+        return new IServerDataProvider<>() {
+            @Override
+            public void appendServerData(CompoundTag tag, BlockAccessor accessor) {
+                BlockPos base = PoleColumn.baseOf(accessor.getLevel(), accessor.getPosition());
+                if (base == null) {
+                    return;
+                }
+                var entity = accessor.getLevel().getBlockEntity(base);
+                if (entity instanceof TransmissionPoleBlockEntity pole) {
+                    putExchange(tag, pole.networkExchange());
+                } else if (entity instanceof TransformerBlockEntity transformer) {
+                    putExchange(tag, transformer.networkExchange());
+                }
+            }
+
+            @Override
+            public Identifier getUid() {
+                return uid;
+            }
+        };
+    }
 
     /** The network's surplus or shortfall, which a Transmission Pole and a Transformer both name. */
     private static void networkLines(ITooltip tooltip, CompoundTag data) {
@@ -231,7 +249,7 @@ public class PoleJadePlugin implements IWailaPlugin {
 
         @Override
         public Identifier getUid() {
-            return UID;
+            return TRANSMISSION_UID;
         }
     };
 
@@ -256,7 +274,7 @@ public class PoleJadePlugin implements IWailaPlugin {
 
         @Override
         public Identifier getUid() {
-            return UID;
+            return TRANSFORMER_UID;
         }
     };
 
@@ -378,8 +396,8 @@ public class PoleJadePlugin implements IWailaPlugin {
     @Override
     public void register(IWailaCommonRegistration registration) {
         registration.registerBlockDataProvider(DATA, SupplyAreaPoleBlockEntity.class);
-        registration.registerBlockDataProvider(LINE_DATA, TransmissionPoleBlockEntity.class);
-        registration.registerBlockDataProvider(LINE_DATA, TransformerBlockEntity.class);
+        registration.registerBlockDataProvider(TRANSMISSION_DATA, TransmissionPoleBlockEntity.class);
+        registration.registerBlockDataProvider(TRANSFORMER_DATA, TransformerBlockEntity.class);
         registration.registerBlockDataProvider(SOLAR_DATA, SolarPanelBlockEntity.class);
         registration.registerBlockDataProvider(ACCUMULATOR_DATA, AccumulatorBlockEntity.class);
         registration.registerBlockDataProvider(STEAM_ENGINE_DATA, SteamEngineBlockEntity.class);
