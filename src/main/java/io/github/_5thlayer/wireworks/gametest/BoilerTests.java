@@ -15,6 +15,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.transfer.ResourceHandler;
@@ -65,6 +66,7 @@ final class BoilerTests {
         tests.test("boiler_steam_port_gives_steam_and_takes_none", 20, BoilerTests::steamPortGivesSteamOnly);
         tests.test("boiler_item_face_takes_fuel_only", 20, BoilerTests::itemFaceTakesFuelOnly);
         tests.test("boiler_parts_reach_the_fuel_slot", 20, BoilerTests::partsReachTheFuelSlot);
+        tests.test("boiler_hoppers_feed_fuel_and_take_none", 60, BoilerTests::hoppers);
         tests.test("boiler_feeds_a_steam_engine_against_its_steam_port", 200, BoilerTests::feedsAnEngine);
     }
 
@@ -337,6 +339,40 @@ final class BoilerTests {
             }
         }
         helper.succeed();
+    }
+
+    /**
+     * Real hoppers, on a Boiler raised a block: one above the anchor pushes coal in, and one under the
+     * anchor and one under a back corner pull none of it out. The anchor's is the one that reaches the
+     * block entity itself, a vanilla container, rather than the item face. With no water the Boiler
+     * burns nothing, so the coal it holds at the end is all the coal it was given.
+     */
+    private static void hoppers(GameTestHelper helper) {
+        BlockPos raised = ANCHOR.above();
+        Network.footprint(helper, WireworksRegistries.BOILER_FOOTPRINT, raised, FACING);
+        BlockPos above = raised.above();
+        BlockPos underAnchor = ANCHOR;
+        BlockPos underCorner = helper.relativePos(
+                WireworksRegistries.BOILER_FOOTPRINT.positions(helper.absolutePos(raised), FACING).get(BACK_WEST)).below();
+        for (BlockPos hopper : List.of(above, underAnchor, underCorner)) {
+            helper.setBlock(hopper, Blocks.HOPPER.defaultBlockState());
+        }
+        BoilerBlockEntity boiler = helper.getBlockEntity(raised, BoilerBlockEntity.class);
+        helper.getBlockEntity(above, HopperBlockEntity.class).setItem(0, new ItemStack(Items.COAL, 1));
+        boiler.setItem(BoilerSlots.FUEL, new ItemStack(Items.COAL, 4));
+        helper.startSequence()
+                .thenWaitUntil(() -> helper.assertValueEqual(boiler.getItem(BoilerSlots.FUEL).getCount(), 5, "coal in the boiler"))
+                .thenIdle(20)
+                .thenExecute(() -> {
+                    helper.assertValueEqual(boiler.getItem(BoilerSlots.FUEL).getCount(), 5, "coal in the boiler after the hoppers ran on");
+                    for (BlockPos under : List.of(underAnchor, underCorner)) {
+                        HopperBlockEntity hopper = helper.getBlockEntity(under, HopperBlockEntity.class);
+                        for (int slot = 0; slot < hopper.getContainerSize(); slot++) {
+                            helper.assertFalse(hopper.getItem(slot).is(Items.COAL), "a hopper at " + under + " pulled coal out");
+                        }
+                    }
+                })
+                .thenSucceed();
     }
 
     /** The Boiler hands its steam to the Engine standing against its steam port, with no pipe between. */

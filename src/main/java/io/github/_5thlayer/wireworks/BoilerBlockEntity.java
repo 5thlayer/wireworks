@@ -225,6 +225,15 @@ public class BoilerBlockEntity extends BlockEntity implements Container, MenuPro
         return slot == BoilerSlots.FUEL && isFuel(stack);
     }
 
+    /**
+     * Nothing comes out. A hopper under the anchor reaches this container itself rather than the
+     * item face, and would otherwise pull the fuel the Boiler is about to burn.
+     */
+    @Override
+    public boolean canTakeItem(Container target, int slot, ItemStack stack) {
+        return false;
+    }
+
     @Override
     public void clearContent() {
         items.clear();
