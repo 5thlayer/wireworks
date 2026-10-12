@@ -56,7 +56,6 @@ public final class WireworksGameTests {
             return;
         }
         TestConsumer.register(modBus);
-        TestCrude.register(modBus);
         PoleReplaceTests.statePackGroup();
         modBus.addListener(WireworksGameTests::registerTests);
     }
@@ -83,7 +82,6 @@ public final class WireworksGameTests {
         BoilerTests.register(tests);
         SteamEngineTests.register(tests);
         EnergyBlockDataTests.register(tests);
-        TarTests.register(tests);
     }
 
     private static Identifier id(String path) {

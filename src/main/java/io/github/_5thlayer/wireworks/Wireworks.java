@@ -27,7 +27,6 @@ public final class Wireworks {
     public Wireworks(IEventBus modBus, ModContainer container) {
         WireworksRegistries.register(modBus);
         SteamFluids.register(modBus);
-        TarInteraction.register(modBus);
         WireworksConfig.register(container, modBus);
         modBus.addListener(Wireworks::registerPayloads);
         PoleColumnReplace.register(modBus);

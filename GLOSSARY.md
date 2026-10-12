@@ -137,16 +137,12 @@ _Avoid_: fission fuel (what the **Reactor** burns), enriched uranium
 
 ### Resources
 
-**Crude**:
-Any fluid in `c:crude_oil`, which another mod ships, such as Fieldworks: Wireworks ships none.
-_Avoid_: oil, petroleum
-
 **Tar**:
-What a **Crude** source block sets as where it touches lava, on any side; the lava stays, and flowing crude never sets. A piston breaks the tar block, and it drops one tar, a **Plastic Resin**.
+Any item in `c:tar`, a **Plastic Resin**. Wireworks makes none: Fieldworks does, where its crude oil meets lava, and without it the tag is empty.
 _Avoid_: bitumen, asphalt
 
 **Plastic Resin**:
-An item in `wireworks:plastic_resins`, which plastic is made from. Tar is one.
+An item in `wireworks:plastic_resins`, which plastic is made from: vanilla's resin clump, and **Tar** when a mod fills `c:tar`.
 _Avoid_: resin (vanilla's resin clump alone)
 
 ### Drawing
