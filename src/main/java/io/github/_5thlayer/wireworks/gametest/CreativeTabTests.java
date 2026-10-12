@@ -3,7 +3,10 @@
 
 package io.github._5thlayer.wireworks.gametest;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import io.github._5thlayer.libworks.WorksTab;
 import io.github._5thlayer.wireworks.PoleTier;
@@ -15,7 +18,7 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-/** The suite's Works tab holds every item the Library adds, the poles first and tar last, and the Library has no tab of its own. */
+/** The suite's Works tab holds every item the Library registers, the poles first and tar last, and the Library has no tab of its own. */
 final class CreativeTabTests {
 
     private CreativeTabTests() {
@@ -23,16 +26,24 @@ final class CreativeTabTests {
 
     static void register(WireworksGameTests.Registrar tests) {
         tests.test("works_tab_holds_every_item_the_library_adds", 1, CreativeTabTests::holdsEveryItem);
+        tests.test("works_tab_shows_the_poles_first_and_tar_last", 1, CreativeTabTests::showsItemsInOrder);
         tests.test("library_registers_no_creative_tab_of_its_own", 1, CreativeTabTests::registersNoTab);
     }
 
     private static void holdsEveryItem(GameTestHelper helper) {
-        CreativeModeTabs.tryRebuildTabContents(helper.getLevel().enabledFeatures(), true,
-                helper.getLevel().registryAccess());
-        List<Item> shown = BuiltInRegistries.CREATIVE_MODE_TAB.getValueOrThrow(WorksTab.KEY).getDisplayItems().stream()
-                .map(ItemStack::getItem)
-                .filter(item -> BuiltInRegistries.ITEM.getKey(item).getNamespace().equals(Wireworks.MOD_ID))
-                .toList();
+        Set<Item> shown = new HashSet<>(shownItems(helper));
+        Set<Item> registered = BuiltInRegistries.ITEM.stream()
+                .filter(CreativeTabTests::isOwn)
+                .collect(Collectors.toSet());
+        if (!shown.equals(registered)) {
+            helper.fail("the Works tab shows " + shown + ", not every registered item " + registered);
+            return;
+        }
+        helper.succeed();
+    }
+
+    private static void showsItemsInOrder(GameTestHelper helper) {
+        List<Item> shown = shownItems(helper);
         List<Item> expected = List.of(WireworksRegistries.poleItem(PoleTier.SMALL).get(),
                 WireworksRegistries.poleItem(PoleTier.MEDIUM).get(), WireworksRegistries.poleItem(PoleTier.LARGE).get(),
                 WireworksRegistries.TRANSMISSION_POLE_ITEM.get(), WireworksRegistries.TRANSFORMER_ITEM.get(),
@@ -44,6 +55,19 @@ final class CreativeTabTests {
             return;
         }
         helper.succeed();
+    }
+
+    private static List<Item> shownItems(GameTestHelper helper) {
+        CreativeModeTabs.tryRebuildTabContents(helper.getLevel().enabledFeatures(), true,
+                helper.getLevel().registryAccess());
+        return BuiltInRegistries.CREATIVE_MODE_TAB.getValueOrThrow(WorksTab.KEY).getDisplayItems().stream()
+                .map(ItemStack::getItem)
+                .filter(CreativeTabTests::isOwn)
+                .toList();
+    }
+
+    private static boolean isOwn(Item item) {
+        return BuiltInRegistries.ITEM.getKey(item).getNamespace().equals(Wireworks.MOD_ID);
     }
 
     private static void registersNoTab(GameTestHelper helper) {
