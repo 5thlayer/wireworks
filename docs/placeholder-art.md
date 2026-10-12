@@ -23,7 +23,7 @@ The Reactor has no art of its own yet either. A block model reaches only one blo
 
 ## From unused-textures
 
-These textures are Malcolm Riley's, from [unused-textures](https://github.com/malcolmriley/unused-textures) at commit `9218cb8997bf1dc83617bd7748acf44a16c19c42`, under [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/) (`LICENSES/CC-BY-4.0.txt`), and `REUSE.toml` annotates them. Every one is copied unmodified but the Boiler's front, which is adapted. The placeholder script draws none of them.
+These textures are Malcolm Riley's, from [unused-textures](https://github.com/malcolmriley/unused-textures) at commit `9218cb8997bf1dc83617bd7748acf44a16c19c42`, under [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/) (`LICENSES/CC-BY-4.0.txt`), and `REUSE.toml` annotates them. Every one is copied unmodified but the Boiler's front, the Accumulator's sides and the Solar Panel's cell, which are adapted. The placeholder script draws none of them.
 
 | Texture | Source file | Where it is used |
 |---|---|---|
@@ -31,16 +31,16 @@ These textures are Malcolm Riley's, from [unused-textures](https://github.com/ma
 | `item/plastic.png` | `items/material_plastic_sheet.png` | Plastic |
 | `item/battery.png` | `items/part_electronic_battery_galvanic.png` | The battery |
 | `block/accumulator/top.png` | `blocks/battery_top.png` | The Accumulator's top |
-| `block/accumulator/sides.png` | `blocks/battery_sides.png` | The Accumulator's four sides |
+| `block/accumulator/sides.png` | adapted from `blocks/battery_sides.png` | The Accumulator's four sides |
 | `block/accumulator/bottom.png` | `blocks/battery_bottom.png` | The Accumulator's bottom |
-| `block/solar_panel/cell.png` | `blocks/blue_cement_center.png` | The top of the Solar Panel's 3x3 layer |
+| `block/solar_panel/cell.png` | adapted from `blocks/blue_cement_center.png` and `space-plating-plain.png` | The top of the Solar Panel's 3x3 layer |
 | `block/plating/brace.png` | `blocks/space-plating-square.png` | The Solar Panel's pillar |
 | `block/plating/rivets.png` | `blocks/space-plating-rivets-horizontal.png` | The sides of the Solar Panel's top layer |
 | `block/plating/plain.png` | `blocks/space-plating-plain.png` | The underside of the Solar Panel's top layer; the top and bottom of every Boiler block |
 | `block/plating/convex_rivets.png` | `blocks/space-plating-convex-rivets-horizontal.png` | The sides of the Boiler's blocks, under the port rings |
 | `block/boiler/front.png` | adapted from `blocks/device_smelter_front_lit.png` with its `.mcmeta`, `device_smelter_front.png` and `space-plating-plain.png` | The Boiler's firebox, on the anchor's front |
 
-The Boiler's front is the lit smelter's let into the plating, as Craftworks' Refiner front is: `scripts/build-boiler-front.py` paints the brick showing round the smelter's rim with the plain plating, on every frame of its animation, and copies the animation beside the sprite. Its sources are kept unmodified under `data/art/`, it needs Pillow, and `--check` fails when the committed front is stale.
+`scripts/build-textures.py` builds the three adapted textures from unmodified copies of their sources kept under `data/art/`. It needs Pillow, and `--check` fails when a committed one is stale. The Boiler's front is the lit smelter's let into the plating, as Craftworks' Refiner front is: the script paints the brick showing round the smelter's rim with the plain plating, on every frame of its animation, and copies the animation beside the sprite. The Accumulator's sides are the battery block's with its light left edge painted over with the column beside it: the model mirrors the left-hand block of each side, so the yellow bands meet in the middle between the two dark lines, and that edge only ever showed as a seam where the two blocks meet. The Solar Panel's cell is the blue cement framed in the plain plating, its outer ring, with a dark navy line inside the frame, so each block of the 3x3 top reads as a panel of its own.
 
 Each texture covers one block's face. The Accumulator's and the Solar Panel's models, `models/block/accumulator.json` and `models/block/solar_panel.json`, draw the whole footprint from the anchor's block model, one element per block with only its outer faces, each face showing the whole 16x16 texture, so nothing is tiled into a larger file. The Solar Panel's spans x and z -16 to 32 and y 0 to 32 from its pillar. The Accumulator's spans x and z 0 to 32 from a corner anchor and is turned by `facing`. Each has an item model recentred for the inventory slot. Both block models turn ambient occlusion off: a face that reaches over a part block samples its shading there, and the part blocks are full blocks to it, so the Solar Panel's top drew near black. The Boiler's model is per block already: the anchor is an `orientable_with_bottom` cube, and each part block draws itself (`DrawnPartBlock`), plating with the port rings on the water and steam ports, picked by part and facing in `blockstates/boiler_part.json`.
 

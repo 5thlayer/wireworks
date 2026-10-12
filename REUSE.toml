@@ -39,17 +39,18 @@ path = ["publish/*.png"]
 SPDX-FileCopyrightText = ["Mojang AB", "2026 5thlayer"]
 SPDX-License-Identifier = "LicenseRef-Mojang"
 
-# Bioresin's, plastic's and the battery's item textures, the Accumulator's and the Solar Panel's
-# textures, the plating the Solar Panel and the Boiler share, the lit smelter's animation beside the
-# Boiler's front, and the unmodified copies that front is built from, are Malcolm Riley's, from
+# Bioresin's, plastic's and the battery's item textures, the Accumulator's top and bottom, the
+# plating the Solar Panel and the Boiler share, the lit smelter's animation beside the Boiler's
+# front, and the unmodified copies under data/art/ that the adapted textures are built from, are
+# Malcolm Riley's, from
 # https://github.com/malcolmriley/unused-textures, unmodified; see docs/placeholder-art.md.
 [[annotations]]
 path = [
     "src/main/resources/assets/wireworks/textures/item/bioresin.png",
     "src/main/resources/assets/wireworks/textures/item/plastic.png",
     "src/main/resources/assets/wireworks/textures/item/battery.png",
-    "src/main/resources/assets/wireworks/textures/block/accumulator/*.png",
-    "src/main/resources/assets/wireworks/textures/block/solar_panel/*.png",
+    "src/main/resources/assets/wireworks/textures/block/accumulator/top.png",
+    "src/main/resources/assets/wireworks/textures/block/accumulator/bottom.png",
     "src/main/resources/assets/wireworks/textures/block/plating/*.png",
     "src/main/resources/assets/wireworks/textures/block/boiler/front.png.mcmeta",
     "data/art/*.png",
@@ -59,10 +60,14 @@ precedence = "override"
 SPDX-FileCopyrightText = "Malcolm Riley"
 SPDX-License-Identifier = "CC-BY-4.0"
 
-# The Boiler's front, adapted from Malcolm Riley's smelter by scripts/build-boiler-front.py; see
-# docs/placeholder-art.md.
+# The Boiler's front, the Accumulator's sides and the Solar Panel's cell, adapted from Malcolm Riley's
+# smelter, battery block and blue cement by scripts/build-textures.py; see docs/placeholder-art.md.
 [[annotations]]
-path = ["src/main/resources/assets/wireworks/textures/block/boiler/front.png"]
+path = [
+    "src/main/resources/assets/wireworks/textures/block/boiler/front.png",
+    "src/main/resources/assets/wireworks/textures/block/accumulator/sides.png",
+    "src/main/resources/assets/wireworks/textures/block/solar_panel/cell.png",
+]
 precedence = "override"
 SPDX-FileCopyrightText = ["Malcolm Riley", "2026 5thlayer"]
 SPDX-License-Identifier = "CC-BY-4.0"
