@@ -6,7 +6,7 @@ A 5thlayer Library: a mod its Consumers, other Libraries or a pack, read from th
 
 Commit on the current branch; open a feature branch only when the user asks for one. Nothing is pushed without the user's word.
 
-Anything that changes the Library's behaviour gets a `/code-review`: the project skill in `.claude/skills/code-review`, from mattpocock/skills, never the built-in review of the same name. Doc and plumbing changes skip it: that covers `CLAUDE.md`, `GLOSSARY.md`, ADRs, `docs/`, `.claude/`, submodule bumps, and tooling or CI config.
+Anything that changes the Library's behaviour gets a `/code-review`: the project skill in `.claude/skills/code-review`, from mattpocock/skills, never the built-in review of the same name. Doc, plumbing and art changes skip it: that covers `CLAUDE.md`, `GLOSSARY.md`, ADRs, `docs/`, `.claude/`, submodule bumps, tooling or CI config, and art: textures, block and item models and the scripts that build textures, which the maintainer judges in the dev client and CI never checks.
 
 ## Commits
 
