@@ -117,8 +117,8 @@ public final class WireworksRegistries {
                     () -> new BlockEntityType<>(AccumulatorBlockEntity::new, ACCUMULATOR.get()));
 
     public static final DeferredBlock<BoilerBlock> BOILER = BLOCKS.registerBlock(BoilerBlock.BLOCK_NAME, BoilerBlock::new);
-    public static final DeferredBlock<DrawnPartBlock> BOILER_PART =
-            drawnPart("boiler_part", () -> WireworksRegistries.BOILER_FOOTPRINT);
+    public static final DeferredBlock<BoilerPartBlock> BOILER_PART = BLOCKS.registerBlock("boiler_part",
+            props -> new BoilerPartBlock(props.noLootTable(), () -> WireworksRegistries.BOILER_FOOTPRINT));
     public static final DeferredItem<BoilerItem> BOILER_ITEM =
             ITEMS.registerItem(BoilerBlock.BLOCK_NAME, BoilerItem::new);
     public static final Footprint BOILER_FOOTPRINT = Footprint.declare(

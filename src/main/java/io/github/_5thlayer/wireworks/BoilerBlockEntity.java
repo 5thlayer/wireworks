@@ -57,6 +57,8 @@ public class BoilerBlockEntity extends BlockEntity implements Container, MenuPro
 
     private static final String WATER = "Water";
     private static final String STEAM = "Steam";
+    /** How long the firebox stays lit after the last boil: a second. */
+    private static final int LIT_HOLD_TICKS = 20;
 
     private final NonNullList<ItemStack> items = NonNullList.withSize(BoilerSlots.SIZE, ItemStack.EMPTY);
     private final FuelBuffer fuel = new FuelBuffer();
@@ -69,6 +71,8 @@ public class BoilerBlockEntity extends BlockEntity implements Container, MenuPro
 
     /** What the last tick did, for the screen and Jade; worked out again every tick, so never saved. */
     private BoilerStatus status = BoilerStatus.NO_FUEL;
+    /** Ticks since the Boiler last boiled, up to {@link #LIT_HOLD_TICKS}; it starts cold. */
+    private int ticksSinceBoiled = LIT_HOLD_TICKS;
 
     private final ContainerData data = new ContainerData() {
         @Override
@@ -153,7 +157,8 @@ public class BoilerBlockEntity extends BlockEntity implements Container, MenuPro
             setChanged();
         }
         status = statusAfter(converted);
-        setLit(status == BoilerStatus.BOILING);
+        ticksSinceBoiled = converted > 0 ? 0 : Math.min(ticksSinceBoiled + 1, LIT_HOLD_TICKS);
+        setLit(ticksSinceBoiled < LIT_HOLD_TICKS);
         exchange(BoilerSlots.STEAM);
         passSteamOn();
     }
@@ -174,11 +179,23 @@ public class BoilerBlockEntity extends BlockEntity implements Container, MenuPro
         return fuelValue(stack) > 0L && !hasOutputRoom(leftBy(stack)) ? BoilerStatus.OUTPUT_FULL : BoilerStatus.NO_FUEL;
     }
 
-    /** Shows the firebox lit, and giving off light, while the Boiler boils. */
+    /**
+     * Lights every block of the Boiler while it boils and for {@link #LIT_HOLD_TICKS} after, so one at
+     * part load, which boils on some ticks and not others, does not flicker or relight its chunk every
+     * tick. A block of the footprint that is not the Boiler's, as after a part was replaced, is left.
+     */
     private void setLit(boolean lit) {
-        BlockState state = getBlockState();
-        if (level != null && state.getValue(BoilerBlock.LIT) != lit) {
-            level.setBlock(worldPosition, state.setValue(BoilerBlock.LIT, lit), Block.UPDATE_ALL);
+        if (level == null) {
+            return;
+        }
+        Direction facing = getBlockState().getValue(Footprint.FACING);
+        for (BlockPos pos : WireworksRegistries.BOILER_FOOTPRINT.positions(worldPosition, facing)) {
+            BlockState state = level.getBlockState(pos);
+            // Each block is asked, not the anchor alone: a turn lays the parts afresh, cold.
+            if ((state.getBlock() instanceof BoilerBlock || state.getBlock() instanceof BoilerPartBlock)
+                    && state.getValue(BoilerBlock.LIT) != lit) {
+                level.setBlock(pos, state.setValue(BoilerBlock.LIT, lit), Block.UPDATE_ALL);
+            }
         }
     }
 

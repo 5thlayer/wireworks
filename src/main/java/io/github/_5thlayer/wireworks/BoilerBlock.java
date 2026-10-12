@@ -21,18 +21,24 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * The Boiler's anchor: the middle of the front row of its 3x2. Fuel reaches it through every block of
- * the footprint, the facing shows which side the firebox is on, and {@code LIT} is set while it boils.
+ * the footprint, the facing shows which side the firebox is on, and {@code LIT} is set on it and on
+ * every part while it boils and for a second after.
  */
 public class BoilerBlock extends EnergyAnchorBlock {
 
     public static final String BLOCK_NAME = "boiler";
     public static final BooleanProperty LIT = BlockStateProperties.LIT;
-    /** How much light a lit firebox gives off, a lit furnace's 13. */
+    /** How much light each block of a lit Boiler gives off, a lit furnace's 13. */
     private static final int LIT_LIGHT = 13;
 
     public BoilerBlock(Properties properties) {
-        super(properties.requiresCorrectToolForDrops().lightLevel(state -> state.getValue(LIT) ? LIT_LIGHT : 0), 3.5F);
+        super(properties.requiresCorrectToolForDrops().lightLevel(BoilerBlock::lightLevel), 3.5F);
         registerDefaultState(defaultBlockState().setValue(LIT, false));
+    }
+
+    /** The light a block of the Boiler, its anchor or a part, gives off: a lit furnace's while lit. */
+    static int lightLevel(BlockState state) {
+        return state.getValue(LIT) ? LIT_LIGHT : 0;
     }
 
     @Override

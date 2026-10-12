@@ -59,6 +59,8 @@ final class BoilerTests {
      */
     private static final int MILLIBUCKETS_PER_TICK = 3;
     private static final int WINDOW = 10;
+    /** How long the firebox stays lit after the last boil, in ticks: a literal second. */
+    private static final int LIT_HOLD = 20;
 
     /** Each tank's two buckets: literals, so the test cannot agree with the spec by construction. */
     private static final int WATER_CAPACITY = 2_000;
@@ -93,6 +95,7 @@ final class BoilerTests {
         tests.test("boiler_holds_a_water_bucket_while_its_output_has_no_room", 20, BoilerTests::holdsAWaterBucketWithoutOutputRoom);
         tests.test("boiler_fills_an_empty_bucket_with_steam", 500, BoilerTests::fillsABucketWithSteam);
         tests.test("boiler_says_why_it_is_not_boiling", 60, BoilerTests::saysWhy);
+        tests.test("boiler_stays_lit_a_second_after_its_last_boil", 100, BoilerTests::staysLitASecond);
         tests.test("boiler_menu_ghosts_show_what_each_input_slot_takes", 20, BoilerTests::ghostsShowWhatSlotsTake);
         tests.test("steam_has_a_bucket", 20, helper -> {
             helper.assertTrue(SteamFluids.STEAM_SOURCE.get().getBucket() == WireworksRegistries.STEAM_BUCKET.get(),
@@ -184,7 +187,7 @@ final class BoilerTests {
                 .thenSucceed();
     }
 
-    /** A steam tank with no room for another tick makes no steam, burns no fuel, lights nothing and shows its firebox unlit, and it resumes the moment a pipe drains it. */
+    /** A steam tank with no room for another tick makes no steam, burns no fuel and lights nothing, and it resumes the moment a pipe drains it. */
     private static void stalls(GameTestHelper helper) {
         place(helper);
         int[] held = new int[3];
@@ -599,9 +602,9 @@ final class BoilerTests {
     }
 
     /**
-     * The status the screen and Jade name, and the firebox it shows, lit and giving off light only
-     * while it boils: no water first, then fuel, then boiling. The backed-up and output-full states
-     * are asserted where those stalls are set up.
+     * The status the screen and Jade name, no water first, then fuel, then boiling, with the Boiler
+     * lit only once it boils. The backed-up and output-full states are asserted where those stalls are
+     * set up.
      */
     private static void saysWhy(GameTestHelper helper) {
         place(helper);
@@ -609,11 +612,13 @@ final class BoilerTests {
                 .thenIdle(1)
                 .thenExecute(() -> {
                     expectStatus(helper, BoilerStatus.NO_WATER);
+                    expectLit(helper, false, "a Boiler that has never boiled");
                     insert(fluidAt(helper, part(helper, WEST_END), null), water(), WATER_CAPACITY);
                 })
                 .thenIdle(1)
                 .thenExecute(() -> {
                     expectStatus(helper, BoilerStatus.NO_FUEL);
+                    expectLit(helper, false, "a Boiler that has never boiled");
                     boiler(helper).setItem(BoilerSlots.FUEL, new ItemStack(Items.COAL));
                 })
                 .thenIdle(1)
@@ -630,14 +635,53 @@ final class BoilerTests {
         if (synced != expected.ordinal()) {
             helper.fail("the menu is sent status " + synced + ", not " + expected.ordinal(), ANCHOR);
         }
-        BlockState state = helper.getBlockState(ANCHOR);
-        boolean lit = state.getValue(BoilerBlock.LIT);
-        if (lit != (expected == BoilerStatus.BOILING)) {
-            helper.fail("a Boiler that says " + expected + (lit ? " shows a lit" : " shows an unlit") + " firebox", ANCHOR);
+        if (expected == BoilerStatus.BOILING) {
+            expectLit(helper, true, "a boiling Boiler");
         }
-        if ((state.getLightEmission() > 0) != lit) {
-            helper.fail("a Boiler that says " + expected + " gives off light " + state.getLightEmission(), ANCHOR);
+    }
+
+    /** Every block of the Boiler, the anchor and each part, is lit or cold together, and gives off light while lit. */
+    private static void expectLit(GameTestHelper helper, boolean expected, String which) {
+        for (BlockPos pos : WireworksRegistries.BOILER_FOOTPRINT.positions(helper.absolutePos(ANCHOR), FACING)) {
+            BlockState state = helper.getLevel().getBlockState(pos);
+            BlockPos at = helper.relativePos(pos);
+            if (state.getValue(BoilerBlock.LIT) != expected) {
+                helper.fail(which + (expected ? " shows a block cold" : " shows a block lit"), at);
+            }
+            if ((state.getLightEmission() > 0) != expected) {
+                helper.fail(which + " has a block giving off light " + state.getLightEmission(), at);
+            }
         }
+    }
+
+    /**
+     * The Boiler stays lit for a second after it last boiled, so one at part load, which boils on some
+     * ticks and not others, does not flicker, and then goes cold.
+     */
+    private static void staysLitASecond(GameTestHelper helper) {
+        place(helper);
+        helper.startSequence()
+                .thenExecute(() -> {
+                    // Ten ticks of water, and a coal for 44 ticks of boiling.
+                    boiler(helper).setItem(BoilerSlots.FUEL, new ItemStack(Items.COAL));
+                    insert(fluidAt(helper, part(helper, WEST_END), null), water(), 10 * MILLIBUCKETS_PER_TICK);
+                })
+                .thenWaitUntil(() -> {
+                    if (boiler(helper).status() != BoilerStatus.BOILING) {
+                        helper.fail("the Boiler has not started boiling", ANCHOR);
+                    }
+                })
+                .thenWaitUntil(() -> {
+                    if (boiler(helper).status() != BoilerStatus.NO_WATER) {
+                        helper.fail("the Boiler has not run dry yet", ANCHOR);
+                    }
+                })
+                .thenExecute(() -> expectLit(helper, true, "a Boiler that boiled a tick ago"))
+                .thenIdle(LIT_HOLD - 3)
+                .thenExecute(() -> expectLit(helper, true, "a Boiler that boiled under a second ago"))
+                .thenIdle(5)
+                .thenExecute(() -> expectLit(helper, false, "a Boiler that last boiled over a second ago"))
+                .thenSucceed();
     }
 
     /** The ghosts the screen draws in each empty input slot are what that slot takes; the output has none. */
