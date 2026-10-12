@@ -6,7 +6,12 @@ Each version has two sections: Players, what a player or pack developer sees, an
 
 ### Players
 
-- The Accumulator, the Solar Panel and the Boiler wear textures by Malcolm Riley, from unused-textures, under CC-BY-4.0, in place of their stand-ins: the Accumulator a battery casing, the Solar Panel blue cells on riveted plating, and the Boiler plating round a lit firebox. (#45)
+- The Accumulator, the Solar Panel and the Boiler wear textures by Malcolm Riley, from unused-textures, under CC-BY-4.0, in place of their stand-ins: the Accumulator a battery casing, the Solar Panel blue cells on riveted plating, and the Boiler plating round a smelter's firebox. (#45)
+- The Boiler's firebox is lit, and gives off a lit furnace's light, only while it boils; it shows cold while it waits on water, fuel, room for its steam or its output. (#45)
+
+### Consumers
+
+- `wireworks:boiler` has a `lit` block state property, true while it boils. (#45)
 
 ## 0.6.0
 

@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 """Builds textures adapted from Malcolm Riley's unused textures in data/art/ (docs/placeholder-art.md).
 
-The Boiler's front is the lit smelter's let into the Boiler's plating, as Craftworks' Refiner front is: the brick
+The Boiler's front, cold and lit, is the smelter's let into the Boiler's plating, as Craftworks' Refiner front is: the brick
 showing round the smelter's rim, in its top two rows and the outer two columns of its upper half, is
 painted over with the plain plating, so the iron firebox and grate sit in a plated casing like the
 Boiler's body. Which pixels are brick is read from the cold front: the lit one's glow warms its iron to a
@@ -65,10 +65,10 @@ def brick_on_rim():
     return [(x, y) for y in range(SIZE) for x in range(SIZE) if on_rim(x, y) and brick(cold[x, y])]
 
 
-def boiler_front():
+def boiler_front(smelter):
     plating = frames("space-plating-plain")[0].load()
     rim = brick_on_rim()
-    built = frames("device_smelter_front_lit")
+    built = frames(smelter)
     for frame in built:
         pixels = frame.load()
         for x, y in rim:
@@ -112,7 +112,8 @@ def png(image):
 
 # Each built texture, its builder, and the animation copied beside it, if any.
 TEXTURES = {
-    BLOCK / "boiler" / "front.png": (boiler_front, "device_smelter_front_lit.png.mcmeta"),
+    BLOCK / "boiler" / "front_off.png": (lambda: boiler_front("device_smelter_front"), None),
+    BLOCK / "boiler" / "front_on.png": (lambda: boiler_front("device_smelter_front_lit"), "device_smelter_front_lit.png.mcmeta"),
     BLOCK / "accumulator" / "sides.png": (accumulator_sides, None),
     BLOCK / "solar_panel" / "cell.png": (solar_cell, None),
 }

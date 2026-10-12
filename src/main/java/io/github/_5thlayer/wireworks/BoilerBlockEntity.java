@@ -19,6 +19,7 @@ import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
@@ -152,6 +153,7 @@ public class BoilerBlockEntity extends BlockEntity implements Container, MenuPro
             setChanged();
         }
         status = statusAfter(converted);
+        setLit(status == BoilerStatus.BOILING);
         exchange(BoilerSlots.STEAM);
         passSteamOn();
     }
@@ -170,6 +172,14 @@ public class BoilerBlockEntity extends BlockEntity implements Container, MenuPro
         }
         ItemStack stack = items.get(BoilerSlots.FUEL);
         return fuelValue(stack) > 0L && !hasOutputRoom(leftBy(stack)) ? BoilerStatus.OUTPUT_FULL : BoilerStatus.NO_FUEL;
+    }
+
+    /** Shows the firebox lit, and giving off light, while the Boiler boils. */
+    private void setLit(boolean lit) {
+        BlockState state = getBlockState();
+        if (level != null && state.getValue(BoilerBlock.LIT) != lit) {
+            level.setBlock(worldPosition, state.setValue(BoilerBlock.LIT, lit), Block.UPDATE_ALL);
+        }
     }
 
     public BoilerStatus status() {

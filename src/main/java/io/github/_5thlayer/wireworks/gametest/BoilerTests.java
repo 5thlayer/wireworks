@@ -4,6 +4,7 @@
 package io.github._5thlayer.wireworks.gametest;
 
 import io.github._5thlayer.libworks.ghost.Ghosts;
+import io.github._5thlayer.wireworks.BoilerBlock;
 import io.github._5thlayer.wireworks.BoilerBlockEntity;
 import io.github._5thlayer.wireworks.BoilerMenu;
 import io.github._5thlayer.wireworks.BoilerSlots;
@@ -20,6 +21,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.transfer.ResourceHandler;
@@ -182,7 +184,7 @@ final class BoilerTests {
                 .thenSucceed();
     }
 
-    /** A steam tank with no room for another tick makes no steam, burns no fuel and lights nothing, and it resumes the moment a pipe drains it. */
+    /** A steam tank with no room for another tick makes no steam, burns no fuel, lights nothing and shows its firebox unlit, and it resumes the moment a pipe drains it. */
     private static void stalls(GameTestHelper helper) {
         place(helper);
         int[] held = new int[3];
@@ -597,8 +599,9 @@ final class BoilerTests {
     }
 
     /**
-     * The status the screen and Jade name: no water first, then fuel, then boiling. The backed-up and
-     * output-full states are asserted where those stalls are set up.
+     * The status the screen and Jade name, and the firebox it shows, lit and giving off light only
+     * while it boils: no water first, then fuel, then boiling. The backed-up and output-full states
+     * are asserted where those stalls are set up.
      */
     private static void saysWhy(GameTestHelper helper) {
         place(helper);
@@ -626,6 +629,14 @@ final class BoilerTests {
         int synced = boiler(helper).data().get(BoilerBlockEntity.DATA_STATUS);
         if (synced != expected.ordinal()) {
             helper.fail("the menu is sent status " + synced + ", not " + expected.ordinal(), ANCHOR);
+        }
+        BlockState state = helper.getBlockState(ANCHOR);
+        boolean lit = state.getValue(BoilerBlock.LIT);
+        if (lit != (expected == BoilerStatus.BOILING)) {
+            helper.fail("a Boiler that says " + expected + (lit ? " shows a lit" : " shows an unlit") + " firebox", ANCHOR);
+        }
+        if ((state.getLightEmission() > 0) != lit) {
+            helper.fail("a Boiler that says " + expected + " gives off light " + state.getLightEmission(), ANCHOR);
         }
     }
 

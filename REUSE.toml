@@ -52,7 +52,7 @@ path = [
     "src/main/resources/assets/wireworks/textures/block/accumulator/top.png",
     "src/main/resources/assets/wireworks/textures/block/accumulator/bottom.png",
     "src/main/resources/assets/wireworks/textures/block/plating/*.png",
-    "src/main/resources/assets/wireworks/textures/block/boiler/front.png.mcmeta",
+    "src/main/resources/assets/wireworks/textures/block/boiler/front_on.png.mcmeta",
     "data/art/*.png",
     "data/art/*.png.mcmeta",
 ]
@@ -64,7 +64,7 @@ SPDX-License-Identifier = "CC-BY-4.0"
 # smelter, battery block and blue cement by scripts/build-textures.py; see docs/placeholder-art.md.
 [[annotations]]
 path = [
-    "src/main/resources/assets/wireworks/textures/block/boiler/front.png",
+    "src/main/resources/assets/wireworks/textures/block/boiler/front_*.png",
     "src/main/resources/assets/wireworks/textures/block/accumulator/sides.png",
     "src/main/resources/assets/wireworks/textures/block/solar_panel/cell.png",
 ]
