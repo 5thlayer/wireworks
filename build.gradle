@@ -1,7 +1,7 @@
 // ModDevGradle on Java 25, the game test server that names each test, the jar's licensing, ~/.m2-only
 // publishing and the release and upload tasks come from the libworks convention plugin (libworks ADR 0003).
 plugins {
-    id 'io.github.5thlayer.libworks.module' version '0.2.1'
+    id 'io.github.5thlayer.libworks.module' version '0.3.0'
 }
 
 repositories {
@@ -11,6 +11,7 @@ repositories {
         content {
             includeModule 'io.github.5thlayer', 'groundworks'
             includeModule 'io.github.5thlayer', 'libworks-runtime'
+            includeModule 'io.github.5thlayer', 'libworks-gametest'
         }
     }
     maven { url = 'https://cursemaven.com' }
@@ -33,7 +34,7 @@ libworks {
     }
     // Nested by jar-in-jar, so players install nothing more; FML loads the newest nested copy in range,
     // which runs to the next minor.
-    runtime = '0.1.7'
+    runtime = '0.1.8'
 }
 
 neoForge {
