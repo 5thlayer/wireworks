@@ -8,6 +8,8 @@ Because I always loved the simplicity of Factorio's power mechanics and I couldn
 
 **NeoForge, Minecraft 26.1.2 only.** Wireworks is early work, so please report any issues you find on [GitHub](https://github.com/5thlayer/wireworks/issues). From 0.2.0 the poles are named by size, with new ids, so a world made with 0.1.0 loses its poles.
 
+To play Wireworks beside every other FactoryWorks mod, install the [FactoryWorks Showcase](https://www.curseforge.com/minecraft/modpacks/factoryworks-showcase) modpack from CurseForge.
+
 ## Features
 
 - **Poles in three tiers.** Small, medium and large poles, each with its own supply area and wire reach, plus a creative pole that generates without limit, for trying a machine without a power chain.
