@@ -27,7 +27,7 @@ final class CreativeTabTests {
     static void register(WireworksGameTests.Registrar tests) {
         tests.test("works_tab_shows_every_item_the_poles_first", 1,
                 helper -> WorksTabCheck.inOrder(helper, Wireworks.MOD_ID, WORKS_TAB_ORDER));
-        tests.test("no_other_tab_holds_a_library_item", 1,
+        tests.test("no_other_tab_holds_a_module_item", 1,
                 helper -> WorksTabCheck.noOtherTab(helper, Wireworks.MOD_ID));
         tests.test("library_registers_no_creative_tab_of_its_own", 1, CreativeTabTests::noOwnTab);
     }
