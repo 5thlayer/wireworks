@@ -21,12 +21,12 @@ repositories {
     }
 }
 
-// What the Library requires of the other Libraries, each as a range whose lower bound is a released version:
+// What the Module requires of the other Modules, each as a range whose lower bound is a released version:
 // the one it is built and run against and the one CI builds from its tag. neoforge.mods.toml names each as
 // ${<name>_range}.
 libworks {
-    // Required at load and not bundled (ADR 0010). The lower bound rises with the version the Library
-    // takes; the cap is the next minor, 0.6, which moves when the Library takes it.
+    // Required at load and not bundled (ADR 0010). The lower bound rises with the version the Module
+    // takes; the cap is the next minor, 0.6, which moves when the Module takes it.
     upstream('groundworks') {
         // Groundworks' tags are v<version>.
         tagPrefix = 'v'
@@ -44,7 +44,7 @@ neoForge {
             systemProperty 'neoforge.warnings.onlyin.hide', 'true'
         }
         gameTestServer {
-            // Registers the Library's tests and test group; a Consumer's game test server leaves it unset.
+            // Registers the Module's tests and test group; a Consumer's game test server leaves it unset.
             systemProperty 'wireworks.gametest', 'true'
         }
     }
@@ -77,19 +77,19 @@ def syncClientMods = tasks.register('syncClientMods', Sync) {
 tasks.named('runClient') { dependsOn syncClientMods }
 
 dependencies {
-    // Jade finds the machines' tooltip plugins by their annotation, so the Library runs without it.
+    // Jade finds the machines' tooltip plugins by their annotation, so the Module runs without it.
     // 26.1.11, the least Craftworks accepts, since it shares the dev client.
     compileOnly 'maven.modrinth:jade:26.1.11+neoforge'
     clientMods 'maven.modrinth:jade:26.1.11+neoforge'
     // EMI finds bioresin's brewing by its annotation, and libworks-runtime's plugin offers the Boiler's and the
-    // Reactor's ghosts, so the Library runs without it too.
+    // Reactor's ghosts, so the Module runs without it too.
     compileOnly 'curse.maven:emi-unofficial-port-1544558:8630349'
     clientMods 'curse.maven:emi-unofficial-port-1544558:8630349'
     // Craftworks' Assembler draws FE, so a pole has a machine to feed. Wireworks names none of its code.
     clientMods 'curse.maven:craftworks-1715876:9146981'
 
     // The JUnit tests run on a plain JVM, with no Minecraft on their classpath: they test the rules
-    // that read no game state, and the game tests test the rest. A Library whose rules need game types
+    // that read no game state, and the game tests test the rest. A Module whose rules need game types
     // adds `addModdingDependenciesTo sourceSets.test` to the neoForge block.
     // DataFixerUpper, and only that: Codec is Mojang's serialisation library, not a Minecraft type,
     // so the wire store's codec round-trips on a plain JVM. The version is the one Minecraft 26.1.2 ships.

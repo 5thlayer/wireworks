@@ -27,12 +27,12 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import net.neoforged.fml.ModList;
 
 /**
- * The Library plays alone on Groundworks (FactoryWorks ADR-0127): nothing else loads, every ingredient its loaded recipes
+ * The Module plays alone on Groundworks (FactoryWorks ADR-0127): nothing else loads, every ingredient its loaded recipes
  * consume has an item of Minecraft or Wireworks, every recipe is a vanilla type, and every tag its code reads or its data names holds an entry of Minecraft or Wireworks.
  */
 final class PlaysAloneTests {
 
-    // libworks is libworks-runtime, nested in the Library's own jar.
+    // libworks is libworks-runtime, nested in the Module's own jar.
     private static final Set<String> LOADED_ALONE = Set.of("minecraft", "neoforge", "groundworks", "libworks", Wireworks.MOD_ID);
 
     private static final Set<String> FILLS_ALONE = Set.of("minecraft", Wireworks.MOD_ID);

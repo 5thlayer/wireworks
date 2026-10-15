@@ -116,7 +116,7 @@ class ReactorDataTest {
     }
 
     @Test
-    @DisplayName("every Wireworks item and tag the three recipes name is one the Library ships")
+    @DisplayName("every Wireworks item and tag the three recipes name is one the Module ships")
     void referencesResolve() throws IOException {
         for (String file : List.of("reactor", "fuel_cell", "fuel_cell_from_depleted_fuel_cell")) {
             String json = Files.readString(DATA.resolve("recipe/" + file + ".json"));
@@ -125,7 +125,7 @@ class ReactorDataTest {
                 Path shipped = named.group(1).isEmpty()
                         ? ITEMS.resolve(named.group(2) + ".json")
                         : DATA.resolve("tags/item/" + named.group(2) + ".json");
-                assertTrue(Files.isRegularFile(shipped), file + " names " + named.group() + ", which the Library does not ship");
+                assertTrue(Files.isRegularFile(shipped), file + " names " + named.group() + ", which the Module does not ship");
             }
         }
     }

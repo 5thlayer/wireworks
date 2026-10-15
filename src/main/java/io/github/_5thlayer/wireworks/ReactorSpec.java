@@ -4,7 +4,7 @@
 package io.github._5thlayer.wireworks;
 
 /**
- * The Reactor's numbers, frozen as the Library's own (ADR-0115, ADR 0012).
+ * The Reactor's numbers, frozen as the Module's own (ADR-0115, ADR 0012).
  *
  * <p>Factorio's reactor is 40 MW. Read straight, through 500 degree steam at steam's 0.2 kJ, that is
  * 20.6 mB of superheated steam a tick, which no tank can move. So the Reactor feeds whole Turbines

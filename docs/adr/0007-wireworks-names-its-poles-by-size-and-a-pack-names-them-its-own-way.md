@@ -23,7 +23,7 @@ FactoryWorks Pack names them after Factorio again.
 Modrinth, so no world worth a remap holds the old ids. Under ADR 0001 the change is breaking, and
 its release is 0.2.0.
 
-- *Considered: Factorio's names as Wireworks' default.* Rejected: the Library is after Factorio's
+- *Considered: Factorio's names as Wireworks' default.* Rejected: the Module is after Factorio's
   poles, not its catalogue, and a pack that plays something else would have to rename every pole.
 - *Considered: new names over the old ids.* Rejected: an id that says `substation` behind a Large
   Pole is two names for one tier, and the ids are cheapest to change before anyone holds them.

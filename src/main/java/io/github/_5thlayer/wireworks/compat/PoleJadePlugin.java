@@ -41,7 +41,7 @@ import snownee.jade.api.config.IPluginConfig;
 
 /**
  * What a pole is doing right now, on the HUD, and the same for the Solar Panel, the Accumulator,
- * the Steam Engine and the Steam Turbine the Library ships. The Boiler and the Reactor have plugins of their own.
+ * the Steam Engine and the Steam Turbine the Module ships. The Boiler and the Reactor have plugins of their own.
  *
  * <p>The item tooltip states what a pole <em>is</em> -- its footprint, that it is wireless, that the
  * area is measured at the base. This is the other half: the two numbers that can only be read from

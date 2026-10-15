@@ -7,10 +7,11 @@ Electric poles after Factorio's: a pole powers every machine inside its supply a
 ### Parties
 
 **Wireworks**:
-This Library.
+This Module.
+_Avoid_: Library, Binding
 
 **Consumer**:
-A mod that builds against this Library: the FactoryWorks Pack, or another Library. It tags its generators, accumulators and wire tools, and its multiblocks name their energy owner.
+A mod that builds against this Module: the FactoryWorks Pack, or another Module. It tags its generators, accumulators and wire tools, and its multiblocks name their energy owner.
 _Avoid_: client (collides with the game's client side), dependent, integration
 
 ### Poles

@@ -6,7 +6,7 @@ status: accepted
 
 Wireworks nested Groundworks in its jar (`jarJar`), so it ran with nothing else installed. Beltworks
 and the Pack also hold Groundworks, and a nested copy per mod leaves the loader choosing among them.
-FactoryWorks #607 moves every Library to a required dependency.
+FactoryWorks #607 moves every Module to a required dependency.
 
 ## Decision
 

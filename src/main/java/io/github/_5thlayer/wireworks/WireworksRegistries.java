@@ -39,7 +39,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/** The Library's blocks, items and block entity types, and the held wire end. */
+/** The Module's blocks, items and block entity types, and the held wire end. */
 public final class WireworksRegistries {
 
     private static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(Wireworks.MOD_ID);
@@ -218,7 +218,7 @@ public final class WireworksRegistries {
                 .map(DeferredItem::get);
     }
 
-    /** Every item the Library adds, the poles first and the intermediates last. */
+    /** Every item the Module adds, the poles first and the intermediates last. */
     private static Stream<Item> items() {
         return Stream.concat(poleItems(), Stream.of(SOLAR_PANEL_ITEM, ACCUMULATOR_ITEM, BOILER_ITEM, STEAM_ENGINE_ITEM, STEAM_TURBINE_ITEM, REACTOR_ITEM, STEAM_BUCKET, BIORESIN, PLASTIC, BATTERY, FUEL_CELL, DEPLETED_FUEL_CELL).map(DeferredItem::get));
     }

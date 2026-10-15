@@ -5,7 +5,7 @@ package io.github._5thlayer.wireworks;
 
 /**
  * The Steam Engine's arithmetic: Factorio's 0.5 steam units per tick and 900 kW, frozen here as the
- * Library's own numbers (ADR-0115).
+ * Module's own numbers (ADR-0115).
  *
  * <p>An engine burns that steam, and burns none when its buffer has no room for what it would make.
  *

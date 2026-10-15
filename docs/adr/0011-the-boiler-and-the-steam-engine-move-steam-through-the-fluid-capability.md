@@ -47,7 +47,7 @@ per-tick rates from them and refuse a rate that does not land on a whole millibu
 **Fuel is vanilla's burn time at 2,500 J per tick by default**, which makes coal's 1,600 ticks
 Factorio's 4 MJ. ADR-0127 has burners read vanilla burn time. The conversion is
 `boiler.joules_per_burn_tick` in the server config, since no table of fuel values ships with the
-Library.
+Module.
 
 ## Consequences
 

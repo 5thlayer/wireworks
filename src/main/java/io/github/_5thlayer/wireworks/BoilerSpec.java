@@ -4,7 +4,7 @@
 package io.github._5thlayer.wireworks;
 
 /**
- * The Boiler's arithmetic, frozen from Factorio's prototype as the Library's own numbers (ADR-0115):
+ * The Boiler's arithmetic, frozen from Factorio's prototype as the Module's own numbers (ADR-0115):
  * a 1.8 MW draw, a 165 degree target, water at 15 degrees and steam's heat capacity of 0.2 kJ per
  * unit per degree.
  *

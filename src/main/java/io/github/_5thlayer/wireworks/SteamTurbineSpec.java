@@ -5,7 +5,7 @@ package io.github._5thlayer.wireworks;
 
 /**
  * The Steam Turbine's numbers: Factorio's 60 units a second of 500 degree steam for 5.82 MW, frozen
- * here as the Library's own (ADR-0115, ADR 0012). That is 3 mB/t for 2,910 FE/t, a whole millibucket,
+ * here as the Module's own (ADR-0115, ADR 0012). That is 3 mB/t for 2,910 FE/t, a whole millibucket,
  * and seven of them burn the Reactor's 21 mB/t.
  *
  * <p>The arithmetic is the Steam Engine's; only the numbers differ.

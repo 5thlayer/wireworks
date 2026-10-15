@@ -11,8 +11,8 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTestHelper;
 
 /**
- * The suite's Works tab holds every item the Library adds, the poles first, no other tab holds
- * one, and the Library has no tab of its own (#23, FactoryWorks ADR-0128).
+ * The suite's Works tab holds every item the Module adds, the poles first, no other tab holds
+ * one, and the Module has no tab of its own (#23, FactoryWorks ADR-0128).
  */
 final class CreativeTabTests {
 
@@ -37,7 +37,7 @@ final class CreativeTabTests {
                 .filter(id -> id.getNamespace().equals(Wireworks.MOD_ID))
                 .toList();
         if (!own.isEmpty()) {
-            helper.fail("the Library registers its own creative tabs " + own);
+            helper.fail("the Module registers its own creative tabs " + own);
             return;
         }
         helper.succeed();
