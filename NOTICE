@@ -1,0 +1,53 @@
+Third-party material committed to this repository
+==================================================
+
+Each entry names the files, their author, where they came from and the licence they are under. A
+file listed here is NOT covered by the licence this repository states for its own work; its own
+licence governs it. Which licence covers which file is REUSE.toml's to say; this list is the
+credits for what was copied in.
+
+Items, plating, the Accumulator's ends, the Turbine's coil ends and running fan, the Reactor, the Steam Engine's sides
+-----------------------------------------------------------------------------------------------------------------------
+
+Files:   src/main/resources/assets/wireworks/textures/item/bioresin.png
+         src/main/resources/assets/wireworks/textures/item/plastic.png
+         src/main/resources/assets/wireworks/textures/item/battery.png
+         src/main/resources/assets/wireworks/textures/item/fuel_cell.png
+         src/main/resources/assets/wireworks/textures/item/depleted_fuel_cell.png
+         src/main/resources/assets/wireworks/textures/block/accumulator/top.png
+         src/main/resources/assets/wireworks/textures/block/accumulator/bottom.png
+         src/main/resources/assets/wireworks/textures/block/plating/*.png
+         src/main/resources/assets/wireworks/textures/block/boiler/front_on.png.mcmeta
+         src/main/resources/assets/wireworks/textures/block/steam_turbine/coil_end.png
+         src/main/resources/assets/wireworks/textures/block/steam_turbine/fan_on.png and its .mcmeta
+         src/main/resources/assets/wireworks/textures/block/reactor/*.png
+         src/main/resources/assets/wireworks/textures/block/steam_engine/intake.png
+         src/main/resources/assets/wireworks/textures/block/steam_engine/duct.png
+Author:  Malcolm Riley
+Source:  https://github.com/malcolmriley/unused-textures
+         at commit 9218cb8997bf1dc83617bd7748acf44a16c19c42, copied unmodified and renamed;
+         docs/placeholder-art.md names each one's source file.
+Licence: Creative Commons Attribution 4.0 International
+         https://creativecommons.org/licenses/by/4.0/
+
+Boiler front, Accumulator sides, Solar Panel cell, Steam Turbine still fan and coil side, Steam Engine front
+-------------------------------------------------------------------------------------------------------------
+
+Files:   data/art/*.png and data/art/*.png.mcmeta
+         src/main/resources/assets/wireworks/textures/block/boiler/front_*.png
+         src/main/resources/assets/wireworks/textures/block/accumulator/sides.png
+         src/main/resources/assets/wireworks/textures/block/solar_panel/cell.png
+         src/main/resources/assets/wireworks/textures/block/steam_turbine/fan_off.png
+         src/main/resources/assets/wireworks/textures/block/steam_turbine/coil_side.png
+         src/main/resources/assets/wireworks/textures/block/steam_engine/cylinder_*.png
+         src/main/resources/assets/wireworks/textures/block/steam_engine/wheel_*.png
+Author:  Malcolm Riley
+Source:  https://github.com/malcolmriley/unused-textures
+         at commit 9218cb8997bf1dc83617bd7748acf44a16c19c42: the smelter's front, cold and lit with
+         its .mcmeta, the battery block's sides, blue cement, the plain plating, the duct fan, the
+         copper coil's side, the iron duct's two flat panels and the copper tank's side. The files
+         under data/art/ are the unmodified copies. The textures above are built from them by
+         scripts/build-textures.py, and the Steam Engine's front is drawn by it in their shades;
+         docs/placeholder-art.md says how each is adapted.
+Licence: Creative Commons Attribution 4.0 International
+         https://creativecommons.org/licenses/by/4.0/

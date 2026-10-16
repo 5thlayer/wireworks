@@ -23,6 +23,7 @@ path = [
     "src/main/resources/**/*.png",
     "src/main/resources/**/*.mcmeta",
     "LICENSE",
+    "NOTICE",
     "publish/summary.txt",
     ".github/**",
 ]
@@ -48,7 +49,7 @@ SPDX-License-Identifier = "LicenseRef-Mojang"
 # beside the Boiler's front, the Steam Turbine's coil and running fan, the Reactor's steel and vent,
 # the Steam Engine's intake and duct, and the unmodified copies under data/art/ that the adapted
 # textures are built from, are Malcolm Riley's, from
-# https://github.com/malcolmriley/unused-textures, unmodified; see docs/placeholder-art.md.
+# https://github.com/malcolmriley/unused-textures, unmodified; see NOTICE and docs/placeholder-art.md.
 [[annotations]]
 path = [
     "src/main/resources/assets/wireworks/textures/item/bioresin.png",
