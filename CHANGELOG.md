@@ -4,6 +4,8 @@ Each version has two sections: Players, what a player or pack developer sees, an
 
 ## Unreleased
 
+## 0.6.3
+
 ### Players
 
 - The Gallery pack, **Wireworks Gallery**: a datapack in the jar, off by default, whose `/function wireworks:gallery/build` builds a working scene of each README feature, in rows of three north-east of the player, each with a sign naming it that rebuilds the scene when clicked; `wireworks:gallery/<scene>` builds one. (#48)
