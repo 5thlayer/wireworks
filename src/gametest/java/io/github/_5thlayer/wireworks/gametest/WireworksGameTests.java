@@ -17,8 +17,10 @@ import net.minecraft.gametest.framework.TestEnvironmentDefinition;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Rotation;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.lifecycle.FMLConstructModEvent;
 import net.neoforged.neoforge.event.RegisterGameTestsEvent;
-import net.neoforged.neoforge.gametest.GameTestHooks;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
@@ -28,17 +30,14 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  * floor is committed at 23x7x7: twenty-three wide, for a creative pole's 18x18 area, a small pole
  * wired seven blocks east and a consumer only that pole reaches, and seven tall, for a column of
  * {@code MAX_SEGMENTS} with a block above. The libworks plugin's {@code buildGametestStructures} refuses
- * to write its default over it.
+ * to write its default over it. It lives in the {@code gametest} source set, which only the Module's own
+ * runs load, and hooks itself in, so the {@code @Mod} class names no game-test code and nothing gates it
+ * (libworks ADR 0011).
  */
+@EventBusSubscriber(modid = Wireworks.MOD_ID)
 public final class WireworksGameTests {
 
     private static final Identifier PLATFORM = id("gametest/platform");
-
-    /**
-     * Set by the Module's own {@code gameTestServer} run. A Consumer's game test server also has
-     * game tests enabled, and there the test pack's group would be claimed before the Consumer's own.
-     */
-    private static final String OWN_RUN = "wireworks.gametest";
 
     private static final DeferredRegister<MapCodec<? extends GameTestInstance>> TEST_TYPES =
             DeferredRegister.create(Registries.TEST_INSTANCE_TYPE, Wireworks.MOD_ID);
@@ -50,13 +49,16 @@ public final class WireworksGameTests {
     private WireworksGameTests() {
     }
 
+    @SubscribeEvent
+    static void construct(FMLConstructModEvent event) {
+        register(event.getContainer().getEventBus());
+    }
+
     public static void register(IEventBus modBus) {
         TEST_TYPES.register(modBus);
-        if (!GameTestHooks.isGametestEnabled() || !Boolean.getBoolean(OWN_RUN)) {
-            return;
-        }
         TestConsumer.register(modBus);
         PoleReplaceTests.statePackGroup();
+        // Posted only when game tests are enabled, which a production game never is.
         modBus.addListener(WireworksGameTests::registerTests);
     }
 

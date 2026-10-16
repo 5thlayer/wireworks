@@ -6,7 +6,6 @@ package io.github._5thlayer.wireworks;
 import io.github._5thlayer.libworks.gallery.GalleryPack;
 import io.github._5thlayer.wireworks.client.PoleWireClient;
 import io.github._5thlayer.wireworks.client.SteamClient;
-import io.github._5thlayer.wireworks.gametest.WireworksGameTests;
 import io.github._5thlayer.wireworks.network.PoleWiresPacket;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -42,7 +41,6 @@ public final class Wireworks {
             PoleWireClient.register(modBus);
             SteamClient.register(modBus);
         }
-        WireworksGameTests.register(modBus);
         GalleryPack.register(modBus, MOD_ID);
     }
 

@@ -27,7 +27,7 @@ import java.util.Set;
 
 /**
  * A machine for the tests to feed, since Wireworks ships none: a block whose FE face takes up to
- * {@link #CAPACITY} and gives nothing back. Registered only when game tests are enabled.
+ * {@link #CAPACITY} and gives nothing back. Registered only in the Module's own runs.
  */
 final class TestConsumer {
 

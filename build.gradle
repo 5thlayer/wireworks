@@ -1,19 +1,10 @@
 // ModDevGradle on Java 25, the game test server that names each test, the jar's licensing, ~/.m2-only
 // publishing and the release and upload tasks come from the libworks convention plugin (libworks ADR 0003).
 plugins {
-    id 'io.github.5thlayer.libworks.module' version '0.3.0'
+    id 'io.github.5thlayer.libworks.module' version '0.4.0'
 }
 
 repositories {
-    // Groundworks and libworks-runtime, from the local maven only, where their releases are published.
-    // CI builds their tags there first.
-    mavenLocal {
-        content {
-            includeModule 'io.github.5thlayer', 'groundworks'
-            includeModule 'io.github.5thlayer', 'libworks-runtime'
-            includeModule 'io.github.5thlayer', 'libworks-gametest'
-        }
-    }
     maven { url = 'https://cursemaven.com' }
     maven {
         url = 'https://api.modrinth.com/maven'
@@ -42,10 +33,6 @@ neoForge {
         client {
             // EMI still uses @OnlyIn, and the warning screen it raises would stop the quick play.
             systemProperty 'neoforge.warnings.onlyin.hide', 'true'
-        }
-        gameTestServer {
-            // Registers the Module's tests and test group; a Consumer's game test server leaves it unset.
-            systemProperty 'wireworks.gametest', 'true'
         }
     }
 }
