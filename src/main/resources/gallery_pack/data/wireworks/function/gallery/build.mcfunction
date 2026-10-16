@@ -7,6 +7,8 @@ function wireworks:gallery/tiers
 execute positioned ~24 ~ ~ run function wireworks:gallery/by_area
 execute positioned ~48 ~ ~ run function wireworks:gallery/generation
 execute positioned ~ ~ ~-16 run function wireworks:gallery/steam
-execute positioned ~24 ~ ~-16 run function wireworks:gallery/wiring
-execute positioned ~48 ~ ~-16 run function wireworks:gallery/pole_line
-execute positioned ~ ~ ~-32 run function wireworks:gallery/jade
+execute positioned ~24 ~ ~-16 run function wireworks:gallery/reactor
+execute positioned ~48 ~ ~-16 run function wireworks:gallery/wiring
+execute positioned ~ ~ ~-32 run function wireworks:gallery/transmission
+execute positioned ~24 ~ ~-32 run function wireworks:gallery/pole_line
+execute positioned ~48 ~ ~-32 run function wireworks:gallery/jade
