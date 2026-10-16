@@ -2,8 +2,8 @@
 # other's. Jade, which the gallery must not require, shows the network on a pole: its poles, production,
 # consumption and accumulators.
 function wireworks:gallery/clear
-setblock ~8 ~ ~-6 wireworks:small_pole
-setblock ~14 ~ ~-6 wireworks:small_pole
+function wireworks:gallery/column {x:8,z:-6,pole:"small_pole"}
+function wireworks:gallery/column {x:14,z:-6,pole:"small_pole"}
 setblock ~6 ~ ~-6 wireworks:solar_panel[facing=north] strict
 setblock ~5 ~1 ~-7 wireworks:solar_panel_part[facing=north,part=1] strict
 setblock ~6 ~1 ~-7 wireworks:solar_panel_part[facing=north,part=2] strict

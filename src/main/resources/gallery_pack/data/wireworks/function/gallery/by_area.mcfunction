@@ -2,7 +2,7 @@
 # no wire or cable to any. Wireworks has no machine of its own that only takes FE, and the gallery
 # requires no other mod; an Accumulator takes FE as any machine would.
 function wireworks:gallery/clear
-setblock ~16 ~ ~-6 wireworks:creative_pole
+function wireworks:gallery/column {x:16,z:-6,pole:"creative_pole"}
 setblock ~9 ~ ~-6 wireworks:accumulator[facing=north] strict
 setblock ~9 ~ ~-5 wireworks:accumulator_part[facing=north,part=1] strict
 setblock ~10 ~ ~-6 wireworks:accumulator_part[facing=north,part=2] strict

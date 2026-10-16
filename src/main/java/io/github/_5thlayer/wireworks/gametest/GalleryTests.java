@@ -14,6 +14,7 @@ import io.github._5thlayer.libworks.testkit.GalleryCheck;
 import io.github._5thlayer.libworks.testkit.GalleryCheck.Scene;
 import io.github._5thlayer.wireworks.AccumulatorBlockEntity;
 import io.github._5thlayer.wireworks.LevelWires;
+import io.github._5thlayer.wireworks.PoleColumn;
 import io.github._5thlayer.wireworks.PoleNetworks;
 import io.github._5thlayer.wireworks.PoleTier;
 import io.github._5thlayer.wireworks.SteamGeneratorBlock;
@@ -82,7 +83,7 @@ final class GalleryTests {
     private static List<Scene> scenes() {
         var small = WireworksRegistries.pole(PoleTier.SMALL).get();
         return List.of(
-                new Scene("tiers", new BlockPos(13, 0, -6), WireworksRegistries.pole(PoleTier.LARGE).get()),
+                new Scene("tiers", new BlockPos(13, PoleColumn.MAX_SEGMENTS - 1, -6), WireworksRegistries.pole(PoleTier.LARGE).get()),
                 new Scene("by_area", new BlockPos(16, 0, -6), WireworksRegistries.CREATIVE_POLE.get()),
                 new Scene("generation", new BlockPos(11, 0, -6), WireworksRegistries.SOLAR_PANEL.get()),
                 new Scene("steam", STEAM_ENGINE, WireworksRegistries.STEAM_ENGINE.get()),

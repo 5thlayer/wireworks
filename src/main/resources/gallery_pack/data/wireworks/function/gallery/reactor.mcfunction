@@ -37,7 +37,7 @@ setblock ~12 ~ ~-6 wireworks:steam_turbine_part[facing=south,part=2] strict
 setblock ~14 ~1 ~-6 wireworks:steam_turbine_part[facing=south,part=3] strict
 setblock ~13 ~1 ~-6 wireworks:steam_turbine_part[facing=south,part=4] strict
 setblock ~12 ~1 ~-6 wireworks:steam_turbine_part[facing=south,part=5] strict
-setblock ~17 ~ ~-8 wireworks:medium_pole
+function wireworks:gallery/column {x:17,z:-8,pole:"medium_pole"}
 setblock ~19 ~ ~-6 wireworks:accumulator[facing=south] strict
 setblock ~19 ~ ~-7 wireworks:accumulator_part[facing=south,part=1] strict
 setblock ~18 ~ ~-6 wireworks:accumulator_part[facing=south,part=2] strict
