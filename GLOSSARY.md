@@ -172,3 +172,9 @@ _Avoid_: acid (Factorio's sulfuric acid)
 **Supply Area Square**:
 The yellow outline of a pole's **Supply Area** on the ground its **Pole Column**'s base stands on, with an outline around every machine it reaches, in its role's colour: orange for a **Generator**, blue for a machine it feeds, purple for an **Accumulator**. Shown while holding a pole or looking at one. It says how much ground the area spreads over, not how far up and down it reaches, which the machine outlines and the item tooltip answer, and never whether anything is fed, which the Jade line answers.
 _Avoid_: Supply Area Box (the cube it replaced), overlay, range indicator
+
+### Gallery
+
+**Gallery pack**:
+The datapack in this Module's jar, "Wireworks Gallery", off until a player turns it on, whose functions build a working scene of each README feature, each with a sign naming it. Functions only (libworks ADR 0010).
+_Avoid_: demo pack, showcase pack, gallery datapack

@@ -64,6 +64,7 @@ public final class WireworksGameTests {
         // Registered rather than borrowed, since the event hands out no lookup for vanilla's.
         var environment = event.registerEnvironment(id("default"), new TestEnvironmentDefinition.AllOf(List.of()));
         var tests = new Registrar(event, environment);
+        GalleryTests.register(tests);
         LoadTests.register(tests);
         PlaysAloneTests.register(tests);
         CreativeTabTests.register(tests);
@@ -106,6 +107,7 @@ public final class WireworksGameTests {
          * reach is not bounded by its test's structure. The test config keeps every reach shorter than
          * the gap between tests, so a Transformer cannot wire itself to a neighbouring test's poles; a
          * test that places one also gets an environment of its own, which is a batch of its own.
+         * So does a test that turns a pack on, which reloads the server's data under its whole batch.
          */
         void isolated(String name, int maxTicks, Consumer<GameTestHelper> body) {
             var alone = event.registerEnvironment(id("alone/" + name), new TestEnvironmentDefinition.AllOf(List.of()));

@@ -20,6 +20,10 @@ To play Wireworks beside every other FactoryWorks mod, install the [FactoryWorks
 - **Place a line of poles.** Poles place, extend and preview through [Groundworks](https://github.com/5thlayer/groundworks), which Wireworks requires.
 - **See the network.** With [Jade](https://www.curseforge.com/minecraft/mc-mods/jade) installed, looking at a pole shows its network.
 
+## Gallery
+
+Wireworks carries a gallery of its features: one working scene each, with a sign naming it, built in rows of three north and east of where you stand. It is a datapack in the jar, **Wireworks Gallery**, off until you turn it on in a world's Data Packs screen or with `/datapack enable "mod/wireworks:gallery_pack"`. Then `/function wireworks:gallery/build` builds every scene, and `/function wireworks:gallery/<scene>` one of them, such as `steam`; clicking a scene's sign builds it again, which puts back the coal and water the Steam scene burns. A function needs cheats in single player (on at world creation, or Open to LAN with cheats) or operator rights on a server. Wireworks has no machine of its own that only takes power, so its scenes power Accumulators. The gallery clears the ground it builds on and changes nothing else; it adds no recipes, loot or worldgen.
+
 ## For pack developers
 
 Each tier's supply area and wire reach, the Solar Panel's peak and the Accumulator's capacity and flow are set in `wireworks-server.toml`, with Factorio's numbers as defaults. Which blocks generate, store and wire is data: tag generators `wireworks:generators`, accumulators `wireworks:accumulators`, and wiring items `wireworks:wire_tools`. A pack names the poles its own way in its own language file, over Wireworks' `block.wireworks.*` and `item.wireworks.*` keys.

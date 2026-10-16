@@ -4,6 +4,14 @@ Each version has two sections: Players, what a player or pack developer sees, an
 
 ## Unreleased
 
+### Players
+
+- The Gallery pack, **Wireworks Gallery**: a datapack in the jar, off by default, whose `/function wireworks:gallery/build` builds a working scene of each README feature, in rows of three north-east of the player, each with a sign naming it that rebuilds the scene when clicked; `wireworks:gallery/<scene>` builds one. (#48)
+
+### Consumers
+
+- Wireworks nests libworks-runtime 0.1.9, for its Gallery pack (libworks ADR 0010, #48).
+
 ## 0.6.2
 
 ### Players

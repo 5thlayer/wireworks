@@ -3,6 +3,7 @@
 
 package io.github._5thlayer.wireworks;
 
+import io.github._5thlayer.libworks.gallery.GalleryPack;
 import io.github._5thlayer.wireworks.client.PoleWireClient;
 import io.github._5thlayer.wireworks.client.SteamClient;
 import io.github._5thlayer.wireworks.gametest.WireworksGameTests;
@@ -42,6 +43,7 @@ public final class Wireworks {
             SteamClient.register(modBus);
         }
         WireworksGameTests.register(modBus);
+        GalleryPack.register(modBus, MOD_ID);
     }
 
     private static void registerPayloads(RegisterPayloadHandlersEvent event) {
