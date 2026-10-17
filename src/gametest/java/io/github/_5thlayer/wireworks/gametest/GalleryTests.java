@@ -4,7 +4,9 @@
 package io.github._5thlayer.wireworks.gametest;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -92,33 +94,44 @@ final class GalleryTests {
                 helper.assertTrue(functions.get(GalleryPack.scene(Wireworks.MOD_ID, scene.name())).isPresent(),
                         "there is no scene function " + scene.name());
             }
+            var laidBefore = wiresTouching(helper, run);
             GalleryCheck.assertRuns(helper, run.source(), GalleryPack.build(Wireworks.MOD_ID));
             for (int row = 0; row * ROW < scenes.size(); row++) {
                 GalleryCheck.assertKeyBlocks(helper, rowOrigin(helper, row),
                         scenes.subList(row * ROW, Math.min(scenes.size(), (row + 1) * ROW)));
             }
-            assertNoWireJoinsTwoScenes(helper, run);
+            assertNoWireJoinsTwoScenes(helper, run, laidBefore);
         });
     }
 
     /**
-     * Every wire in the gallery joins two poles of one scene: a pole wires itself to any in reach, so
+     * Every wire the build laid joins two poles of one scene: a pole wires itself to any in reach, so
      * a scene's pole standing too near the next scene's would join their networks into one, and no
-     * scene would then show its feature alone.
+     * scene would then show its feature alone. The wires {@code laidBefore} the build are left out:
+     * the runner lays every batch's tests in one grid and clears none of them, and the plots' chunks
+     * reach past the plots onto the test laid out just west of the gallery, its poles standing, wired.
      */
-    private static void assertNoWireJoinsTwoScenes(GameTestHelper helper, Run run) {
-        var wires = LevelWires.of(helper.getLevel()).wires();
+    private static void assertNoWireJoinsTwoScenes(GameTestHelper helper, Run run, Set<PoleNetworks.Wire> laidBefore) {
         var plots = new ArrayList<BoundingBox>();
         for (int plot = 0; plot < run.plots(); plot++) {
             plots.add(GalleryCheck.plot(plotOrigin(helper, plot)));
         }
-        run.area().intersectingChunks().forEach(chunk -> {
-            for (var wire : wires.touching(chunk.x(), chunk.z())) {
-                int from = plotOf(plots, wire.a());
-                helper.assertTrue(from >= 0 && from == plotOf(plots, wire.b()),
-                        "a wire joins " + wire.a() + " and " + wire.b() + ", in two scenes' plots");
+        for (var wire : wiresTouching(helper, run)) {
+            if (laidBefore.contains(wire)) {
+                continue;
             }
-        });
+            int from = plotOf(plots, wire.a());
+            helper.assertTrue(from >= 0 && from == plotOf(plots, wire.b()),
+                    "a wire joins " + wire.a() + " and " + wire.b() + ", in two scenes' plots");
+        }
+    }
+
+    /** Every wire touching the chunks of {@code run}'s plots. */
+    private static Set<PoleNetworks.Wire> wiresTouching(GameTestHelper helper, Run run) {
+        var wires = LevelWires.of(helper.getLevel()).wires();
+        var touching = new HashSet<PoleNetworks.Wire>();
+        run.area().intersectingChunks().forEach(chunk -> touching.addAll(wires.touching(chunk.x(), chunk.z())));
+        return touching;
     }
 
     /** The plot, numbered as {@code build} lays them, that {@code pos} stands in, or -1. */
