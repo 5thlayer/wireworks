@@ -12,12 +12,10 @@ import java.util.function.Consumer;
 import io.github._5thlayer.libworks.gallery.GalleryPack;
 import io.github._5thlayer.libworks.testkit.GalleryCheck;
 import io.github._5thlayer.libworks.testkit.GalleryCheck.Scene;
-import io.github._5thlayer.wireworks.AccumulatorBlockEntity;
 import io.github._5thlayer.wireworks.LevelWires;
 import io.github._5thlayer.wireworks.PoleColumn;
 import io.github._5thlayer.wireworks.PoleNetworks;
 import io.github._5thlayer.wireworks.PoleTier;
-import io.github._5thlayer.wireworks.SteamGeneratorBlock;
 import io.github._5thlayer.wireworks.Wireworks;
 import io.github._5thlayer.wireworks.WireworksRegistries;
 import net.minecraft.commands.CommandSourceStack;
@@ -37,14 +35,12 @@ import net.minecraft.world.phys.Vec3;
 /**
  * The Gallery pack (libworks ADR 0010), through libworks' {@link GalleryCheck}: offered and off, its
  * build running every command without failing, and each scene's key block where it stands. The scenes
- * stand in rows of three, each row 16 blocks north of the last, which keeps them near enough to where
- * the gallery is run for their machines to tick; {@link GalleryCheck#builds} lays one long row, so the
- * test runs its parts a row at a time. Beyond the build, no wire joins two scenes, the Steam scene's
- * Engine and the Reactor scene's Turbine run and charge their Accumulators, the By Area scene's pole
- * charges all four of its own, the Transmission scene's eastern Accumulator charges across the line, and
- * a scene's sign, clicked, builds it again. Each test turns the pack on, which reloads the server's
- * data, and off again, passing or failing, and each builds where the others do, so each runs in a
- * batch of its own.
+ * stand in rows of three, each row 16 blocks north of the last; {@link GalleryCheck#builds} lays one
+ * long row, so the test runs its parts a row at a time. Beyond the build, no wire joins two scenes, and
+ * a scene's sign, clicked, builds it again. They check the pack alone, never that a scene's machines
+ * work: each machine's own game tests check that. Each test turns the pack on, which reloads
+ * the server's data, and off again, passing or failing, and each builds where the others do, so each
+ * runs in a batch of its own.
  */
 final class GalleryTests {
 
@@ -58,20 +54,8 @@ final class GalleryTests {
     private static final BlockPos ORIGIN = new BlockPos(0, 1, 8);
     /** Where a scene's sign stands, from where the scene is run. */
     private static final BlockPos SIGN = new BlockPos(14, 0, 0);
-    /** Where the Steam scene's Boiler, its Engine and its two Accumulators stand, from where the scene is run. */
+    /** Where the Steam scene's Boiler stands, from where the scene is run. */
     private static final BlockPos STEAM_BOILER = new BlockPos(13, 0, -4);
-    private static final BlockPos STEAM_ENGINE = new BlockPos(13, 0, -6);
-    private static final List<BlockPos> STEAM_ACCUMULATORS = List.of(new BlockPos(19, 0, -4), new BlockPos(19, 0, -8));
-    /** Where the Reactor scene's Reactor, its Turbine and its two Accumulators stand, from where the scene is run. */
-    private static final BlockPos REACTOR = new BlockPos(13, 0, -4);
-    private static final BlockPos REACTOR_TURBINE = new BlockPos(13, 0, -6);
-    private static final List<BlockPos> REACTOR_ACCUMULATORS = List.of(new BlockPos(19, 0, -6), new BlockPos(19, 0, -10));
-    /** Where the Transmission scene's eastern Transformer and the Accumulator in its District stand, from where the scene is run. */
-    private static final BlockPos LINE_TRANSFORMER = new BlockPos(19, 0, -6);
-    private static final BlockPos LINE_ACCUMULATOR = new BlockPos(22, 0, -3);
-    /** Where the By Area scene's four Accumulators stand, each facing another way, from where the scene is run. */
-    private static final List<BlockPos> BY_AREA_ACCUMULATORS = List.of(
-            new BlockPos(9, 0, -6), new BlockPos(21, 0, -6), new BlockPos(16, 0, -3), new BlockPos(15, 0, -10));
 
     /** How many plots a test of one scene loads: a scene run alone, from where the gallery is run, fills only the first. */
     private static final int ONE_SCENE = 1;
@@ -86,22 +70,16 @@ final class GalleryTests {
                 new Scene("tiers", new BlockPos(13, PoleColumn.MAX_SEGMENTS - 1, -6), WireworksRegistries.pole(PoleTier.LARGE).get()),
                 new Scene("by_area", new BlockPos(16, 0, -6), WireworksRegistries.CREATIVE_POLE.get()),
                 new Scene("generation", new BlockPos(11, 0, -6), WireworksRegistries.SOLAR_PANEL.get()),
-                new Scene("steam", STEAM_ENGINE, WireworksRegistries.STEAM_ENGINE.get()),
-                new Scene("reactor", REACTOR, WireworksRegistries.REACTOR.get()),
+                new Scene("steam", new BlockPos(13, 0, -6), WireworksRegistries.STEAM_ENGINE.get()),
+                new Scene("reactor", new BlockPos(13, 0, -4), WireworksRegistries.REACTOR.get()),
                 new Scene("wiring", new BlockPos(16, 0, -6), small),
-                new Scene("transmission", LINE_TRANSFORMER, WireworksRegistries.TRANSFORMER.get()),
+                new Scene("transmission", new BlockPos(19, 0, -6), WireworksRegistries.TRANSFORMER.get()),
                 new Scene("pole_line", new BlockPos(19, 2, -6), small),
                 new Scene("jade", new BlockPos(14, 0, -6), small));
     }
 
     static void register(WireworksGameTests.Registrar tests) {
         tests.isolated("gallery_builds_a_scene_of_each_feature", GalleryCheck.TICKS, GalleryTests::builds);
-        tests.isolated("gallery_steam_scene_runs_its_engine", GalleryCheck.TICKS,
-                helper -> generatorRuns(helper, "steam", STEAM_ENGINE, WireworksRegistries.STEAM_ENGINE.get(), STEAM_ACCUMULATORS));
-        tests.isolated("gallery_reactor_scene_runs_its_turbine", GalleryCheck.TICKS,
-                helper -> generatorRuns(helper, "reactor", REACTOR_TURBINE, WireworksRegistries.STEAM_TURBINE.get(), REACTOR_ACCUMULATORS));
-        tests.isolated("gallery_transmission_scene_charges_across_the_line", GalleryCheck.TICKS, GalleryTests::chargesAcrossTheLine);
-        tests.isolated("gallery_by_area_scene_charges_every_accumulator", GalleryCheck.TICKS, GalleryTests::byAreaCharges);
         tests.isolated("gallery_scenes_sign_clicked_builds_the_scene_again", GalleryCheck.TICKS, GalleryTests::signReplays);
     }
 
@@ -125,8 +103,8 @@ final class GalleryTests {
 
     /**
      * Every wire in the gallery joins two poles of one scene: a pole wires itself to any in reach, so
-     * a scene's pole standing too near the next scene's would join their networks, and the Steam
-     * scene's Engine would then charge nothing, the By Area scene's creative pole charging all.
+     * a scene's pole standing too near the next scene's would join their networks into one, and no
+     * scene would then show its feature alone.
      */
     private static void assertNoWireJoinsTwoScenes(GameTestHelper helper, Run run) {
         var wires = LevelWires.of(helper.getLevel()).wires();
@@ -154,40 +132,6 @@ final class GalleryTests {
     }
 
     /**
-     * A scene whose fuel makes steam for a generator against it: {@code block}, the generator at
-     * {@code generator}, runs, and charges each Accumulator at {@code accumulators} through the scene's pole.
-     */
-    private static void generatorRuns(GameTestHelper helper, String scene, BlockPos generator, SteamGeneratorBlock block,
-                                      List<BlockPos> accumulators) {
-        var generatorPos = at(helper, generator);
-        withPack(helper, ONE_SCENE, run -> GalleryCheck.assertRuns(helper, run.source(), GalleryPack.scene(Wireworks.MOD_ID, scene)),
-                () -> {
-                    var state = helper.getLevel().getBlockState(generatorPos);
-                    helper.assertTrue(state.is(block) && state.getValue(SteamGeneratorBlock.RUNNING),
-                            "the " + scene + " scene's generator is not running yet");
-                    for (var accumulator : accumulators) {
-                        helper.assertTrue(stored(helper, accumulator) > 0, "the generator has not charged the Accumulator at " + accumulator.toShortString() + " yet");
-                    }
-                });
-    }
-
-    /** The Transmission scene: the creative pole's District charges the other's Accumulator, out of its area, across the line. */
-    private static void chargesAcrossTheLine(GameTestHelper helper) {
-        withPack(helper, ONE_SCENE, run -> GalleryCheck.assertRuns(helper, run.source(), GalleryPack.scene(Wireworks.MOD_ID, "transmission")),
-                () -> helper.assertTrue(stored(helper, LINE_ACCUMULATOR) > 0, "nothing has crossed the line to the eastern Accumulator yet"));
-    }
-
-    /** The By Area scene: its creative pole charges each Accumulator in its area, whichever way it faces, with no wire to any. */
-    private static void byAreaCharges(GameTestHelper helper) {
-        withPack(helper, ONE_SCENE, run -> GalleryCheck.assertRuns(helper, run.source(), GalleryPack.scene(Wireworks.MOD_ID, "by_area")),
-                () -> {
-                    for (var accumulator : BY_AREA_ACCUMULATORS) {
-                        helper.assertTrue(stored(helper, accumulator) > 0, "the pole has not charged the Accumulator at " + accumulator.toShortString() + " yet");
-                    }
-                });
-    }
-
-    /**
      * A scene's sign, clicked, builds the scene again where it stands, leaving nothing loose: here the
      * Steam scene's Boiler, broken, which drops its water bucket and its coal.
      */
@@ -210,24 +154,13 @@ final class GalleryTests {
         });
     }
 
-    private static long stored(GameTestHelper helper, BlockPos accumulator) {
-        var entity = helper.getLevel().getBlockEntity(at(helper, accumulator));
-        return entity instanceof AccumulatorBlockEntity found ? found.energy().getAmountAsLong() : 0L;
-    }
-
-    /** As {@link #withPack(GameTestHelper, int, Consumer, Runnable)}, waiting for nothing after {@code body}. */
-    private static void withPack(GameTestHelper helper, int plots, Consumer<Run> body) {
-        withPack(helper, plots, body, () -> {
-        });
-    }
-
     /**
      * Turns the pack on over the first {@code plots} plots, as {@code build} lays them, loaded; runs
-     * {@code body} as an operator player standing where the gallery is run; waits until {@code until}
-     * passes; then clears the plots and turns the pack off, passing or failing. A single scene run
-     * from where the gallery is run stands on the first plot.
+     * {@code body} as an operator player standing where the gallery is run; then clears the plots and
+     * turns the pack off, passing or failing. A single scene run from where the gallery is run stands
+     * on the first plot.
      */
-    private static void withPack(GameTestHelper helper, int plots, Consumer<Run> body, Runnable until) {
+    private static void withPack(GameTestHelper helper, int plots, Consumer<Run> body) {
         var server = helper.getLevel().getServer();
         GalleryCheck.assertOfferedAndOff(helper, PACK);
         var run = new Run(helper, plots, GalleryCheck.operator(helper, helper.absolutePos(ORIGIN)));
@@ -241,7 +174,6 @@ final class GalleryTests {
                 .thenWaitUntil(() -> helper.assertTrue(area.intersectingChunks().allMatch(chunk -> helper.getLevel().hasChunk(chunk.x(), chunk.z())),
                         "the gallery's plots are not loaded yet"))
                 .thenExecute(() -> body.accept(run))
-                .thenWaitUntil(until)
                 .thenExecute(() -> off.set(run.clearAway()))
                 .thenWaitUntil(() -> helper.assertTrue(off.get() != null && off.get().isDone(), PACK + " is not off yet"))
                 .thenSucceed();
