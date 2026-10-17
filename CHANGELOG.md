@@ -4,6 +4,8 @@ Each version has two sections: Players, what a player or pack developer sees, an
 
 ## Unreleased
 
+## 0.6.4
+
 ### Consumers
 
 - Wireworks' game-test code and structures no longer ship in its jar (libworks ADR 0011): a Consumer's game tests and dev client no longer register Wireworks' test type `wireworks:code`, its test block `wireworks:gametest_consumer` or its tests' pole group `wireworks:gametest_pack_poles`, nor carry its `gametest/platform` structure. Wireworks builds on libworks-plugin 0.4.0.
