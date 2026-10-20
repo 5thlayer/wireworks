@@ -4,6 +4,10 @@ Each version has two sections: Players, what a player or pack developer sees, an
 
 ## Unreleased
 
+### Players
+
+- Wireworks requires Groundworks 0.6.0 or later, below 0.7, the Groundworks the other FactoryWorks mods now load with (5thlayer/groundworks#72).
+
 ## 0.6.4
 
 ### Consumers
