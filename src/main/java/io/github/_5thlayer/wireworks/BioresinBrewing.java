@@ -19,14 +19,17 @@ import net.neoforged.neoforge.common.crafting.DataComponentIngredient;
 import net.neoforged.neoforge.event.brewing.RegisterBrewingRecipesEvent;
 
 /**
- * Bioresin brewed in a vanilla brewing stand (#28). Vanilla builds its brewing table in code, so each pairing is
- * added through {@link RegisterBrewingRecipesEvent}. A NeoForge recipe is tried before vanilla's mixes, so no pairing
- * may be one vanilla brews: sugar was turned down because sugar on a water bottle is the Mundane Potion.
+ * Bioresin brewed in a vanilla brewing stand (#28): from a water bottle and sugar cane, or a water bottle and a vine
+ * (#51). Vanilla builds its brewing table in code, so each pairing is added through
+ * {@link RegisterBrewingRecipesEvent}. A NeoForge recipe is tried before vanilla's mixes, so no pairing may be one
+ * vanilla brews: sugar was turned down because sugar on a water bottle is the Mundane Potion.
  */
 public final class BioresinBrewing {
 
     /** Each bottle a brewing stand turns into bioresin, and what it is brewed with. */
-    public static final List<Pairing> PAIRINGS = List.of(new Pairing(Potions.WATER, Items.SUGAR_CANE));
+    public static final List<Pairing> PAIRINGS = List.of(
+            new Pairing(Potions.WATER, Items.SUGAR_CANE),
+            new Pairing(Potions.WATER, Items.VINE));
 
     private BioresinBrewing() {
     }

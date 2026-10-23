@@ -184,7 +184,7 @@ public final class WireworksRegistries {
     /** What a burnt Fuel Cell leaves in the Reactor, which a Fissile refills into a Fuel Cell. */
     public static final DeferredItem<Item> DEPLETED_FUEL_CELL = ITEMS.registerSimpleItem("depleted_fuel_cell");
 
-    /** Bioresin, a Plastic Resin made from plants: brewed from a water bottle and sugar cane, or crafted from honeycomb and kelp. */
+    /** Bioresin, a Plastic Resin made from plants: brewed from a water bottle and sugar cane or a vine, or crafted from honeycomb and kelp. */
     public static final DeferredItem<Item> BIORESIN = ITEMS.registerSimpleItem("bioresin");
 
     /** Plastic, blasted from any Plastic Resin; the Solar Panel, the Transformer and the large and transmission poles take it. */
