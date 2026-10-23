@@ -4,6 +4,8 @@ Each version has two sections: Players, what a player or pack developer sees, an
 
 ## Unreleased
 
+## 0.6.6
+
 ### Players
 
 - A brewing stand also turns a water bottle and a vine into bioresin. (#51)
