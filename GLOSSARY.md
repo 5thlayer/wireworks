@@ -143,7 +143,7 @@ Any item in `c:tar`, a **Plastic Resin**. Wireworks makes none: Fieldworks does,
 _Avoid_: bitumen, asphalt
 
 **Bioresin**:
-Wireworks' own **Plastic Resin**, made from plants: brewed from a water bottle and sugar cane, or crafted from honeycomb and kelp. No route is a pairing vanilla already brews.
+Wireworks' own **Plastic Resin**, made from plants: brewed from a water bottle and sugar cane or a vine, or crafted from honeycomb and kelp. No route is a pairing vanilla already brews.
 _Avoid_: bioplastic (what plastic made from it would be)
 
 **Plastic Resin**:
