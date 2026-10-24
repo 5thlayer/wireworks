@@ -4,6 +4,8 @@ Each version has two sections: Players, what a player or pack developer sees, an
 
 ## Unreleased
 
+## 0.6.7
+
 ### Players
 
 - The Boiler draws water from a pipe against either end of its water row; it took water only when something pushed it in.
