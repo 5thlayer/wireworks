@@ -91,6 +91,7 @@ final class ReactorTests {
         tests.test("reactor_says_why_it_is_not_running", 20, ReactorTests::saysWhy);
         tests.test("reactor_ports_open_onto_their_outer_faces_whatever_its_facing", 20, ReactorTests::portsOpenOutward);
         tests.test("reactor_pulls_water_from_a_passive_handler_against_a_water_port", 40, ReactorTests::pullsWater);
+        tests.test("reactor_leaves_a_boilers_water_port_alone", 40, ReactorTests::leavesABoilersWaterPort);
         tests.test("reactor_water_ports_take_water_only_and_the_steam_port_gives_only", 20, ReactorTests::portsTakeAndGive);
     }
 
@@ -103,6 +104,25 @@ final class ReactorTests {
             int held = reactor(helper).water();
             if (held != 1_000) {
                 helper.fail("the Reactor drew " + held + " mB from a full water cauldron against its water port, not 1000", ANCHOR);
+            }
+            helper.succeed();
+        });
+    }
+
+    /**
+     * A Boiler's west water port stands against the Reactor's east one, the Boiler holding water: the
+     * Reactor does not draw it, since the Boiler pulls its own and the two would only trade it.
+     */
+    private static void leavesABoilersWaterPort(GameTestHelper helper) {
+        place(helper);
+        // Facing north, the Boiler's west end is the block west of its anchor, against the Reactor's east face.
+        BlockPos boiler = ANCHOR.east(3);
+        Network.footprint(helper, WireworksRegistries.BOILER_FOOTPRINT, boiler, Direction.NORTH);
+        insert(fluidAt(helper, boiler.west(), Direction.WEST), water(), 1_000);
+        helper.runAfterDelay(20, () -> {
+            int held = reactor(helper).water();
+            if (held != 0) {
+                helper.fail("the Reactor drew " + held + " mB from a Boiler's water port", ANCHOR);
             }
             helper.succeed();
         });

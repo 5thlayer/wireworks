@@ -26,6 +26,18 @@ final class PassiveFluid {
 
     private static final Map<BlockPos, FluidStacksResourceHandler> TANKS = new HashMap<>();
 
+    /** Room for a few thousand mB, more than a machine's own tank. */
+    static final int PIPE_CAPACITY = 5_000;
+
+    /** What {@link #expectDrawn} stands in the pipe. */
+    private static final int STOOD = 1_000;
+
+    /**
+     * The least {@link #expectDrawn} takes for a draw: under a generator's 200 mB tank, which it fills
+     * at once and then only tops up as it burns.
+     */
+    static final int MIN_DRAWN = 150;
+
     private PassiveFluid() {
     }
 
@@ -47,6 +59,21 @@ final class PassiveFluid {
         }
         TANKS.put(absolute, tank);
         helper.getLevel().setBlock(absolute, Blocks.COPPER_BLOCK.defaultBlockState(), Block.UPDATE_ALL);
+    }
+
+    /**
+     * Stands a pipe holding {@link #STOOD} mB of {@code fluid} against a machine at {@code pos} and,
+     * after {@code ticks}, fails unless the machine drew at least {@link #MIN_DRAWN} mB from it.
+     */
+    static void expectDrawn(GameTestHelper helper, BlockPos pos, FluidResource fluid, int ticks, String what) {
+        stand(helper, pos, fluid, STOOD, PIPE_CAPACITY);
+        helper.runAfterDelay(ticks, () -> {
+            int drawn = STOOD - amount(helper, pos);
+            if (drawn < MIN_DRAWN) {
+                helper.fail(what + " drew " + drawn + " mB from the pipe against it, not " + MIN_DRAWN + " or more", pos);
+            }
+            helper.succeed();
+        });
     }
 
     static int amount(GameTestHelper helper, BlockPos pos) {
