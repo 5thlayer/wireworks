@@ -115,12 +115,14 @@ final class ReactorTests {
      */
     private static void leavesABoilersWaterPort(GameTestHelper helper) {
         place(helper);
-        BlockPos boiler = new BlockPos(5, 1, 3);
+        // Facing north, the Boiler's west end is the block west of its anchor, against the Reactor's east face.
+        BlockPos boiler = ANCHOR.east(3);
         Network.footprint(helper, WireworksRegistries.BOILER_FOOTPRINT, boiler, Direction.NORTH);
         insert(fluidAt(helper, boiler.west(), Direction.WEST), water(), 1_000);
         helper.runAfterDelay(20, () -> {
-            if (reactor(helper).water() != 0) {
-                helper.fail("the Reactor drew " + reactor(helper).water() + " mB from a Boiler's water port", ANCHOR);
+            int held = reactor(helper).water();
+            if (held != 0) {
+                helper.fail("the Reactor drew " + held + " mB from a Boiler's water port", ANCHOR);
             }
             helper.succeed();
         });
