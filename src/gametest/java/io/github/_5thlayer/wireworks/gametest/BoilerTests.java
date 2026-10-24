@@ -20,6 +20,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LayeredCauldronBlock;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
@@ -76,6 +77,10 @@ final class BoilerTests {
         tests.test("boiler_ports_open_onto_the_faces_adr_says", 20, BoilerTests::portsOpenWhereTheyShould);
         tests.test("boiler_ports_follow_the_facing", 20, BoilerTests::portsFollowTheFacing);
         tests.test("boiler_water_port_takes_water_only", 20, BoilerTests::waterPortTakesWaterOnly);
+        tests.test("boiler_pulls_water_from_a_passive_handler_against_its_west_end", 40,
+                helper -> pullsWaterThrough(helper, WEST_END, Direction.WEST));
+        tests.test("boiler_pulls_water_from_a_passive_handler_against_its_east_end", 40,
+                helper -> pullsWaterThrough(helper, EAST_END, Direction.EAST));
         tests.test("boiler_steam_port_gives_steam_and_takes_none", 20, BoilerTests::steamPortGivesSteamOnly);
         tests.test("boiler_item_face_takes_fuel_only", 20, BoilerTests::itemFaceTakesFuelOnly);
         tests.test("boiler_parts_reach_the_fuel_slot", 20, BoilerTests::partsReachTheFuelSlot);
@@ -311,6 +316,24 @@ final class BoilerTests {
             helper.fail("water does not pass through the row to its other end", ANCHOR);
         }
         helper.succeed();
+    }
+
+    /**
+     * A pipe pushes nothing, so the Boiler pulls its water: a full water cauldron, which only answers
+     * as a pipe does, empties into the water row through the end {@code end} opens onto {@code side}.
+     */
+    private static void pullsWaterThrough(GameTestHelper helper, int end, Direction side) {
+        place(helper);
+        helper.getLevel().setBlock(part(helper, end).relative(side),
+                Blocks.WATER_CAULDRON.defaultBlockState().setValue(LayeredCauldronBlock.LEVEL, 3), Block.UPDATE_ALL);
+        helper.runAfterDelay(20, () -> {
+            int held = boiler(helper).water();
+            if (held != 1_000) {
+                helper.fail("the Boiler drew " + held + " mB from a full water cauldron against its " + side
+                        + " end, not 1000", ANCHOR);
+            }
+            helper.succeed();
+        });
     }
 
     private static void steamPortGivesSteamOnly(GameTestHelper helper) {

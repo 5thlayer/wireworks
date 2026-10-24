@@ -3,6 +3,8 @@
 
 package io.github._5thlayer.wireworks;
 
+import java.util.List;
+
 import io.github._5thlayer.groundworks.Footprint;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -147,6 +149,7 @@ public class BoilerBlockEntity extends BlockEntity implements Container, MenuPro
         if (!(level instanceof ServerLevel)) {
             return;
         }
+        pullWater();
         exchange(BoilerSlots.WATER);
         int converted = BoilerCycle.tick(water.amount(), steam.room(), BoilerSpec.MILLIBUCKETS_PER_TICK,
                 BoilerSpec.JOULES_PER_TICK, fuel, this::light);
@@ -219,6 +222,35 @@ public class BoilerBlockEntity extends BlockEntity implements Container, MenuPro
         stack.shrink(1);
         items.set(BoilerSlots.OUTPUT, after);
         setChanged();
+    }
+
+    /**
+     * Draws water from whatever stands against each end of the water row, since a pipe pushes
+     * nothing. Another machine's port is left alone: two Boilers end to end would trade their water
+     * back and forth, and a Reactor's water is its own.
+     */
+    private void pullWater() {
+        Direction facing = getBlockState().getValue(Footprint.FACING);
+        List<BlockPos> positions = WireworksRegistries.BOILER_FOOTPRINT.positions(worldPosition, facing);
+        for (int part = 0; part < positions.size() && water.room() > 0; part++) {
+            if (SteamFootprints.boilerPort(part) != BoilerPort.WATER) {
+                continue;
+            }
+            for (Direction side : Direction.Plane.HORIZONTAL) {
+                if (!SteamFootprints.boilerPortOpens(part, facing, side)) {
+                    continue;
+                }
+                BlockPos beside = positions.get(part).relative(side);
+                BlockState there = level.getBlockState(beside);
+                if (there.is(WireworksRegistries.BOILER_PART.get()) || there.is(WireworksRegistries.REACTOR_PART.get())) {
+                    continue;
+                }
+                ResourceHandler<FluidResource> from = level.getCapability(Capabilities.Fluid.BLOCK, beside, side.getOpposite());
+                if (from != null) {
+                    ResourceHandlerUtil.move(from, water, resource -> resource.is(Fluids.WATER), water.room(), null);
+                }
+            }
+        }
     }
 
     /** Offers the steam to whatever stands against the steam port. */
