@@ -65,25 +65,17 @@ final class SteamTurbineTests {
         tests.test("steam_engine_refuses_superheated_steam", 20, SteamTurbineTests::engineRefusesSuperheated);
     }
 
-    private static final int PIPE_CAPACITY = 5_000;
-
     /** A pipe pushes nothing, so the Turbine pulls: a stand-in against the end opening onto {@code side} empties into it. */
     private static void pullsFrom(GameTestHelper helper, Direction side) {
         Network.footprint(helper, WireworksRegistries.STEAM_TURBINE_FOOTPRINT, ANCHOR, Direction.NORTH);
-        PassiveFluid.stand(helper, ANCHOR.relative(side), superheated(), 1_000, PIPE_CAPACITY);
-        helper.runAfterDelay(30, () -> {
-            if (PassiveFluid.amount(helper, ANCHOR.relative(side)) >= 1_000) {
-                helper.fail("the Turbine drew nothing from a passive handler against its " + side + " end", ANCHOR);
-            }
-            helper.succeed();
-        });
+        PassiveFluid.expectDrawn(helper, ANCHOR.relative(side), superheated(), 40, "the Turbine against its " + side + " end");
     }
 
     private static void pipeFedRow(GameTestHelper helper) {
         for (BlockPos anchor : ROW) {
             Network.footprint(helper, WireworksRegistries.STEAM_TURBINE_FOOTPRINT, anchor, Direction.NORTH);
         }
-        PassiveFluid.stand(helper, ROW[0].north(), superheated(), PIPE_CAPACITY, PIPE_CAPACITY);
+        PassiveFluid.stand(helper, ROW[0].north(), superheated(), PassiveFluid.PIPE_CAPACITY, PassiveFluid.PIPE_CAPACITY);
         helper.runAfterDelay(40, () -> {
             for (BlockPos anchor : ROW) {
                 if (helper.getBlockEntity(anchor, SteamTurbineBlockEntity.class).energy().getAmountAsLong() <= 0L) {

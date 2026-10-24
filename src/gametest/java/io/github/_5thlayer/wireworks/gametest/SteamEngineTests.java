@@ -92,27 +92,19 @@ final class SteamEngineTests {
     /** Supply to the row each tick of a starved row: over one engine's 1.5 mB, under the 4.5 the three burn. */
     private static final int STARVED_SUPPLY = 2;
 
-    private static final int PIPE_CAPACITY = 5_000;
     /** Too big for the engine's 200 mB a tick to fill within the test. */
     private static final int BIG_PIPE = 100_000;
 
     /** A pipe pushes nothing, so the engine pulls: a stand-in against the end opening onto {@code side} empties into it. */
     private static void pullsFrom(GameTestHelper helper, Direction side) {
         place(helper);
-        PassiveFluid.stand(helper, ANCHOR.relative(side), steam(), 1_000, PIPE_CAPACITY);
-        helper.runAfterDelay(30, () -> {
-            int left = PassiveFluid.amount(helper, ANCHOR.relative(side));
-            if (left >= 1_000) {
-                helper.fail("the Engine drew nothing from a passive handler against its " + side + " end", ANCHOR);
-            }
-            helper.succeed();
-        });
+        PassiveFluid.expectDrawn(helper, ANCHOR.relative(side), steam(), 40, "the Engine against its " + side + " end");
     }
 
     /** Steam pulled in at the north end of a row goes on to every engine behind, as pushed steam does. */
     private static void pipeFedRow(GameTestHelper helper) {
         placeRow(helper);
-        PassiveFluid.stand(helper, ROW[0].north(), steam(), PIPE_CAPACITY, PIPE_CAPACITY);
+        PassiveFluid.stand(helper, ROW[0].north(), steam(), PassiveFluid.PIPE_CAPACITY, PassiveFluid.PIPE_CAPACITY);
         helper.runAfterDelay(40, () -> {
             for (BlockPos anchor : ROW) {
                 if (engineAt(helper, anchor).energy().getAmountAsLong() <= 0L) {
