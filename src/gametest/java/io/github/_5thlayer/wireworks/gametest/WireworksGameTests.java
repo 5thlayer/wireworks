@@ -57,6 +57,7 @@ public final class WireworksGameTests {
     public static void register(IEventBus modBus) {
         TEST_TYPES.register(modBus);
         TestConsumer.register(modBus);
+        PassiveFluid.register(modBus);
         PoleReplaceTests.statePackGroup();
         // Posted only when game tests are enabled, which a production game never is.
         modBus.addListener(WireworksGameTests::registerTests);

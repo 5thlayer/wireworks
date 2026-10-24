@@ -94,6 +94,7 @@ public abstract class SteamGeneratorBlockEntity extends BlockEntity {
     }
 
     void serverTick() {
+        pullSteam();
         long room = spec.bufferCapacity() - stored;
         SteamEngineSpec.Request asked = spec.request(carry, room);
         SteamEngineSpec.Tick burnt;
@@ -135,6 +136,41 @@ public abstract class SteamGeneratorBlockEntity extends BlockEntity {
                     || state.getBlock() instanceof SteamEnginePartBlock;
             if (generators && state.getValue(SteamGeneratorBlock.RUNNING) != running) {
                 level.setBlock(pos, state.setValue(SteamGeneratorBlock.RUNNING, running), Block.UPDATE_ALL);
+            }
+        }
+    }
+
+    /**
+     * Draws steam from whatever stands against either end of the row, since a pipe pushes nothing. The
+     * end the steam goes out of is left alone, so a pipe there is not drawn back from, and so is a
+     * Boiler's or a Reactor's port, which pushes its own steam; a generator's face gives none.
+     */
+    private void pullSteam() {
+        Direction facing = getBlockState().getValue(Footprint.FACING);
+        Direction rowSide = rowSide();
+        Direction[] ends = {rowSide, rowSide.getOpposite()};
+        Direction before = passOn;
+        for (BlockPos block : footprint.positions(worldPosition, facing)) {
+            for (Direction side : ends) {
+                if (tank.room() <= 0) {
+                    return;
+                }
+                if (side == passOn) {
+                    continue;
+                }
+                BlockPos beside = block.relative(side);
+                BlockState there = level.getBlockState(beside);
+                if (SteamFootprints.pushesItsOwn(there)) {
+                    continue;
+                }
+                ResourceHandler<FluidResource> from = level.getCapability(Capabilities.Fluid.BLOCK, beside, side.getOpposite());
+                if (from != null) {
+                    ResourceHandlerUtil.move(from, steamFace(side), resource -> true, tank.room(), null);
+                    if (passOn != before) {
+                        // One supply a tick: a second end would turn the way the steam goes back at the first.
+                        return;
+                    }
+                }
             }
         }
     }

@@ -242,7 +242,7 @@ public class BoilerBlockEntity extends BlockEntity implements Container, MenuPro
                 }
                 BlockPos beside = positions.get(part).relative(side);
                 BlockState there = level.getBlockState(beside);
-                if (there.is(WireworksRegistries.BOILER_PART.get()) || there.is(WireworksRegistries.REACTOR_PART.get())) {
+                if (SteamFootprints.pushesItsOwn(there)) {
                     continue;
                 }
                 ResourceHandler<FluidResource> from = level.getCapability(Capabilities.Fluid.BLOCK, beside, side.getOpposite());

@@ -23,6 +23,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LayeredCauldronBlock;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.TagValueInput;
@@ -89,7 +90,22 @@ final class ReactorTests {
         tests.test("reactor_holds_a_water_bucket_while_its_bucket_output_has_no_room", 20, ReactorTests::holdsAWaterBucket);
         tests.test("reactor_says_why_it_is_not_running", 20, ReactorTests::saysWhy);
         tests.test("reactor_ports_open_onto_their_outer_faces_whatever_its_facing", 20, ReactorTests::portsOpenOutward);
+        tests.test("reactor_pulls_water_from_a_passive_handler_against_a_water_port", 40, ReactorTests::pullsWater);
         tests.test("reactor_water_ports_take_water_only_and_the_steam_port_gives_only", 20, ReactorTests::portsTakeAndGive);
+    }
+
+    /** A pipe pushes nothing, so the Reactor pulls: a full water cauldron against a water port empties into it. */
+    private static void pullsWater(GameTestHelper helper) {
+        place(helper);
+        helper.getLevel().setBlock(helper.absolutePos(WEST_WATER.west()),
+                Blocks.WATER_CAULDRON.defaultBlockState().setValue(LayeredCauldronBlock.LEVEL, 3), Block.UPDATE_ALL);
+        helper.runAfterDelay(20, () -> {
+            int held = reactor(helper).water();
+            if (held != 1_000) {
+                helper.fail("the Reactor drew " + held + " mB from a full water cauldron against its water port, not 1000", ANCHOR);
+            }
+            helper.succeed();
+        });
     }
 
     private static void place(GameTestHelper helper) {

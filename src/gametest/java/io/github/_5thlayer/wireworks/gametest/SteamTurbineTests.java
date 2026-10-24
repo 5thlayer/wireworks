@@ -57,7 +57,41 @@ final class SteamTurbineTests {
                 SteamTurbineTests::fedRow);
         tests.test("steam_turbine_spins_its_fan_while_it_runs_and_a_second_after", 100, SteamTurbineTests::spinsASecond);
         tests.test("steam_turbine_refuses_steam_and_gives_none_back", 20, SteamTurbineTests::refusesSteam);
+        tests.test("steam_turbine_pulls_superheated_steam_from_a_passive_handler_against_its_north_end", 60,
+                helper -> pullsFrom(helper, Direction.NORTH));
+        tests.test("steam_turbine_pulls_superheated_steam_from_a_passive_handler_against_its_south_end", 60,
+                helper -> pullsFrom(helper, Direction.SOUTH));
+        tests.test("steam_turbine_row_fed_by_a_passive_handler_shares_the_steam", 100, SteamTurbineTests::pipeFedRow);
         tests.test("steam_engine_refuses_superheated_steam", 20, SteamTurbineTests::engineRefusesSuperheated);
+    }
+
+    private static final int PIPE_CAPACITY = 5_000;
+
+    /** A pipe pushes nothing, so the Turbine pulls: a stand-in against the end opening onto {@code side} empties into it. */
+    private static void pullsFrom(GameTestHelper helper, Direction side) {
+        Network.footprint(helper, WireworksRegistries.STEAM_TURBINE_FOOTPRINT, ANCHOR, Direction.NORTH);
+        PassiveFluid.stand(helper, ANCHOR.relative(side), superheated(), 1_000, PIPE_CAPACITY);
+        helper.runAfterDelay(30, () -> {
+            if (PassiveFluid.amount(helper, ANCHOR.relative(side)) >= 1_000) {
+                helper.fail("the Turbine drew nothing from a passive handler against its " + side + " end", ANCHOR);
+            }
+            helper.succeed();
+        });
+    }
+
+    private static void pipeFedRow(GameTestHelper helper) {
+        for (BlockPos anchor : ROW) {
+            Network.footprint(helper, WireworksRegistries.STEAM_TURBINE_FOOTPRINT, anchor, Direction.NORTH);
+        }
+        PassiveFluid.stand(helper, ROW[0].north(), superheated(), PIPE_CAPACITY, PIPE_CAPACITY);
+        helper.runAfterDelay(40, () -> {
+            for (BlockPos anchor : ROW) {
+                if (helper.getBlockEntity(anchor, SteamTurbineBlockEntity.class).energy().getAmountAsLong() <= 0L) {
+                    helper.fail("a Turbine of the row made nothing from steam pulled in at its north end", anchor);
+                }
+            }
+            helper.succeed();
+        });
     }
 
     private static FluidResource superheated() {

@@ -75,6 +75,13 @@ final class SteamEngineTests {
                 SteamEngineTests::fedRowFromTheOtherEnd);
         tests.test("steam_engine_row_on_starved_steam_splits_it", 100, SteamEngineTests::starvedRow);
         tests.test("steam_engine_passes_on_nothing_it_took_from_no_end", 60, SteamEngineTests::passesNothingFromNoEnd);
+        tests.test("steam_engine_pulls_steam_from_a_passive_handler_against_its_north_end", 60,
+                helper -> pullsFrom(helper, Direction.NORTH));
+        tests.test("steam_engine_pulls_steam_from_a_passive_handler_against_its_south_end", 60,
+                helper -> pullsFrom(helper, Direction.SOUTH));
+        tests.test("steam_engine_row_fed_by_a_passive_handler_shares_the_steam", 100, SteamEngineTests::pipeFedRow);
+        tests.test("steam_engine_pulls_nothing_back_from_the_end_it_passes_steam_to", 100,
+                SteamEngineTests::pullsNothingBack);
         tests.test("steam_engine_remembers_the_way_steam_passes_across_a_reload", 20,
                 SteamEngineTests::remembersTheWayAcrossAReload);
     }
@@ -84,6 +91,58 @@ final class SteamEngineTests {
 
     /** Supply to the row each tick of a starved row: over one engine's 1.5 mB, under the 4.5 the three burn. */
     private static final int STARVED_SUPPLY = 2;
+
+    private static final int PIPE_CAPACITY = 5_000;
+    /** Too big for the engine's 200 mB a tick to fill within the test. */
+    private static final int BIG_PIPE = 100_000;
+
+    /** A pipe pushes nothing, so the engine pulls: a stand-in against the end opening onto {@code side} empties into it. */
+    private static void pullsFrom(GameTestHelper helper, Direction side) {
+        place(helper);
+        PassiveFluid.stand(helper, ANCHOR.relative(side), steam(), 1_000, PIPE_CAPACITY);
+        helper.runAfterDelay(30, () -> {
+            int left = PassiveFluid.amount(helper, ANCHOR.relative(side));
+            if (left >= 1_000) {
+                helper.fail("the Engine drew nothing from a passive handler against its " + side + " end", ANCHOR);
+            }
+            helper.succeed();
+        });
+    }
+
+    /** Steam pulled in at the north end of a row goes on to every engine behind, as pushed steam does. */
+    private static void pipeFedRow(GameTestHelper helper) {
+        placeRow(helper);
+        PassiveFluid.stand(helper, ROW[0].north(), steam(), PIPE_CAPACITY, PIPE_CAPACITY);
+        helper.runAfterDelay(40, () -> {
+            for (BlockPos anchor : ROW) {
+                if (engineAt(helper, anchor).energy().getAmountAsLong() <= 0L) {
+                    helper.fail("an Engine of the row made nothing from steam pulled in at its north end", anchor);
+                }
+            }
+            helper.succeed();
+        });
+    }
+
+    /**
+     * A pipe at each end: steam pulled in at the north goes out of the south, and the engine does not
+     * draw it back, so the far pipe only fills.
+     */
+    private static void pullsNothingBack(GameTestHelper helper) {
+        place(helper);
+        BlockPos in = ANCHOR.north();
+        BlockPos out = ANCHOR.south();
+        PassiveFluid.stand(helper, in, steam(), BIG_PIPE, BIG_PIPE);
+        PassiveFluid.stand(helper, out, steam(), 0, BIG_PIPE);
+        int[] earlier = {0};
+        helper.runAfterDelay(30, () -> earlier[0] = PassiveFluid.amount(helper, out));
+        helper.runAfterDelay(50, () -> {
+            int later = PassiveFluid.amount(helper, out);
+            if (earlier[0] <= 0 || later <= earlier[0]) {
+                helper.fail("the far pipe held " + earlier[0] + " mB then " + later + " mB: steam did not keep passing on", ANCHOR);
+            }
+            helper.succeed();
+        });
+    }
 
     private static BlockPos place(GameTestHelper helper) {
         Network.footprint(helper, WireworksRegistries.STEAM_ENGINE_FOOTPRINT, ANCHOR, Direction.NORTH);

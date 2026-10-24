@@ -3,6 +3,8 @@
 
 package io.github._5thlayer.wireworks;
 
+import java.util.List;
+
 import io.github._5thlayer.groundworks.Footprint;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -148,6 +150,7 @@ public class ReactorBlockEntity extends BlockEntity implements Container, MenuPr
         if (!(level instanceof ServerLevel)) {
             return;
         }
+        pullWater();
         emptyWaterContainer();
         ItemStack leaves = cellTicks > 0 ? leftByBurning : remainderOf(items.get(ReactorSlots.FUEL));
         ReactorCycle.Tick tick = ReactorCycle.tick(water.amount(), steam.room(), hasDepletedRoomFor(leaves),
@@ -165,6 +168,34 @@ public class ReactorBlockEntity extends BlockEntity implements Container, MenuPr
         }
         status = statusAfter(tick.converted(), leaves);
         passSteamOn();
+    }
+
+    /**
+     * Draws water from whatever stands against each water port, since a pipe pushes nothing. Another
+     * machine's port is left alone, as the Boiler leaves it.
+     */
+    private void pullWater() {
+        Direction facing = getBlockState().getValue(Footprint.FACING);
+        List<BlockPos> positions = WireworksRegistries.REACTOR_FOOTPRINT.positions(worldPosition, facing);
+        for (int part = 0; part < positions.size() && water.room() > 0; part++) {
+            if (SteamFootprints.reactorPort(part) != ReactorPort.WATER) {
+                continue;
+            }
+            for (Direction side : Direction.Plane.HORIZONTAL) {
+                if (!SteamFootprints.reactorPortOpens(part, facing, side)) {
+                    continue;
+                }
+                BlockPos beside = positions.get(part).relative(side);
+                BlockState there = level.getBlockState(beside);
+                if (SteamFootprints.pushesItsOwn(there)) {
+                    continue;
+                }
+                ResourceHandler<FluidResource> from = level.getCapability(Capabilities.Fluid.BLOCK, beside, side.getOpposite());
+                if (from != null) {
+                    ResourceHandlerUtil.move(from, water, resource -> resource.is(Fluids.WATER), water.room(), null);
+                }
+            }
+        }
     }
 
     /** Why a tick that converted nothing did not, asked in {@link ReactorCycle}'s order. */

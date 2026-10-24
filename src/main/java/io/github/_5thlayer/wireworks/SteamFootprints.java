@@ -106,6 +106,11 @@ final class SteamFootprints {
         return world(facing, 1, 0);
     }
 
+    /** Whether {@code state} is a Boiler's or a Reactor's block, whose steam port pushes its own and whose water is its own. */
+    static boolean pushesItsOwn(BlockState state) {
+        return state.is(WireworksRegistries.BOILER_PART.get()) || state.is(WireworksRegistries.REACTOR_PART.get());
+    }
+
     static int partOf(BlockState state) {
         return state.getValue(io.github._5thlayer.groundworks.FootprintPartBlock.PART);
     }

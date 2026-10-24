@@ -68,3 +68,14 @@ slot fills an empty bucket from the steam tank, and its water slot empties a wat
 tank, each sending the bucket to the output slot. The bucket draws upside down, through NeoForge's
 fluid container model with `flip_gas`, since Steam is lighter than air. Superheated Steam keeps no
 bucket.
+
+## Amended, on pipes that push nothing
+
+A Pipeworks pipe draws an arm toward a fluid inventory but never inserts into it, so the machines pull
+what they burn, as Craftworks' machines pull their ingredients. The Boiler draws water from whatever
+stands against either end of its water row. The Steam Engine, like the Steam Turbine, draws steam each
+tick from whatever stands against either end of its row, through its own face at that end, so the end
+it took steam in at is remembered and the steam passes on out of the other as before. It leaves the end
+it passes on to alone, so a pipe there is not drawn back from, and it leaves a Boiler's or a Reactor's
+port alone, since those push their own steam; another Engine's face gives none. Nothing trades back
+and forth.

@@ -56,3 +56,10 @@ stays an ingredient of the Accumulator.
 - #29 is blocked by #27, which adds plastic and the battery.
 - `#wireworks:fission_fuel`, which the Reactor burns, and `#wireworks:fissile`, which a Fuel Cell is
   crafted from, are two different tags.
+
+## Amended, on pipes that push nothing
+
+The Reactor draws water each tick from whatever stands against its water ports, as the Boiler does
+(ADR 0011), and leaves a Boiler's or another Reactor's port alone. The Steam Turbine draws its
+superheated steam from whatever stands against either end of its row, so a pipe between the Reactor and
+a Turbine moves steam, while the Reactor's own push still serves a Turbine against its port.
