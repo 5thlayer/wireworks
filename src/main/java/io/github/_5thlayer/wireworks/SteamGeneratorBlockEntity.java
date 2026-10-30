@@ -13,14 +13,10 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.energy.EnergyHandler;
-import net.neoforged.neoforge.transfer.fluid.FluidResource;
 import net.neoforged.neoforge.transfer.TransferPreconditions;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
-
-import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -60,9 +56,9 @@ public abstract class SteamGeneratorBlockEntity extends BlockEntity {
         ports = SteamPorts.row(this, footprint, tank);
     }
 
-    /** The fluid face on {@code side}: see {@link SteamPorts.Row#face}. */
-    ResourceHandler<FluidResource> steamFace(@Nullable Direction side) {
-        return ports.face(side);
+    /** The row's Ports, whose faces every block of the footprint answers with (ADR-0011). */
+    SteamPorts.Row ports() {
+        return ports;
     }
 
     /** The FE face on every block of the footprint. Journalled so a pole's aborted probe takes nothing. */

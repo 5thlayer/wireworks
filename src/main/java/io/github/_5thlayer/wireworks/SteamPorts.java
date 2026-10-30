@@ -4,6 +4,7 @@
 package io.github._5thlayer.wireworks;
 
 import java.util.List;
+import java.util.function.BiConsumer;
 
 import io.github._5thlayer.groundworks.Footprint;
 import io.github._5thlayer.groundworks.FootprintShape.Local;
@@ -39,7 +40,7 @@ abstract sealed class SteamPorts permits SteamPorts.Fixed, SteamPorts.Row {
         this.footprint = footprint;
     }
 
-    /** The Boiler's or the Reactor's Ports, laid out by {@code layout}: water ports fill {@code water}, steam ports empty {@code steam}. */
+    /** The Boiler's or the Reactor's Ports, laid out by {@code layout}: water Ports fill {@code water}, steam Ports empty {@code steam}. */
     static Fixed fixed(BlockEntity owner, Footprint footprint, PortLayout layout, SingleFluidTank water, SingleFluidTank steam) {
         return new Fixed(owner, footprint, layout, water, steam);
     }
@@ -111,17 +112,12 @@ abstract sealed class SteamPorts permits SteamPorts.Fixed, SteamPorts.Row {
 
         @Override
         void pullIn() {
-            List<BlockPos> positions = positions();
-            for (int part = 0; part < positions.size() && water.room() > 0; part++) {
-                PortLayout.Port port = portOf(part);
-                if (port == null || port.tank() != PortLayout.Tank.WATER) {
-                    continue;
-                }
-                ResourceHandler<FluidResource> from = source(positions.get(part), opening(port));
+            eachPort(PortLayout.Tank.WATER, (pos, side) -> {
+                ResourceHandler<FluidResource> from = water.room() > 0 ? source(pos, side) : null;
                 if (from != null) {
                     ResourceHandlerUtil.move(from, water, resource -> resource.is(Fluids.WATER), water.room(), null);
                 }
-            }
+            });
         }
 
         @Override
@@ -129,15 +125,21 @@ abstract sealed class SteamPorts permits SteamPorts.Fixed, SteamPorts.Row {
             if (steam.amount() <= 0) {
                 return;
             }
+            eachPort(PortLayout.Tank.STEAM, (pos, side) -> {
+                ResourceHandler<FluidResource> next = neighbour(pos, side);
+                if (next != null) {
+                    ResourceHandlerUtil.move(steam, next, resource -> true, steam.amount(), null);
+                }
+            });
+        }
+
+        /** Visits each Port onto {@code tank}, in the footprint's part order, with its block and the side it opens onto. */
+        private void eachPort(PortLayout.Tank tank, BiConsumer<BlockPos, Direction> visit) {
             List<BlockPos> positions = positions();
             for (int part = 0; part < positions.size(); part++) {
                 PortLayout.Port port = portOf(part);
-                if (port == null || port.tank() != PortLayout.Tank.STEAM) {
-                    continue;
-                }
-                ResourceHandler<FluidResource> next = neighbour(positions.get(part), opening(port));
-                if (next != null) {
-                    ResourceHandlerUtil.move(steam, next, resource -> true, steam.amount(), null);
+                if (port != null && port.tank() == tank) {
+                    visit.accept(positions.get(part), opening(port));
                 }
             }
         }
@@ -162,16 +164,16 @@ abstract sealed class SteamPorts permits SteamPorts.Fixed, SteamPorts.Row {
 
         private final SingleFluidTank tank;
         private final SteamRow<Direction> row = new SteamRow<>();
-        private final ResourceHandler<FluidResource> sideFace;
+        private final ResourceHandler<FluidResource> fillOnlyFace;
         private final ResourceHandler<FluidResource> enteredAtRowSide;
         private final ResourceHandler<FluidResource> enteredAtRowBack;
 
         private Row(BlockEntity owner, Footprint footprint, SingleFluidTank tank) {
             super(owner, footprint);
             this.tank = tank;
-            sideFace = new FluidFace(tank, true, false);
-            enteredAtRowSide = new FluidFace(tank, true, false, () -> row.passesOnAt(rowSide().getOpposite()));
-            enteredAtRowBack = new FluidFace(tank, true, false, () -> row.passesOnAt(rowSide()));
+            fillOnlyFace = new FluidFace(tank, true, false);
+            enteredAtRowSide = new FluidFace(tank, true, false, () -> row.passOnAt(rowSide().getOpposite()));
+            enteredAtRowBack = new FluidFace(tank, true, false, () -> row.passOnAt(rowSide()));
         }
 
         /**
@@ -183,7 +185,7 @@ abstract sealed class SteamPorts permits SteamPorts.Fixed, SteamPorts.Row {
             if (side == rowSide) {
                 return enteredAtRowSide;
             }
-            return side == rowSide.getOpposite() ? enteredAtRowBack : sideFace;
+            return side == rowSide.getOpposite() ? enteredAtRowBack : fillOnlyFace;
         }
 
         /** Leaves alone the end the steam goes out of, so a pipe there is not drawn back from. */
@@ -224,7 +226,7 @@ abstract sealed class SteamPorts permits SteamPorts.Fixed, SteamPorts.Row {
         }
 
         void load(ValueInput input) {
-            row.restore(Direction.byName(input.getStringOr(PASS_ON, "")));
+            row.passOnAt(Direction.byName(input.getStringOr(PASS_ON, "")));
         }
 
         void save(ValueOutput output) {

@@ -12,7 +12,7 @@ import org.jspecify.annotations.Nullable;
  * at. A pull leaves that end alone, and draws from one supply a tick, since steam coming in at a second
  * end would turn the way back at the first.
  *
- * <p>Pure: generic over the side, a {@code Direction} in the game.
+ * <p>Pure: no Minecraft types. It is generic over the side, a {@code Direction} in the game.
  *
  * @param <S> a side of the row
  */
@@ -25,13 +25,11 @@ final class SteamRow<S> {
         return passOn;
     }
 
-    /** Sets the way on, as a load restores it. */
-    void restore(@Nullable S end) {
-        passOn = end;
-    }
-
-    /** Steam came in at the end opposite {@code end}, so it goes on out of {@code end}. */
-    void passesOnAt(S end) {
+    /**
+     * Sets the end the steam goes on out of: the one opposite where it came in, or what a load
+     * restores, null for none.
+     */
+    void passOnAt(@Nullable S end) {
         passOn = end;
     }
 

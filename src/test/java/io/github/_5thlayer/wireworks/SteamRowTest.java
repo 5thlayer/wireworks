@@ -31,7 +31,7 @@ class SteamRowTest {
     @Test
     void aPullLeavesAloneTheEndTheSteamGoesOutOf() {
         SteamRow<End> row = new SteamRow<>();
-        row.passesOnAt(End.FRONT);
+        row.passOnAt(End.FRONT);
         SteamRow<End>.Pull pull = row.pull();
 
         assertTrue(pull.drawsAt(End.BACK));
@@ -43,7 +43,7 @@ class SteamRowTest {
         SteamRow<End> row = new SteamRow<>();
         SteamRow<End>.Pull pull = row.pull();
 
-        row.passesOnAt(End.FRONT);
+        row.passOnAt(End.FRONT);
 
         assertFalse(pull.drawsAt(End.BACK));
         assertFalse(pull.drawsAt(End.FRONT));
@@ -53,10 +53,10 @@ class SteamRowTest {
     @Test
     void steamComingInTheWayItAlreadyGoesKeepsThePullGoing() {
         SteamRow<End> row = new SteamRow<>();
-        row.passesOnAt(End.FRONT);
+        row.passOnAt(End.FRONT);
         SteamRow<End>.Pull pull = row.pull();
 
-        row.passesOnAt(End.FRONT);
+        row.passOnAt(End.FRONT);
 
         assertTrue(pull.drawsAt(End.BACK));
     }
@@ -64,9 +64,9 @@ class SteamRowTest {
     @Test
     void steamPushedInAtTheOtherEndTurnsTheWay() {
         SteamRow<End> row = new SteamRow<>();
-        row.passesOnAt(End.FRONT);
+        row.passOnAt(End.FRONT);
 
-        row.passesOnAt(End.BACK);
+        row.passOnAt(End.BACK);
 
         assertEquals(End.BACK, row.passOn());
         assertTrue(row.pull().drawsAt(End.FRONT));
@@ -76,7 +76,7 @@ class SteamRowTest {
     void aLoadRestoresTheWay() {
         SteamRow<End> row = new SteamRow<>();
 
-        row.restore(End.BACK);
+        row.passOnAt(End.BACK);
 
         assertEquals(End.BACK, row.passOn());
     }

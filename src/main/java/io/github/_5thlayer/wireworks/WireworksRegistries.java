@@ -251,9 +251,9 @@ public final class WireworksRegistries {
         energyOnAnchor(event, STEAM_ENGINE, SteamEngineBlockEntity.class, SteamEngineBlockEntity::energy);
         energyOnAnchor(event, STEAM_TURBINE, SteamTurbineBlockEntity.class, SteamTurbineBlockEntity::energy);
         event.registerBlockEntity(Capabilities.Fluid.BLOCK, STEAM_ENGINE_ENTITY.get(),
-                SteamEngineBlockEntity::steamFace);
+                (engine, side) -> engine.ports().face(side));
         event.registerBlockEntity(Capabilities.Fluid.BLOCK, STEAM_TURBINE_ENTITY.get(),
-                SteamTurbineBlockEntity::steamFace);
+                (turbine, side) -> turbine.ports().face(side));
         event.registerBlockEntity(Capabilities.Item.BLOCK, BOILER_ENTITY.get(), (boiler, side) -> boiler.itemFace());
         event.registerBlockEntity(Capabilities.Item.BLOCK, REACTOR_ENTITY.get(), (reactor, side) -> reactor.itemFace());
     }
