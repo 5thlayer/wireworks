@@ -7,9 +7,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 
 import io.github._5thlayer.libworks.gallery.GalleryPack;
 import io.github._5thlayer.libworks.testkit.GalleryCheck;
@@ -20,37 +17,30 @@ import io.github._5thlayer.wireworks.PoleNetworks;
 import io.github._5thlayer.wireworks.PoleTier;
 import io.github._5thlayer.wireworks.Wireworks;
 import io.github._5thlayer.wireworks.WireworksRegistries;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.gametest.framework.GameTestInfo;
-import net.minecraft.gametest.framework.GameTestListener;
-import net.minecraft.gametest.framework.GameTestRunner;
-import net.minecraft.gametest.framework.StructureUtils;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 
 /**
  * The Gallery pack (libworks ADR 0010), through libworks' {@link GalleryCheck}: offered and off, its
  * build running every command without failing, and each scene's key block where it stands. The scenes
- * stand in rows of three, each row 16 blocks north of the last; {@link GalleryCheck#builds} lays one
- * long row, so the test runs its parts a row at a time. Beyond the build, no wire joins two scenes, and
- * a scene's sign, clicked, builds it again. They check the pack alone, never that a scene's machines
+ * stand in rows of three, each row 16 blocks north of the last, as {@link #LAYOUT} lays them. Beyond
+ * {@link GalleryCheck#builds}' checks, no wire joins two scenes, and a scene's sign, clicked, builds it
+ * again. They check the pack alone, never that a scene's machines
  * work: each machine's own game tests check that. Each test turns the pack on, which reloads
  * the server's data, and off again, passing or failing, and each builds where the others do, so each
  * runs in a batch of its own.
  */
 final class GalleryTests {
 
-    private static final String PACK = GalleryPack.id(Wireworks.MOD_ID);
-
     /** How many scenes a row holds, and how far north each row is of the last, as {@code gallery/build} lays them. */
     private static final int ROW = 3;
     private static final int ROW_DEPTH = 16;
+    private static final GalleryCheck.Layout LAYOUT = new GalleryCheck.Layout(ROW, ROW_DEPTH);
 
     /** Where the gallery is run from: the platform's south-west corner, its plots spilling north and east of it. */
     private static final BlockPos ORIGIN = new BlockPos(0, 1, 8);
@@ -90,20 +80,18 @@ final class GalleryTests {
     private static void builds(GameTestHelper helper) {
         var scenes = scenes();
         var functions = helper.getLevel().getServer().getFunctions();
-        withPack(helper, scenes.size(), run -> {
-            GalleryCheck.assertLoads(helper, run.source(), Wireworks.MOD_ID);
+        int plots = scenes.size();
+        GalleryCheck.withPack(helper, Wireworks.MOD_ID, ORIGIN, LAYOUT, plots, (source, steps) -> steps.thenExecute(() -> {
+            GalleryCheck.assertLoads(helper, source, Wireworks.MOD_ID);
             for (var scene : scenes) {
                 helper.assertTrue(functions.get(GalleryPack.scene(Wireworks.MOD_ID, scene.name())).isPresent(),
                         "there is no scene function " + scene.name());
             }
-            var laidBefore = wiresTouching(helper, run);
-            GalleryCheck.assertRuns(helper, run.source(), GalleryPack.build(Wireworks.MOD_ID));
-            for (int row = 0; row * ROW < scenes.size(); row++) {
-                GalleryCheck.assertKeyBlocks(helper, rowOrigin(helper, row),
-                        scenes.subList(row * ROW, Math.min(scenes.size(), (row + 1) * ROW)));
-            }
-            assertNoWireJoinsTwoScenes(helper, run, laidBefore);
-        });
+            var laidBefore = wiresTouching(helper, plots);
+            GalleryCheck.assertRuns(helper, source, GalleryPack.build(Wireworks.MOD_ID));
+            GalleryCheck.assertKeyBlocks(helper, helper.absolutePos(ORIGIN), LAYOUT, scenes);
+            assertNoWireJoinsTwoScenes(helper, plots, laidBefore);
+        })).thenSucceed();
     }
 
     /**
@@ -113,12 +101,12 @@ final class GalleryTests {
      * the runner lays every batch's tests in one grid and clears none of them, and the plots' chunks
      * reach past the plots onto the test laid out just west of the gallery, its poles standing, wired.
      */
-    private static void assertNoWireJoinsTwoScenes(GameTestHelper helper, Run run, Set<PoleNetworks.Wire> laidBefore) {
+    private static void assertNoWireJoinsTwoScenes(GameTestHelper helper, int scenes, Set<PoleNetworks.Wire> laidBefore) {
         var plots = new ArrayList<BoundingBox>();
-        for (int plot = 0; plot < run.plots(); plot++) {
-            plots.add(GalleryCheck.plot(plotOrigin(helper, plot)));
+        for (int plot = 0; plot < scenes; plot++) {
+            plots.add(LAYOUT.plot(LAYOUT.sceneOrigin(helper.absolutePos(ORIGIN), plot)));
         }
-        for (var wire : wiresTouching(helper, run)) {
+        for (var wire : wiresTouching(helper, scenes)) {
             if (laidBefore.contains(wire)) {
                 continue;
             }
@@ -128,11 +116,11 @@ final class GalleryTests {
         }
     }
 
-    /** Every wire touching the chunks of {@code run}'s plots. */
-    private static Set<PoleNetworks.Wire> wiresTouching(GameTestHelper helper, Run run) {
+    /** Every wire touching the chunks of the gallery's first {@code plots} plots. */
+    private static Set<PoleNetworks.Wire> wiresTouching(GameTestHelper helper, int plots) {
         var wires = LevelWires.of(helper.getLevel()).wires();
         var touching = new HashSet<PoleNetworks.Wire>();
-        run.area().intersectingChunks().forEach(chunk -> touching.addAll(wires.touching(chunk.x(), chunk.z())));
+        LAYOUT.area(helper.absolutePos(ORIGIN), plots).intersectingChunks().forEach(chunk -> touching.addAll(wires.touching(chunk.x(), chunk.z())));
         return touching;
     }
 
@@ -153,107 +141,24 @@ final class GalleryTests {
     private static void signReplays(GameTestHelper helper) {
         var boiler = at(helper, STEAM_BOILER);
         var sign = at(helper, SIGN);
-        withPack(helper, ONE_SCENE, run -> {
+        GalleryCheck.withPack(helper, Wireworks.MOD_ID, ORIGIN, LAYOUT, ONE_SCENE, (source, steps) -> steps.thenExecute(() -> {
             var level = helper.getLevel();
-            GalleryCheck.assertRuns(helper, run.source(), GalleryPack.scene(Wireworks.MOD_ID, "steam"));
+            GalleryCheck.assertRuns(helper, source, GalleryPack.scene(Wireworks.MOD_ID, "steam"));
             level.destroyBlock(boiler, true);
             helper.assertTrue(level.getBlockEntity(sign) instanceof SignBlockEntity entity
-                            && entity.executeClickCommandsIfPresent(level, run.source().getPlayer(), sign, true),
+                            && entity.executeClickCommandsIfPresent(level, source.getPlayer(), sign, true),
                     "the scene's sign runs no command when clicked");
             helper.assertTrue(level.getBlockState(boiler).is(WireworksRegistries.BOILER.get()),
                     "clicking the sign did not build the Boiler again where it stood");
-            var plot = GalleryCheck.plot(helper.absolutePos(ORIGIN));
+            var plot = LAYOUT.plot(helper.absolutePos(ORIGIN));
             var loose = level.getEntitiesOfClass(ItemEntity.class, AABB.of(plot));
             helper.assertTrue(loose.isEmpty(), "building the scene again left items loose: " + loose.stream().map(ItemEntity::getItem).toList());
             helper.assertTrue(level.getBlockState(sign).is(Blocks.OAK_SIGN), "building the scene again left no sign");
-        });
-    }
-
-    /**
-     * Turns the pack on over the first {@code plots} plots, as {@code build} lays them, loaded; runs
-     * {@code body} as an operator player standing where the gallery is run; then clears the plots and
-     * turns the pack off, passing or failing. A single scene run from where the gallery is run stands
-     * on the first plot.
-     */
-    private static void withPack(GameTestHelper helper, int plots, Consumer<Run> body) {
-        var server = helper.getLevel().getServer();
-        GalleryCheck.assertOfferedAndOff(helper, PACK);
-        var run = new Run(helper, plots, GalleryCheck.operator(helper, helper.absolutePos(ORIGIN)));
-        var area = run.area();
-        area.intersectingChunks().forEach(chunk -> helper.getLevel().setChunkForced(chunk.x(), chunk.z(), true));
-        var on = GalleryCheck.select(server, PACK, true);
-        helper.testInfo.addListener(new ClearAwayIfFailed(run, on));
-        var off = new AtomicReference<CompletableFuture<Void>>();
-        helper.startSequence()
-                .thenWaitUntil(() -> helper.assertTrue(on.isDone(), PACK + " is not on yet"))
-                .thenWaitUntil(() -> helper.assertTrue(area.intersectingChunks().allMatch(chunk -> helper.getLevel().hasChunk(chunk.x(), chunk.z())),
-                        "the gallery's plots are not loaded yet"))
-                .thenExecute(() -> body.accept(run))
-                .thenExecute(() -> off.set(run.clearAway()))
-                .thenWaitUntil(() -> helper.assertTrue(off.get() != null && off.get().isDone(), PACK + " is not off yet"))
-                .thenSucceed();
+        })).thenSucceed();
     }
 
     /** {@code offset}, from where the gallery is run, absolute. */
     private static BlockPos at(GameTestHelper helper, BlockPos offset) {
         return helper.absolutePos(ORIGIN).offset(offset);
-    }
-
-    /** Where row {@code row} of the gallery is run from, absolute. */
-    private static BlockPos rowOrigin(GameTestHelper helper, int row) {
-        return helper.absolutePos(ORIGIN).north(ROW_DEPTH * row);
-    }
-
-    /** Where plot {@code plot} of the gallery, numbered from 0 as {@code build} lays them, is run from, absolute. */
-    private static BlockPos plotOrigin(GameTestHelper helper, int plot) {
-        return rowOrigin(helper, plot / ROW).east(GalleryCheck.PLOT_WIDTH * (plot % ROW));
-    }
-
-    /** A test's run of the gallery: its first {@code plots} plots, built by {@code source}, standing where the gallery is run. */
-    private record Run(GameTestHelper helper, int plots, CommandSourceStack source) {
-
-        /** The plots, their floors included. */
-        BoundingBox area() {
-            int rows = Math.ceilDiv(plots, ROW);
-            return BoundingBox.encapsulatingBoxes(List.of(
-                    GalleryCheck.plot(helper.absolutePos(ORIGIN)),
-                    GalleryCheck.strip(rowOrigin(helper, rows - 1), Math.min(plots, ROW)))).orElseThrow();
-        }
-
-        /** Air where the plots stood, their entities gone, and the pack off. The runner releases the forced chunks once the batch ends. */
-        CompletableFuture<Void> clearAway() {
-            // The pack's own clear first, which removes each pole as a player's world would, its wires
-            // with it: the runner's clear sets blocks with no removal, which leaves the wires saved
-            // for the next test's poles to meet.
-            var commands = helper.getLevel().getServer().getCommands();
-            for (int plot = 0; plot < plots; plot++) {
-                var from = Vec3.atBottomCenterOf(plotOrigin(helper, plot));
-                commands.performPrefixedCommand(source.withPosition(from), "function " + Wireworks.MOD_ID + ":gallery/clear");
-            }
-            StructureUtils.clearSpaceForStructure(area(), helper.getLevel());
-            return GalleryCheck.select(helper.getLevel().getServer(), PACK, false);
-        }
-    }
-
-    /** A failed test skips its own last steps, which would leave the pack on; it clears away once turning it on is done. */
-    private record ClearAwayIfFailed(Run run, CompletableFuture<Void> on) implements GameTestListener {
-
-        @Override
-        public void testStructureLoaded(GameTestInfo testInfo) {
-        }
-
-        @Override
-        public void testPassed(GameTestInfo testInfo, GameTestRunner runner) {
-        }
-
-        @Override
-        public void testFailed(GameTestInfo testInfo, GameTestRunner runner) {
-            var server = run.helper().getLevel().getServer();
-            on.whenComplete((done, failed) -> server.execute(run::clearAway));
-        }
-
-        @Override
-        public void testAddedForRerun(GameTestInfo original, GameTestInfo copy, GameTestRunner runner) {
-        }
     }
 }
