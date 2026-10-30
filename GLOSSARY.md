@@ -98,6 +98,10 @@ _Avoid_: turbine (the **Steam Turbine**)
 The fluid the **Boiler** makes and the **Steam Engine** burns, Factorio's 165 degree steam. Its bucket, which draws upside down as a gas does, is filled by the **Boiler**. It crosses between blocks through NeoForge's fluid capability, so Wireworks needs no pipe mod. The **Steam Turbine** refuses it.
 _Avoid_: vapour
 
+**Port**:
+A face of a steam machine's footprint where water or steam crosses to the block beside it. A fixed Port draws or pushes one fluid: the **Boiler**'s and the **Reactor**'s water Ports draw water, their steam Port pushes steam. A **Steam Engine**'s or **Steam Turbine**'s row has a Port at each end, and the two trade roles by where the steam came in. A machine never draws from another machine's Port.
+_Avoid_: inlet, outlet, side (any face of a block)
+
 **Daylight**:
 How much of a **Solar Panel**'s peak output the time of day allows, all of it through the day, none at night, ramping between them at dusk and dawn.
 _Avoid_: sunlight, light level (the game's block light, which a roof or torch changes)

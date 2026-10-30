@@ -60,6 +60,6 @@ stays an ingredient of the Accumulator.
 ## Amended, on pipes that push nothing
 
 The Reactor draws water each tick from whatever stands against its water ports, as the Boiler does
-(ADR 0011), and leaves a Boiler's or another Reactor's port alone. The Steam Turbine draws its
+(ADR 0011), and leaves another machine's Port alone. The Steam Turbine draws its
 superheated steam from whatever stands against either end of its row, so a pipe between the Reactor and
 a Turbine moves steam, while the Reactor's own push still serves a Turbine against its port.
