@@ -258,22 +258,22 @@ public final class WireworksRegistries {
         event.registerBlockEntity(Capabilities.Item.BLOCK, REACTOR_ENTITY.get(), (reactor, side) -> reactor.itemFace());
     }
 
-    /** The Boiler's and the Reactor's part blocks answer for their own port (ADR-0011). */
+    /** The Boiler's and the Reactor's part blocks answer for their own Port (ADR-0011). */
     private static void registerPorts(RegisterCapabilitiesEvent event) {
+        ports(event, BOILER_FOOTPRINT, BOILER_PART.get(), BoilerBlockEntity.class, BoilerBlockEntity::ports);
+        ports(event, REACTOR_FOOTPRINT, REACTOR_PART.get(), ReactorBlockEntity.class, ReactorBlockEntity::ports);
+    }
+
+    private static <E extends BlockEntity> void ports(RegisterCapabilitiesEvent event, Footprint footprint, Block part,
+                                                      Class<E> owner, Function<E, SteamPorts.Fixed> ports) {
         event.registerBlock(Capabilities.Fluid.BLOCK, (level, pos, state, entity, side) -> {
-            BlockPos at = BOILER_FOOTPRINT.standingOrigin(level, pos, state);
-            if (at == null || !(level.getBlockEntity(at) instanceof BoilerBlockEntity boiler)) {
+            BlockPos at = footprint.standingOrigin(level, pos, state);
+            BlockEntity origin = at == null ? null : level.getBlockEntity(at);
+            if (!owner.isInstance(origin)) {
                 return null;
             }
-            return boiler.fluidFace(SteamFootprints.partOf(state), state.getValue(Footprint.FACING), side);
-        }, BOILER_PART.get());
-        event.registerBlock(Capabilities.Fluid.BLOCK, (level, pos, state, entity, side) -> {
-            BlockPos at = REACTOR_FOOTPRINT.standingOrigin(level, pos, state);
-            if (at == null || !(level.getBlockEntity(at) instanceof ReactorBlockEntity reactor)) {
-                return null;
-            }
-            return reactor.fluidFace(SteamFootprints.partOf(state), state.getValue(Footprint.FACING), side);
-        }, REACTOR_PART.get());
+            return ports.apply(owner.cast(origin)).face(SteamFootprints.partOf(state), side);
+        }, part);
     }
 
     /**

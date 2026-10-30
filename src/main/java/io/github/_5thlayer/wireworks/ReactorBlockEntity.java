@@ -3,11 +3,7 @@
 
 package io.github._5thlayer.wireworks;
 
-import java.util.List;
-
-import io.github._5thlayer.groundworks.Footprint;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -25,10 +21,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.transfer.ResourceHandler;
-import net.neoforged.neoforge.transfer.ResourceHandlerUtil;
-import net.neoforged.neoforge.transfer.fluid.FluidResource;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import org.jspecify.annotations.Nullable;
 
@@ -67,8 +60,8 @@ public class ReactorBlockEntity extends BlockEntity implements Container, MenuPr
     private final SingleFluidTank water = new SingleFluidTank(Fluids.WATER, ReactorSpec.WATER_CAPACITY, this::setChanged);
     private final SingleFluidTank steam =
             new SingleFluidTank(SteamFluids.SUPERHEATED_STEAM_SOURCE.get(), ReactorSpec.STEAM_CAPACITY, this::setChanged);
-    private final ResourceHandler<FluidResource> waterFace = new FluidFace(water, true, true);
-    private final ResourceHandler<FluidResource> steamFace = new FluidFace(steam, false, true);
+    private final SteamPorts.Fixed ports =
+            SteamPorts.fixed(this, WireworksRegistries.REACTOR_FOOTPRINT, PortLayout.REACTOR, water, steam);
     private final ResourceHandler<ItemResource> itemFace = new ReactorItemHandler(this);
     private int cellTicks;
     /** What the loaded Fission Fuel leaves once burnt, empty when none is loaded or it leaves nothing. */
@@ -105,17 +98,9 @@ public class ReactorBlockEntity extends BlockEntity implements Container, MenuPr
         super(WireworksRegistries.REACTOR_ENTITY.get(), pos, state);
     }
 
-    /**
-     * The fluid face of the footprint block numbered {@code part}, or null where its port does not
-     * open onto {@code side}: only the four water ports and the steam port open, each onto its outer
-     * face. The null side answers every port block, for a tool that names no face.
-     */
-    @Nullable ResourceHandler<FluidResource> fluidFace(int part, Direction facing, @Nullable Direction side) {
-        ReactorPort port = SteamFootprints.reactorPort(part);
-        if (port == null || side != null && !SteamFootprints.reactorPortOpens(part, facing, side)) {
-            return null;
-        }
-        return port == ReactorPort.WATER ? waterFace : steamFace;
+    /** The Ports, whose faces its part blocks answer with (ADR-0011). */
+    SteamPorts.Fixed ports() {
+        return ports;
     }
 
     ResourceHandler<ItemResource> itemFace() {
@@ -150,7 +135,7 @@ public class ReactorBlockEntity extends BlockEntity implements Container, MenuPr
         if (!(level instanceof ServerLevel)) {
             return;
         }
-        pullWater();
+        ports.pullIn();
         emptyWaterContainer();
         ItemStack leaves = cellTicks > 0 ? leftByBurning : remainderOf(items.get(ReactorSlots.FUEL));
         ReactorCycle.Tick tick = ReactorCycle.tick(water.amount(), steam.room(), hasDepletedRoomFor(leaves),
@@ -167,35 +152,7 @@ public class ReactorBlockEntity extends BlockEntity implements Container, MenuPr
             setChanged();
         }
         status = statusAfter(tick.converted(), leaves);
-        passSteamOn();
-    }
-
-    /**
-     * Draws water from whatever stands against each water port, since a pipe pushes nothing. Another
-     * machine's port is left alone, as the Boiler leaves it.
-     */
-    private void pullWater() {
-        Direction facing = getBlockState().getValue(Footprint.FACING);
-        List<BlockPos> positions = WireworksRegistries.REACTOR_FOOTPRINT.positions(worldPosition, facing);
-        for (int part = 0; part < positions.size() && water.room() > 0; part++) {
-            if (SteamFootprints.reactorPort(part) != ReactorPort.WATER) {
-                continue;
-            }
-            for (Direction side : Direction.Plane.HORIZONTAL) {
-                if (!SteamFootprints.reactorPortOpens(part, facing, side)) {
-                    continue;
-                }
-                BlockPos beside = positions.get(part).relative(side);
-                BlockState there = level.getBlockState(beside);
-                if (SteamFootprints.pushesItsOwn(there)) {
-                    continue;
-                }
-                ResourceHandler<FluidResource> from = level.getCapability(Capabilities.Fluid.BLOCK, beside, side.getOpposite());
-                if (from != null) {
-                    ResourceHandlerUtil.move(from, water, resource -> resource.is(Fluids.WATER), water.room(), null);
-                }
-            }
-        }
+        ports.passOn();
     }
 
     /** Why a tick that converted nothing did not, asked in {@link ReactorCycle}'s order. */
@@ -267,20 +224,6 @@ public class ReactorBlockEntity extends BlockEntity implements Container, MenuPr
             items.set(ReactorSlots.DEPLETED, leaves.copy());
         } else {
             depleted.grow(leaves.getCount());
-        }
-    }
-
-    /** Offers the steam to whatever stands against the steam port. */
-    private void passSteamOn() {
-        if (steam.amount() <= 0) {
-            return;
-        }
-        Direction facing = getBlockState().getValue(Footprint.FACING);
-        Direction side = SteamFootprints.reactorSteamSide(facing);
-        BlockPos port = WireworksRegistries.REACTOR_FOOTPRINT.positions(worldPosition, facing).get(SteamFootprints.REACTOR_STEAM_PART);
-        ResourceHandler<FluidResource> next = level.getCapability(Capabilities.Fluid.BLOCK, port.relative(side), side.getOpposite());
-        if (next != null) {
-            ResourceHandlerUtil.move(steam, next, resource -> true, steam.amount(), null);
         }
     }
 
