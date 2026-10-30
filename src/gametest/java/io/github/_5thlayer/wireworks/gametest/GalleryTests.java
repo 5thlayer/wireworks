@@ -83,6 +83,8 @@ final class GalleryTests {
     static void register(WireworksGameTests.Registrar tests) {
         tests.isolated("gallery_builds_a_scene_of_each_feature", GalleryCheck.TICKS, GalleryTests::builds);
         tests.isolated("gallery_scenes_sign_clicked_builds_the_scene_again", GalleryCheck.TICKS, GalleryTests::signReplays);
+        tests.isolated("gallery_clear_empties_its_plot", GalleryCheck.TICKS,
+                helper -> GalleryCheck.clears(helper, Wireworks.MOD_ID, ORIGIN, GalleryCheck.Layout.ONE_ROW));
     }
 
     private static void builds(GameTestHelper helper) {
