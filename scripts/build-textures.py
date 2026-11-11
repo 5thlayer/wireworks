@@ -3,12 +3,13 @@
 # SPDX-License-Identifier: MIT
 """Builds textures adapted from Malcolm Riley's unused textures in data/art/ (docs/placeholder-art.md).
 
-The Boiler's front, cold and lit, is the smelter's let into the Boiler's plating, as Craftworks' Refiner front is: the brick
-showing round the smelter's rim, in its top two rows and the outer two columns of its upper half, is
-painted over with the plain plating, so the iron firebox and grate sit in a plated casing like the
-Boiler's body. Which pixels are brick is read from the cold front: the lit one's glow warms its iron to a
-brick's red. Every frame of the lit smelter's animation is built, and its animation copied beside the
-sprite.
+The Boiler's front, cold and lit, is the kiln's arched iron door let into the duct's flat panel: the
+kiln's brick and mortar, every brick or mortar pixel reached from the sprite's edge without crossing
+the door's iron frame, is painted over with the panel, so the door and the fire behind it are left as
+drawn. Which pixels are masonry is read from the cold front, since the lit one's fire is as red as
+brick. Every frame of the lit kiln's animation is built, and its animation copied beside the sprite.
+The dark panel sets the door off from the Boiler's light plated sides, and the front no longer
+matches Craftworks' Refiner, which wears the smelter's.
 
 The Accumulator's sides are the battery block's with its left column, a light edge, painted over with
 the column beside it. The Accumulator's model mirrors one block of each side, so that column only ever
@@ -47,13 +48,10 @@ BLOCK = ROOT / "src" / "main" / "resources" / "assets" / "wireworks" / "textures
 
 # A sprite's side, and the height of each frame of its animation.
 SIZE = 16
-# The smelter's rim, where its brick shows: rows down to RIM_TOP, and the outer RIM_SIDE columns on each
-# side down to RIM_UPPER, the bottom of the firebox; below it the grate's iron reaches the edge.
-RIM_TOP = 1
-RIM_SIDE = 2
-RIM_UPPER = 7
-# How much redder than blue a pixel is to be the smelter's brick, against the grey of its cold iron.
+# How much redder than blue a pixel is to be the kiln's brick, and how bright to be its mortar, against
+# the grey of its iron door frame.
 BRICK_RED = 18
+MORTAR_BRIGHT = 150
 # Half the width of the dark band down the copper coil side's left edge.
 COIL_BAND_HALF = 2
 # The line inside a solar cell's frame, a navy darker than the cell.
@@ -85,28 +83,33 @@ def frames(name):
     return [image.crop((0, y, SIZE, y + SIZE)) for y in range(0, image.height, SIZE)]
 
 
-def on_rim(x, y):
-    return y <= RIM_TOP or (y <= RIM_UPPER and (x < RIM_SIDE or x >= SIZE - RIM_SIDE))
-
-
-def brick(pixel):
+def masonry(pixel):
     r, g, b, _ = pixel
-    return r > g and r - b >= BRICK_RED
+    return r - b >= BRICK_RED or (r + g + b) / 3 > MORTAR_BRIGHT
 
 
-def brick_on_rim():
-    cold = frames("device_smelter_front")[0].load()
-    return [(x, y) for y in range(SIZE) for x in range(SIZE) if on_rim(x, y) and brick(cold[x, y])]
+def masonry_round_door():
+    """The kiln's brick and mortar reached from the sprite's edge, stopping at the door's iron frame."""
+    cold = frames("device_kiln")[0].load()
+    found = set()
+    todo = [(x, y) for i in range(SIZE) for x, y in ((i, 0), (i, SIZE - 1), (0, i), (SIZE - 1, i))]
+    while todo:
+        x, y = todo.pop()
+        if (x, y) in found or not (0 <= x < SIZE and 0 <= y < SIZE) or not masonry(cold[x, y]):
+            continue
+        found.add((x, y))
+        todo += [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]
+    return found
 
 
-def boiler_front(smelter):
-    plating = frames("space-plating-plain")[0].load()
-    rim = brick_on_rim()
-    built = frames(smelter)
+def boiler_front(kiln):
+    panel = frames("industrial_metal_duct_flat_1")[0].load()
+    masonry_pixels = masonry_round_door()
+    built = frames(kiln)
     for frame in built:
         pixels = frame.load()
-        for x, y in rim:
-            pixels[x, y] = plating[x, y]
+        for x, y in masonry_pixels:
+            pixels[x, y] = panel[x, y]
     strip = Image.new("RGBA", (SIZE, SIZE * len(built)))
     for i, frame in enumerate(built):
         strip.paste(frame, (0, SIZE * i))
@@ -252,8 +255,8 @@ def png(image):
 
 # Each built texture, its builder, and the animation beside it, if any: copied from data/art/, or written.
 TEXTURES = {
-    BLOCK / "boiler" / "front_off.png": (lambda: boiler_front("device_smelter_front"), None),
-    BLOCK / "boiler" / "front_on.png": (lambda: boiler_front("device_smelter_front_lit"), "device_smelter_front_lit.png.mcmeta"),
+    BLOCK / "boiler" / "front_off.png": (lambda: boiler_front("device_kiln"), None),
+    BLOCK / "boiler" / "front_on.png": (lambda: boiler_front("device_kiln_front_active"), "device_kiln_front_active.png.mcmeta"),
     BLOCK / "accumulator" / "sides.png": (accumulator_sides, None),
     BLOCK / "solar_panel" / "cell.png": (solar_cell, None),
     BLOCK / "steam_turbine" / "fan_off.png": (still_fan, None),

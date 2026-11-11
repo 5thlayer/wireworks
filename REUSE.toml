@@ -46,7 +46,7 @@ SPDX-FileCopyrightText = ["Mojang AB", "2026 5thlayer"]
 SPDX-License-Identifier = "LicenseRef-Mojang"
 
 # Bioresin's, plastic's, the battery's and the fuel cells' item textures, the Accumulator's top and
-# bottom, the plating the Solar Panel, the Boiler and the Reactor share, the lit smelter's animation
+# bottom, the plating the Solar Panel, the Boiler and the Reactor share, the lit kiln's animation
 # beside the Boiler's front, the Steam Turbine's coil and running fan, the Reactor's steel and vent,
 # the Steam Engine's intake and duct, and the unmodified copies under data/art/ that the adapted
 # textures are built from, are Malcolm Riley's, from
@@ -76,7 +76,7 @@ SPDX-FileCopyrightText = "Malcolm Riley"
 SPDX-License-Identifier = "CC-BY-4.0"
 
 # The Boiler's front, the Accumulator's sides, the Solar Panel's cell, the Steam Turbine's still
-# fan and coil side and the Steam Engine's front, adapted from Malcolm Riley's smelter, battery
+# fan and coil side and the Steam Engine's front, adapted from Malcolm Riley's kiln, battery
 # block, blue cement, duct fan, copper coil, duct panels and copper tank by
 # scripts/build-textures.py; see docs/placeholder-art.md.
 [[annotations]]

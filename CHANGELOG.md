@@ -4,6 +4,10 @@ Each version has two sections: Players, what a player or pack developer sees, an
 
 ## Unreleased
 
+### Players
+
+- The Boiler's front is Malcolm Riley's kiln door set in a dark duct panel, its fire burning while it boils, so in an item frame or on a shelf it no longer looks like Craftworks' Refiner.
+
 ## 0.6.8
 
 ### Players
